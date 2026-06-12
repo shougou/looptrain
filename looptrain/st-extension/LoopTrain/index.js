@@ -948,6 +948,16 @@
     const s=normalizeState(st); const npcId=s.active_npc; const sess=s.dialogue_session || {pending_clues:[],pending_events:[],ap_cost:3,started_at:s.clock,turns:[]}; const pending=unique(sess.pending_clues||[]); pending.forEach(id=>addClue(s,id)); if(npcId==='xiaoning'&&pending.includes('ticking_under_floor')) addClue(s,'harmonica_from_dining_car'); const from=sess.started_at||s.clock; const cost=sess.ap_cost||3; s.ap_remaining-=cost; advanceClock(s,cost); if((sess.pending_events||[]).includes('zhao_ready_to_check_floor')&&countValidEvidence(s)>=2){s.flags.trial_success=true;} const out={npc_id:npcId,npc_name:npcName(npcId),ap_cost:cost,time_advance:{from,to:s.clock},turns_used:sess.turns_used||(sess.turns||[]).length||0,turn_limit:sess.turn_limit||local.npcs[npcId]?.turnLimit,clues_gained:pending.map(id=>clueDetail(id)),world_events:npcId==='xiaoning'?['沈墨寒已经离开第七节车厢。','餐车方向传来一小段口琴声。']:[],unlocked_actions:getSuggestions().slice(0,3)}; s.mode='explore'; s.active_npc=null; s.dialogue_session=null; const res={state:s,dialogue_outcome:out}; if(s.flags.trial_success){res.trial_success=true; res.messages=[{type:'outcome',html:successHtml()}];} return res;
   }
   function localFailLoop(st) { const s=normalizeState(st); const carry=s.known_clues.filter(x=>x!=='gray_coat_note_pressure' && clueDetail(x).carry_to_next_loop); return {state:s, loop_failure_outcome:{loop:s.loop, failed_at:s.clock, failure_reason:'你没能在爆炸前证明异常。', confirmed_facts:carry.map(id=>Object.assign(clueDetail(id),{text:clueName(id),carry_to_next_loop:true})), next_loop_suggestions:getSuggestions().slice(0,3)}}; }
+  function notifyGameReady() {
+    requestAnimationFrame(() => {
+      const rootEl = document.getElementById('looptrain-root');
+      const ready = rootEl && !rootEl.classList.contains('lt-hidden') && document.body.classList.contains('lt-game-shell');
+      if (ready) {
+        window.dispatchEvent(new CustomEvent('looptrain:game-ready', { detail: { version: VERSION, readyAt: Date.now() } }));
+      }
+    });
+  }
+
   function localNextLoop(previous) { const carry=unique(previous?.loop_failure_outcome?.confirmed_facts?.map(x=>x.id) || []); const s=normalizeState(local.startState); s.loop=(previous?.state?.loop||1)+1; s.flags.intro_seen=true; s.carried_memory=carry; s.known_clues=unique(['gray_coat_note_pressure',...carry]); let opening='你猛地睁开眼。\\n\\n第七节车厢，08:45。'; if(carry.length){opening+=`\\n\\n你记得上一轮留下的信息：${carry.map(clueName).join('、')}。`; if(carry.includes('xiaoning_heard_ticking')||carry.includes('ticking_under_floor')) opening+='\\n\\n小宁还坐在靠窗的位置，抱着那只旧布娃娃。你知道，她听见过地板下方的声音。'; if(carry.includes('zhao_requires_evidence')) opening+='\\n\\n你也记得，赵乘警不会相信没有证据的报警。';} else opening+='\\n\\n你只记得上一轮的失败。'; return {state:s, opening}; }
 
   function escapeHtml(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -985,16 +995,13 @@
     bindSTEvents();
     render();
 
-    document.documentElement.classList.remove('lt-game-boot');
-    document.documentElement.classList.remove('lt-boot-hide-st');
+    if (requestedGameShell) {
+      notifyGameReady();
+    }
+
+    document.documentElement.classList.remove('lt-game-boot', 'lt-boot-hide-st');
     const overlay = document.getElementById('lt-boot-overlay');
     if (overlay) overlay.remove();
-    // Safety timeout
-    setTimeout(() => {
-      document.documentElement.classList.remove('lt-game-boot', 'lt-boot-hide-st');
-      const o = document.getElementById('lt-boot-overlay');
-      if (o) o.remove();
-    }, 8000);
     if (requestedGameShell) {
       appendMessage('system', `LoopTrain v${VERSION} 已启动。${useRemote ? '已连接 Server Plugin。' : '未连接 Server Plugin，使用本地控制层。'} 可在输入区切换“扮演 / 指令”。`, log);
     }
