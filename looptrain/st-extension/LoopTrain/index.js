@@ -800,30 +800,25 @@
 
     recognition.onerror = (ev) => {
       if (ev.error === 'not-allowed') toast('请允许麦克风权限后重试。');
-      else if (ev.error !== 'aborted' && ev.error !== 'no-speech') toast('语音识别出现问题，请重试。');
-      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') stopVoiceInput();
+      else if (ev.error === 'no-speech') toast('未识别到语音。');
+      else if (ev.error !== 'aborted') toast('语音识别出现问题，请重试。');
+      if (micBtn) micBtn.classList.remove('lt-mic-listening');
     };
 
     recognition.onend = () => {
       if (micBtn) micBtn.classList.remove('lt-mic-listening');
     };
 
-    const start = (e) => { e.preventDefault(); startVoiceInput(); };
-    const stop  = (e) => { e.preventDefault(); stopVoiceInput(); };
-    micBtn.addEventListener('mousedown', start);
-    micBtn.addEventListener('touchstart', start, { passive: false });
-    micBtn.addEventListener('mouseup', stop);
-    micBtn.addEventListener('touchend', stop);
-    micBtn.addEventListener('mouseleave', stop);
-  }
-
-  function startVoiceInput() {
-    if (!recognition) return;
-    try {
-      voiceInputBase = input.value.trimEnd();
-      recognition.start();
-      if (micBtn) micBtn.classList.add('lt-mic-listening');
-    } catch (_) { /* already started */ }
+    micBtn.addEventListener('click', () => {
+      if (!recognition) return;
+      if (micBtn.classList.contains('lt-mic-listening')) {
+        stopVoiceInput();
+      } else {
+        voiceInputBase = input.value.trimEnd();
+        try { recognition.start(); } catch (_) { return; }
+        micBtn.classList.add('lt-mic-listening');
+      }
+    });
   }
 
   function stopVoiceInput() {
