@@ -813,13 +813,18 @@
     };
 
     micBtn.addEventListener('click', () => {
-      if (!recognition) return;
+      if (!recognition) { toast('语音识别不可用，请使用 Chrome 浏览器。'); return; }
       if (micBtn.classList.contains('lt-mic-listening')) {
         stopVoiceInput();
-      } else {
-        voiceInputBase = input.value.trimEnd();
-        try { recognition.start(); } catch (_) { return; }
+        return;
+      }
+      voiceInputBase = input.value.trimEnd();
+      try {
+        recognition.start();
         micBtn.classList.add('lt-mic-listening');
+      } catch (e) {
+        toast('麦克风启动失败，请检查权限设置。');
+        console.warn('[LoopTrain] speech start error', e);
       }
     });
   }
