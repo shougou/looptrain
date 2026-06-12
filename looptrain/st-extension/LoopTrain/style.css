@@ -39,11 +39,14 @@
   width: min(100vw, 430px);
   height: min(100vh, 100dvh, 930px);
   max-height: 100vh;
-  max-height: 100dvh;
   overflow: hidden;
   background: #0d1118;
   box-shadow: 0 22px 90px rgba(0,0,0,.65);
   border: 1px solid rgba(255,255,255,.08);
+}
+
+@supports (height: 100dvh) {
+  .lt-phone { max-height: 100dvh; }
 }
 
 @media (min-width: 720px) {
@@ -182,8 +185,8 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 40%, rgba(0,0,0,.10), rgba(0,0,0,.68));
-  backdrop-filter: blur(2px);
+  background: radial-gradient(circle at 50% 40%, rgba(0,0,0,.04), rgba(0,0,0,.42));
+  backdrop-filter: blur(.5px);
 }
 .lt-portrait {
   position: absolute;
@@ -196,8 +199,8 @@
   opacity: 0;
   filter: drop-shadow(0 28px 45px rgba(0,0,0,.72)) saturate(1.04);
   animation: lt-portrait-float 4.4s ease-in-out infinite;
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 48%, rgba(0,0,0,.72) 65%, rgba(0,0,0,.28) 81%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 0%, black 48%, rgba(0,0,0,.72) 65%, rgba(0,0,0,.28) 81%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,.88) 75%, rgba(0,0,0,.55) 90%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 58%, rgba(0,0,0,.88) 75%, rgba(0,0,0,.55) 90%, transparent 100%);
 }
 .lt-dialogue-panel {
   position: absolute;
@@ -368,7 +371,7 @@
 }
 @keyframes lt-portrait-enter {
   from { opacity: 0; transform: translateX(-50%) translateY(28px); }
-  to { opacity: 0.48; transform: translateX(-50%) translateY(0); }
+  to { opacity: 0.68; transform: translateX(-50%) translateY(0); }
 }
 @keyframes lt-ng-push {
   from { transform: scale(1.02); filter: brightness(.9); }
@@ -560,8 +563,15 @@ body.lt-game-shell #looptrain-show-btn,
 
 @media (max-width: 720px) {
   #looptrain-root.lt-game-shell-root .lt-phone {
-    height: 100dvh;
     height: 100vh;
+  }
+}
+
+@supports (height: 100dvh) {
+  @media (max-width: 720px) {
+    #looptrain-root.lt-game-shell-root .lt-phone {
+      height: 100dvh;
+    }
   }
 }
 
@@ -726,7 +736,7 @@ body.lt-game-shell #looptrain-show-btn {
 .lt-phone.lt-has-portrait .lt-portrait {
   display: block !important;
   visibility: visible !important;
-  opacity: 0.48 !important;
+  opacity: 0.68 !important;
 }
 
 .lt-phone.lt-dialogue .lt-content {
