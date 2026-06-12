@@ -127,6 +127,8 @@
 .lt-npc-chip { border: 1px solid rgba(214,168,90,.24); background: rgba(214,168,90,.09); color: #f3dfaa; padding: 6px 10px; border-radius: 999px; font-size: 12px; }
 .lt-scene-chip { border: 1px solid rgba(127,179,213,.32); background: rgba(127,179,213,.10); color: #b3d9f0; padding: 6px 10px; border-radius: 999px; font-size: 12px; cursor: pointer; margin-left: 4px; }
 .lt-scene-chip:hover { border-color: rgba(127,179,213,.55); background: rgba(127,179,213,.18); }
+.lt-hidden-npc-chip { font-family: "STKaiti", "KaiTi", "楷体", serif; border-color: rgba(245,190,142,.34); background: rgba(96,58,42,.20); color: #f2c9a8; letter-spacing: .08em; }
+.lt-hidden-npc-chip:hover { border-color: rgba(245,190,142,.60); background: rgba(96,58,42,.32); }
 
 .lt-log {
   margin-top: 12px;

@@ -30,6 +30,7 @@ const START_STATE = {
     trial_success: false,
     xiaoning_mother_memory_triggered: false,
     shen_connector_hint_seen: false,
+    visible_hidden_npcs: [],
   },
 };
 
@@ -101,7 +102,10 @@ const NPCS = {
     role: 'hidden_memory',
     hidden: true,
     location: 'carriage_7',
-    suggestions: [],
+    opening: '你听见小宁怀里的布娃娃里，像有一个温柔的声音隔着旧布料传来：“别吓着她。”',
+    near_limit_hint: '那个温柔的声音渐渐变轻，像一段快要散去的记忆。',
+    limit_message: '布娃娃安静下来，车厢里的铁轨声重新盖过一切。',
+    suggestions: [{ label: '结束对话', template: '__END_DIALOGUE__' }],
   },
 };
 
@@ -185,6 +189,7 @@ function normalize(state) {
   const s = Object.assign(clone(START_STATE), state || {});
   s.npc_states = Object.assign(clone(START_STATE.npc_states), state?.npc_states || {});
   s.flags = Object.assign(clone(START_STATE.flags), state?.flags || {});
+  s.flags.visible_hidden_npcs = unique(s.flags.visible_hidden_npcs);
   s.known_clues = unique(s.known_clues);
   s.carried_memory = unique(s.carried_memory);
   s.unlocked_actions = s.unlocked_actions || [];
@@ -206,6 +211,8 @@ function clueName(id) { return CLUE_DETAILS[id]?.title || id; }
 function clueDetail(id) { return clone(CLUE_DETAILS[id] || { id, title: id, source: '未知', confidence: 'unknown', usable_with: [], carry_to_next_loop: false }); }
 function npcName(id) { return NPCS[id]?.name || id; }
 function sceneName(id) { return SCENES[id]?.name || id; }
+function isHiddenNpcVisible(s, npcId) { return unique(s.flags?.visible_hidden_npcs).includes(npcId) || !!s.flags?.xiaoning_mother_memory_triggered; }
+function unlockHiddenNpc(s, npcId) { s.flags.visible_hidden_npcs = unique([...(s.flags.visible_hidden_npcs || []), npcId]); }
 
 function currentGoal(s) {
   s = normalize(s);
@@ -291,7 +298,8 @@ function successHtml() {
 function startDialogue(state, npcId) {
   const s = normalize(state);
   const npc = NPCS[npcId];
-  if (!npc || npc.hidden) return { state: s, messages: [{ type: 'system', text: '这个人现在不在第七节车厢。' }], suggestions: suggestions(s), goal: currentGoal(s) };
+  if (!npc) return { state: s, messages: [{ type: 'system', text: '这个人现在不在第七节车厢。' }], suggestions: suggestions(s), goal: currentGoal(s) };
+  if (npc.hidden && !isHiddenNpcVisible(s, npcId)) return { state: s, messages: [{ type: 'system', text: '这个人现在还只存在于小宁的记忆里。' }], suggestions: suggestions(s), goal: currentGoal(s) };
   if (npc.location && npc.location !== s.location) return { state: s, messages: [{ type: 'system', text: `${npc.name}不在这里。` }], suggestions: suggestions(s), goal: currentGoal(s) };
   if (s.ap_remaining < npc.cost) return failLoop(s, 'ap_not_enough');
   s.mode = 'dialogue';
@@ -410,9 +418,12 @@ function dialogueMessage(npcId, playerText, state, options = {}) {
   if (npcId === 'xiaoning') {
     const gentle = /别怕|帮你|温和|轻声|压低|我也听见|蹲|相信|保护/.test(t);
     if (gentle) { s.npc_states.xiaoning.trust += 12; s.npc_states.xiaoning.fear = Math.max(0, s.npc_states.xiaoning.fear - 6); }
-    if (/妈妈|布娃娃|一个人|害怕|等谁/.test(t) && s.npc_states.xiaoning.trust >= 30) {
+    const motherTopic = /(你妈妈|妈妈.*(布娃娃|娃娃|玩偶)|布娃娃.*(妈妈|母亲|家人)|娃娃.*(妈妈|母亲|家人)|一个人.*(坐车|上车|害怕)|等谁|谁给你的)/.test(t);
+    const emotionalKey = /(别怕|相信|保护|帮你|我会帮你|我会保护你|我也听见)/.test(t);
+    if (motherTopic && emotionalKey && s.npc_states.xiaoning.trust >= 36 && s.npc_states.xiaoning.fear <= 55) {
       session.pending_clues = unique([...(session.pending_clues || []), 'mother_doll_memory']);
       s.flags.xiaoning_mother_memory_triggered = true;
+      unlockHiddenNpc(s, 'xiaoning_mother_hidden');
       reply = '小宁低头看着怀里的布娃娃，声音轻得像怕惊醒什么：“妈妈说，坐火车的时候，不要和陌生人讲话……可是你不像坏人。”';
       response.memory_node = { id: 'xiaoning_mother_memory', npc_id: 'xiaoning_mother_hidden', portrait: NPCS.xiaoning_mother_hidden.portrait, title: '隐藏记忆：小宁妈妈' };
     } else if (/滴答|声音|下面|地板|听见/.test(t) || gentle) {
@@ -440,6 +451,10 @@ function dialogueMessage(npcId, playerText, state, options = {}) {
     } else {
       reply = '沈墨寒看着你，像是在衡量你究竟记得多少：“你问得太急了。”';
     }
+  } else if (npcId === 'xiaoning_mother_hidden') {
+    reply = /小宁|孩子|她/.test(t)
+      ? '那个温柔的声音像从旧布料深处传来：“她一直很怕声音。你若真想帮她，就别急着逼她说出全部。”'
+      : '布娃娃轻轻晃了一下。那个声音低低地说：“有些话，她不是不记得，只是不敢记得。”';
   }
 
   const llmReply = cleanLlmReply(options.llm_reply || options.llmReply || '');

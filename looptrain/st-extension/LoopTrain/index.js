@@ -34,7 +34,7 @@
         shen_mohan: { trust: -10, suspicion: 35, composure: 80 },
         xiaoning_mother_hidden: { trust: 0, fear: 0, visibility: 'hidden' },
       },
-      flags: { intro_seen: false, roleplay_hint_seen: false, command_hint_seen: false, zhao_checked_floor: false, trial_success: false, xiaoning_mother_memory_triggered: false, shen_connector_hint_seen: false },
+      flags: { intro_seen: false, roleplay_hint_seen: false, command_hint_seen: false, zhao_checked_floor: false, trial_success: false, xiaoning_mother_memory_triggered: false, shen_connector_hint_seen: false, visible_hidden_npcs: [] },
     },
     npcs: {
       xiaoning: { name: '小宁', cost: 3, turnLimit: 10, nearLimitHintAt: 8, turnLimitPolicy: 'soft_close', portrait: 'xiaoning_portrait.png', nearLimitHint: '小宁低头看了看窗外，像是不想再说太久。你感觉接下来最好问关键问题。', limitMessage: '小宁把布娃娃抱得更紧，轻轻摇了摇头。她暂时不愿意再说了。', suggestions: [
@@ -55,7 +55,7 @@
         ['提到口琴声', '我故意说：餐车那段口琴声，你也听见了吧？'],
         ['结束对话', '__END_DIALOGUE__'],
       ] },
-      xiaoning_mother_hidden: { name: '小宁妈妈', cost: 0, turnLimit: 2, nearLimitHintAt: 1, turnLimitPolicy: 'memory_once', portrait: 'xiaoning_mother_portrait.png', hidden: true, suggestions: [] },
+      xiaoning_mother_hidden: { name: '小宁妈妈', cost: 0, turnLimit: 2, nearLimitHintAt: 1, turnLimitPolicy: 'memory_once', portrait: 'xiaoning_mother_portrait.png', hidden: true, opening: '你听见小宁怀里的布娃娃里，像有一个温柔的声音隔着旧布料传来：“别吓着她。”', suggestions: [['结束对话', '__END_DIALOGUE__']] },
     },
     clueDetails: {
       gray_coat_note_pressure: { id: 'gray_coat_note_pressure', title: '不要相信灰大衣', source: '开场纸条', confidence: 'medium', usable_with: ['shen_mohan','self_reasoning'], carry_to_next_loop: true },
@@ -186,6 +186,7 @@
     const merged = Object.assign(clone(local.startState), s || {});
     merged.npc_states = Object.assign(clone(local.startState.npc_states), s?.npc_states || {});
     merged.flags = Object.assign(clone(local.startState.flags), s?.flags || {});
+    merged.flags.visible_hidden_npcs = unique(merged.flags.visible_hidden_npcs);
     merged.known_clues = unique(merged.known_clues || []);
     merged.carried_memory = unique(merged.carried_memory || []);
     merged.unlocked_actions = merged.unlocked_actions || [];
@@ -199,7 +200,13 @@
   function portraitFor(npcId) { return local.npcs[npcId]?.portrait || local.npcs.xiaoning.portrait; }
   function assetUrl(name) { return ASSET_BASE + name; }
   function sceneName(id) { return local.scenes[id]?.name || id; }
-  function sceneNpcs() { return (local.scenes[state.location]?.npcs || []); }
+  function isHiddenNpcVisible(s, npcId) { return unique(s.flags?.visible_hidden_npcs).includes(npcId) || !!s.flags?.xiaoning_mother_memory_triggered; }
+  function unlockHiddenNpc(s, npcId) { s.flags.visible_hidden_npcs = unique([...(s.flags.visible_hidden_npcs || []), npcId]); }
+  function sceneNpcs() {
+    const base = local.scenes[state.location]?.npcs || [];
+    const hidden = unique(state.flags?.visible_hidden_npcs).filter(id => local.npcs[id]?.location === state.location);
+    return unique([...base, ...hidden]);
+  }
 
   async function checkRemote() {
     try {
@@ -327,6 +334,12 @@
       if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submitInput(); }
     });
     root.addEventListener('click', async (ev) => {
+      const npcChip = ev.target.closest('[data-npc-id]');
+      if (npcChip) {
+        const res = await api('/dialogue/start', { state, npc_id: npcChip.dataset.npcId }) || localStartDialogue(state, npcChip.dataset.npcId);
+        handleEngineResponse(res, true);
+        return;
+      }
       const chip = ev.target.closest('[data-template]');
       if (chip) {
         const t = chip.dataset.template;
@@ -425,7 +438,8 @@
     npcWrap.innerHTML = sceneNpcs().map(npcId => {
       const n = local.npcs[npcId];
       if (!n) return '';
-      return `<button class="lt-npc-chip" data-template="我走向${n.name}，试着和${n.name}对话。">${n.name}</button>`;
+      const hiddenClass = n.hidden ? ' lt-hidden-npc-chip' : '';
+      return `<button class="lt-npc-chip${hiddenClass}" data-npc-id="${npcId}">${n.name}</button>`;
     }).join('') + getSceneTransitions();
     input.placeholder = inputPlaceholder();
     renderSuggestions();
@@ -906,10 +920,11 @@
   function localStartDialogue(s, npcId) {
     const npc = local.npcs[npcId];
     if (!npc) return { state:s, messages:[{type:'system', text:'这个人现在不在第七节车厢。'}] };
+    if (npc.hidden && !isHiddenNpcVisible(s, npcId)) return { state:s, messages:[{type:'system', text:'这个人现在还只存在于小宁的记忆里。'}] };
     if (npc.location && npc.location !== s.location) return { state:s, messages:[{type:'system', text:`${npc.name}不在这里。`}] };
     s.mode='dialogue'; s.active_npc=npcId;
     s.dialogue_session={npc_id:npcId, started_at:s.clock, ap_cost:npc.cost, turns:[], turns_used:0, turn_limit:npc.turnLimit||8, near_limit_hint_at:npc.nearLimitHintAt||Math.max(1,(npc.turnLimit||8)-2), near_limit_hint_shown:false, pending_clues:[], pending_events:[]};
-    const openings = { xiaoning:'小宁把旧布娃娃抱得更紧，眼神躲开你。她很轻地说：“你……也听见了吗？”', zhao_police:'赵乘警看向你：“你最好想清楚再说。”', shen_mohan:'沈墨寒把视线从窗外移到你身上：“你终于注意到我了。”' };
+    const openings = { xiaoning:'小宁把旧布娃娃抱得更紧，眼神躲开你。她很轻地说：“你……也听见了吗？”', zhao_police:'赵乘警看向你：“你最好想清楚再说。”', shen_mohan:'沈墨寒把视线从窗外移到你身上：“你终于注意到我了。”', xiaoning_mother_hidden: local.npcs.xiaoning_mother_hidden.opening };
     return { state:s, messages:[{type:'npc', text:openings[npcId] || ''}] };
   }
   function localApplyTurnLimit(s, npcId, res) {
@@ -936,12 +951,15 @@
   function localDialogueMessage(npcId, text, st, llmReply = '') {
     const s = normalizeState(st); const npc=local.npcs[npcId]||{}; const sess=s.dialogue_session || {pending_clues:[], pending_events:[], turns:[], turns_used:0, turn_limit:npc.turnLimit||8, near_limit_hint_at:npc.nearLimitHintAt||Math.max(1,(npc.turnLimit||8)-2), ap_cost: npc.cost || 3, started_at:s.clock}; let reply=''; const res={state:s,messages:[]};
     if (npcId==='xiaoning') {
-      const gentle=/别怕|帮你|温和|轻声|我也听见|蹲/.test(text); if(gentle){s.npc_states.xiaoning.trust+=12;s.npc_states.xiaoning.fear=Math.max(0,s.npc_states.xiaoning.fear-6);} 
-      if(/妈妈|布娃娃|一个人|害怕/.test(text)&&s.npc_states.xiaoning.trust>=30){sess.pending_clues=unique([...sess.pending_clues,'mother_doll_memory']);s.flags.xiaoning_mother_memory_triggered=true;reply='小宁低头看着布娃娃：“妈妈说，坐火车的时候，不要和陌生人讲话……可是你不像坏人。”'; res.memory_node={id:'xiaoning_mother_memory', npc_id:'xiaoning_mother_hidden', portrait:'xiaoning_mother_portrait.png', title:'隐藏记忆：小宁妈妈'};}
+      const gentle=/别怕|帮你|温和|轻声|我也听见|蹲|相信|保护/.test(text); if(gentle){s.npc_states.xiaoning.trust+=12;s.npc_states.xiaoning.fear=Math.max(0,s.npc_states.xiaoning.fear-6);} 
+      const motherTopic=/(你妈妈|妈妈.*(布娃娃|娃娃|玩偶)|布娃娃.*(妈妈|母亲|家人)|娃娃.*(妈妈|母亲|家人)|一个人.*(坐车|上车|害怕)|等谁|谁给你的)/.test(text);
+      const emotionalKey=/(别怕|相信|保护|帮你|我会帮你|我会保护你|我也听见)/.test(text);
+      if(motherTopic&&emotionalKey&&s.npc_states.xiaoning.trust>=36&&s.npc_states.xiaoning.fear<=55){sess.pending_clues=unique([...sess.pending_clues,'mother_doll_memory']);s.flags.xiaoning_mother_memory_triggered=true;unlockHiddenNpc(s,'xiaoning_mother_hidden');reply='小宁低头看着布娃娃：“妈妈说，坐火车的时候，不要和陌生人讲话……可是你不像坏人。”'; res.memory_node={id:'xiaoning_mother_memory', npc_id:'xiaoning_mother_hidden', portrait:'xiaoning_mother_portrait.png', title:'隐藏记忆：小宁妈妈'};}
       else if(/滴答|声音|下面|地板|听见/.test(text)||gentle){sess.pending_clues=unique([...sess.pending_clues,'ticking_under_floor','xiaoning_heard_ticking']);reply='小宁用鞋尖轻轻碰了碰地板：“不是座位下面……是下面在响。”';}
       else reply='小宁抱紧布娃娃，只用很小的幅度摇了摇头。';
     } else if (npcId==='zhao_police') { if(/证据|地板|检查|声音|小宁|滴答/.test(text)&&countValidEvidence(s)>=2){reply='赵乘警听完你的证据：“你带我过去。别惊动其他乘客。”'; sess.pending_events.push('zhao_ready_to_check_floor');} else {addClue(s,'zhao_requires_evidence'); reply='赵乘警没有立刻行动：“你需要给我能查证的东西。”';} }
     else if (npcId==='shen_mohan') { if(/连接处|08:48|餐车|口琴|离开/.test(text)){sess.pending_clues=unique([...sess.pending_clues,'suspicious_connector_movement','harmonica_from_dining_car']);reply='沈墨寒的手指在打火机上停了一瞬：“你关心的是我，还是连接处？”';} else if(/灰大衣|纸条|相信|不相信/.test(text)){s.npc_states.shen_mohan.suspicion+=8; reply='沈墨寒低头看了一眼自己的袖口，笑意很淡：“提醒你的人，也许更不值得相信。”';} else reply='沈墨寒看着你：“你问得太急了。”'; }
+    else if (npcId==='xiaoning_mother_hidden') { reply=/小宁|孩子|她/.test(text)?'那个温柔的声音像从旧布料深处传来：“她一直很怕声音。你若真想帮她，就别急着逼她说出全部。”':'布娃娃轻轻晃了一下。那个声音低低地说：“有些话，她不是不记得，只是不敢记得。”'; }
     const cleanedLlmReply = sanitizeLlmReply(llmReply); if (cleanedLlmReply) reply = cleanedLlmReply; sess.turns.push({player:text,npc:reply}); sess.turns_used=sess.turns.length; s.dialogue_session=sess; res.state=s; res.messages.unshift({type:'npc', text:reply}); return localApplyTurnLimit(s, npcId, res);
   }
   function localEndDialogue(st) {
