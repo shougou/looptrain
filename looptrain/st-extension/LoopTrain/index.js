@@ -811,7 +811,7 @@
       if (micBtn) micBtn.classList.remove('lt-mic-listening');
     };
 
-    micBtn.addEventListener('click', () => {
+    micBtn.addEventListener('click', async () => {
       if (!recognition) { toast('语音识别不可用，请使用 Chrome 浏览器。'); return; }
       if (micBtn.classList.contains('lt-mic-listening')) {
         stopVoiceInput();
@@ -819,6 +819,11 @@
       }
       voiceInputBase = input.value.trimEnd();
       try {
+        // Android Chrome requires explicit getUserMedia before SpeechRecognition
+        if (navigator.mediaDevices?.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          stream.getTracks().forEach(t => t.stop());
+        }
         recognition.start();
         micBtn.classList.add('lt-mic-listening');
       } catch (e) {
