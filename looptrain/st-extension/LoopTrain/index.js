@@ -809,16 +809,21 @@
       if (micBtn) micBtn.classList.remove('lt-mic-listening');
     };
 
-    micBtn.addEventListener('click', () => {
-      if (!recognition) return;
-      if (micBtn.classList.contains('lt-mic-listening')) {
-        stopVoiceInput();
-      } else {
-        voiceInputBase = input.value.trimEnd();
-        try { recognition.start(); } catch (_) { return; }
-        micBtn.classList.add('lt-mic-listening');
-      }
-    });
+    const start = (e) => {
+      e.preventDefault();
+      voiceInputBase = input.value.trimEnd();
+      try { recognition.start(); } catch (_) { return; }
+      micBtn.classList.add('lt-mic-listening');
+    };
+    const stop = (e) => {
+      e.preventDefault();
+      stopVoiceInput();
+    };
+    micBtn.addEventListener('mousedown', start);
+    micBtn.addEventListener('touchstart', start, { passive: false });
+    micBtn.addEventListener('mouseup', stop);
+    micBtn.addEventListener('touchend', stop);
+    micBtn.addEventListener('mouseleave', stop);
   }
 
   function stopVoiceInput() {
