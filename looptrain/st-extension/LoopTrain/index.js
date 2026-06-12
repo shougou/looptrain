@@ -323,7 +323,6 @@
     initVoiceInput();
 
     root.querySelector('.lt-btn-send').addEventListener('click', submitInput);
-    initVoiceInput();
     input.addEventListener('keydown', (ev) => {
       if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submitInput(); }
     });
