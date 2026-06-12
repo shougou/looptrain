@@ -69,8 +69,8 @@
     },
   };
   local.scenes = {
-    carriage_7: { name: '第七节车厢', npcs: ['xiaoning','zhao_police'], text: '列车第七节车厢灯光昏黄，乘客们各自闭目或望着窗外。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。地板下方似乎藏着很轻的滴答声。' },
-    connector_7_8: { name: '连接处', npcs: ['shen_mohan'], text: '第七节车厢与第八节车厢之间的连接处。列车晃动时，铁板发出沉闷的声响。灰大衣的沈墨寒站在这里，像是在等人，又像是在观察着什么。' },
+    carriage_7: { name: '第七节车厢', npcs: ['xiaoning','zhao_police'], text: '列车第七节车厢灯光昏黄。窗外，重庆方向的火光已经渐远。乘客们神色紧张，各自拥着行李。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。地板下方似乎藏着很轻的滴答声。' },
+    connector_7_8: { name: '连接处', npcs: ['shen_mohan'], text: '第七节车厢与第八节车厢之间的连接处。冷风从缝隙中灌入，列车晃动时铁板发出沉闷的声响。灰大衣的沈墨寒站在这里，像是在等人，又像是在观察着什么。远处偶尔还能听见防空警报的余音。' },
   };
   // Assign NPC locations
   local.npcs.xiaoning.location = 'carriage_7';
@@ -271,10 +271,10 @@
           <div class="lt-ng"><div class="lt-ng-bg"></div><div class="lt-ng-card"></div></div>
           <div class="lt-intro">
             <div class="lt-intro-card">
-              <div class="lt-intro-kicker">渝江线 307 次｜1947 年冬</div>
+              <div class="lt-intro-kicker">渝江线 307 次｜1939 年冬</div>
               <div class="lt-intro-title">第七节车厢</div>
               <div class="lt-intro-steps">
-                <div><strong>08:45</strong><span>你在夜行列车第七节车厢醒来。</span></div>
+                <div><strong>重庆</strong><span>日机轰炸不断。渝江线 307 次夜行列车，是离开这座燃烧之城最后的窗口。</span></div>
                 <div><strong>身份</strong><span>普通乘客只是伪装，你携带绝密情报前往江城。</span></div>
                 <div><strong>接头</strong><span>代号"扣子"的同志会在列车上出现。</span></div>
                 <div><strong>危机</strong><span>09:00 前，列车将在北江铁桥前爆炸。</span></div>
@@ -422,7 +422,7 @@
   }
 
   function openingSceneText() {
-    return '1947 年冬，重庆开往江城的渝江线 307 次夜行列车。你在第七节车厢醒来，表面是普通乘客，真实身份是打入敌人内部的地下工作者。口袋里有半张车票、一张写着“不要相信灰大衣”的纸条，以及一枚银色扣子。09:00 前，列车会在北江铁桥前爆炸。';
+    return '1939 年冬，重庆。日机连日轰炸，渝江线 307 次夜行列车成了离开这座燃烧之城的最后窗口。你在第七节车厢醒来，表面是普通乘客，真实身份是打入敌人内部的地下工作者。口袋里有半张车票、一张写着"不要相信灰大衣"的纸条，以及一枚银色扣子。09:00 前，列车会在北江铁桥前爆炸。';
   }
 
   function inputPlaceholder() {
@@ -438,7 +438,7 @@
     if (state.mode === 'dialogue') return `你正在与${npcName(state.active_npc)}交谈。世界没有停下，你必须从对话里得到可行动的信息。`;
     const scene = local.scenes[state.location] || {};
     const mem = state.loop > 1 && state.carried_memory.length ? `你记得上一轮留下的信息：${state.carried_memory.map(clueName).join('、')}。` : '';
-    return `${mem}${scene.text || '1947 年冬，渝江线 307 次夜行列车正从重庆驶向江城。第七节车厢灯光昏黄。'}`;
+    return `${mem}${scene.text || '1939 年冬，渝江线 307 次夜行列车从重庆驶向江城。窗外远方的火光渐远，车厢里灯光昏黄。'}`;
   }
   function renderSuggestions() {
     const arr = getSuggestions();
@@ -610,7 +610,7 @@
 
     const prompt =
       `【当前场景】\n` +
-      `1947 年冬，重庆开往江城的渝江线 307 次夜行列车，第七节车厢。09:00 前列车可能在北江铁桥前爆炸。\n\n` +
+      `1939 年冬，重庆连日遭日机轰炸。渝江线 307 次夜行列车从重庆驶向江城，第七节车厢。09:00 前列车可能在北江铁桥前爆炸。\n\n` +
       `【当前游戏状态】\n` +
       `时间：${state.clock}\n` +
       `AP：${state.ap_remaining}\n` +

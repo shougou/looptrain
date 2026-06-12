@@ -175,8 +175,8 @@ const CLUE_DETAILS = {
 const CLUE_TITLES = Object.fromEntries(Object.values(CLUE_DETAILS).map(x => [x.id, x.title]));
 
 const SCENES = {
-  carriage_7: { name: '第七节车厢', npcs: ['xiaoning','zhao_police'], text: '列车第七节车厢灯光昏黄，乘客们各自闭目或望着窗外。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。地板下方似乎藏着很轻的滴答声。' },
-  connector_7_8: { name: '连接处', npcs: ['shen_mohan'], text: '第七节车厢与第八节车厢之间的连接处。列车晃动时，铁板发出沉闷的声响。灰大衣的沈墨寒站在这里，像是在等人，又像是在观察着什么。' },
+    carriage_7: { name: '第七节车厢', npcs: ['xiaoning','zhao_police'], text: '列车第七节车厢灯光昏黄。窗外，重庆方向的火光已经渐远。乘客们神色紧张，各自拥着行李。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。地板下方似乎藏着很轻的滴答声。' },
+    connector_7_8: { name: '连接处', npcs: ['shen_mohan'], text: '第七节车厢与第八节车厢之间的连接处。冷风从缝隙中灌入，列车晃动时铁板发出沉闷的声响。灰大衣的沈墨寒站在这里，像是在等人，又像是在观察着什么。远处偶尔还能听见防空警报的余音。' },
 };
 
 function clone(x) { return JSON.parse(JSON.stringify(x)); }
