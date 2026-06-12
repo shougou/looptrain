@@ -13,6 +13,7 @@
   const ASSET_BASE = '/scripts/extensions/third-party/LoopTrain/';
   const NG_BG = 'train_explosion_landscape_concept.png';
   const MODULE_NAME = 'looptrain';
+  const STATE_STORAGE_KEY = 'looptrain.gameState.v1';
   const DEFAULT_SETTINGS = Object.freeze({
     llm_reply_source: 'st_llm', // mock | st_llm
     st_quiet_prompt: true,
@@ -171,6 +172,7 @@
   }
   function saveState(next, options = {}) {
     state = normalizeState(next || state);
+    try { localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
     const c = ctx();
     if (c && c.chatMetadata) {
       c.chatMetadata.looptrain = state;
@@ -179,7 +181,9 @@
     render();
   }
   function loadState() {
-    const meta = getMeta();
+    let meta = null;
+    try { const raw = localStorage.getItem(STATE_STORAGE_KEY); if (raw) meta = JSON.parse(raw); } catch (_) {}
+    if (!meta) meta = getMeta();
     state = normalizeState(meta || clone(local.startState));
   }
   function normalizeState(s) {
