@@ -858,8 +858,8 @@
   function advanceClock(s, n) { const [h,m]=s.clock.split(':').map(Number); const total=h*60+m+n; s.clock=String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0'); }
   function countValidEvidence(s) { return s.known_clues.filter(x => ['ticking_under_floor','xiaoning_heard_ticking','sound_not_from_seat','suspicious_connector_movement'].includes(x)).length; }
   function localParseAction(text) {
-    if (/连接处|8号车厢|八号车厢|8号|八号/.test(text)) return { intent:'move_to_connector' };
-    if (/第七节|回到车厢|返回车厢/.test(text)) return { intent:'move_to_carriage_7' };
+      if (/回到第七节|返回第七节|回到车厢|返回车厢|回车厢/.test(text)) return { intent:'move_to_carriage_7' };
+      if (/前往连接处|去连接处|到连接处|走向.*连接处/.test(text)) return { intent:'move_to_connector' };
     if (/赵|乘警|警察/.test(text) && /检查|证据|地板|说服|异常|请他|报告/.test(text)) return { intent:'convince_zhao' };
     if (/赵|乘警|警察/.test(text)) return { intent:'start_dialogue', target_npc:'zhao_police' };
     if (/沈|灰大衣|墨寒/.test(text)) return { intent:'start_dialogue', target_npc:'shen_mohan' };

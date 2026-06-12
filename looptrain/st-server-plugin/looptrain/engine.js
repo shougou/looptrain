@@ -219,8 +219,8 @@ function currentGoal(s) {
 function parseAction(text) {
   const t = String(text || '').trim();
   if (!t) return { intent: 'empty', confidence: 0 };
-  if (/连接处|8号车厢|八号车厢|8号|八号/.test(t)) return { intent: 'move_to_connector', confidence: 0.88 };
-  if (/第七节|回到车厢|返回车厢/.test(t)) return { intent: 'move_to_carriage_7', confidence: 0.88 };
+      if (/回到第七节|返回第七节|回到车厢|返回车厢|回车厢/.test(t)) return { intent: 'move_to_carriage_7', confidence: 0.88 };
+      if (/前往连接处|去连接处|到连接处|走向.*连接处/.test(t)) return { intent: 'move_to_connector', confidence: 0.88 };
   if (/赵|乘警|警察/.test(t) && /检查|证据|地板|说服|异常|请他|报告/.test(t)) return { intent: 'convince_zhao', target_npc: 'zhao_police', confidence: 0.9 };
   if (/赵|乘警|警察/.test(t)) return { intent: 'start_dialogue', target_npc: 'zhao_police', confidence: 0.82 };
   if (/沈|灰大衣|墨寒/.test(t)) return { intent: 'start_dialogue', target_npc: 'shen_mohan', confidence: 0.84 };
