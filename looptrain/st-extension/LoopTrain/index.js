@@ -75,6 +75,7 @@
   let lastFailure = null;
   let memoryPortraitTimer = null;
   let thinkingEl = null;
+  let introRollingTimer = null;
   let state = clone(local.startState);
 
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
@@ -240,12 +241,13 @@
               <div class="lt-intro-steps">
                 <div><strong>08:45</strong><span>你在夜行列车第七节车厢醒来。</span></div>
                 <div><strong>身份</strong><span>普通乘客只是伪装，你携带绝密情报前往江城。</span></div>
-                <div><strong>接头</strong><span>代号“扣子”的同志会在列车上出现。</span></div>
+                <div><strong>接头</strong><span>代号"扣子"的同志会在列车上出现。</span></div>
                 <div><strong>危机</strong><span>09:00 前，列车将在北江铁桥前爆炸。</span></div>
               </div>
               <p class="lt-intro-memory">你只记得爆炸前最后听见的声音——第七节车厢地板下方，传来一阵极轻的滴答声。</p>
               <button class="lt-intro-btn" data-lt-action="intro-start">进入第七节车厢</button>
             </div>
+            <div class="lt-intro-skip">点击任意位置跳过</div>
           </div>
           <div class="lt-bottom">
             <div class="lt-channel-tabs">
@@ -309,6 +311,12 @@
         input.focus();
         return;
       }
+      if (introLayer && introLayer.classList.contains('lt-intro-rolling') && ev.target.closest('.lt-intro')) {
+        introLayer.classList.remove('lt-intro-rolling');
+        clearTimeout(introRollingTimer);
+        introRollingTimer = null;
+        return;
+      }
       const mini = ev.target.closest('[data-lt-action]');
       if (mini) {
         if (mini.dataset.ltAction === 'toggle-game-shell') {
@@ -359,7 +367,25 @@
     if (channelTabs) {
       channelTabs.querySelectorAll('[data-channel]').forEach(btn => btn.classList.toggle('lt-active', btn.dataset.channel === state.input_channel));
     }
-    if (introLayer) introLayer.classList.toggle('lt-show', !state.flags.intro_seen);
+    if (introLayer) {
+      const showIntro = !state.flags.intro_seen;
+      introLayer.classList.toggle('lt-show', showIntro);
+      if (showIntro) {
+        introLayer.classList.add('lt-intro-rolling');
+        const card = introLayer.querySelector('.lt-intro-card');
+        clearTimeout(introRollingTimer);
+        const finish = () => {
+          introLayer.classList.remove('lt-intro-rolling');
+          introRollingTimer = null;
+        };
+        card.onanimationend = finish;
+        introRollingTimer = setTimeout(finish, 8000);
+      } else {
+        introLayer.classList.remove('lt-intro-rolling');
+        clearTimeout(introRollingTimer);
+        introRollingTimer = null;
+      }
+    }
     sceneText.textContent = getSceneText();
     if (goalEl) goalEl.textContent = '当前目标：' + currentGoal();
     npcWrap.innerHTML = [

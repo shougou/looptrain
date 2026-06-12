@@ -580,6 +580,51 @@ body.lt-game-shell #looptrain-show-btn,
   padding-left: 10px;
 }
 
+/* v0.4.4 intro roll-in animation: card slides up from below with fade */
+.lt-intro-rolling .lt-intro-card {
+  animation: intro-roll-in 6s ease-out forwards;
+  transform-origin: center bottom;
+}
+@keyframes intro-roll-in {
+  0% {
+    transform: translateY(26vh);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.lt-intro-rolling .lt-intro-btn {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s ease;
+}
+.lt-intro-rolling .lt-intro-skip {
+  display: block;
+}
+.lt-intro-skip {
+  display: none;
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(237,231,217,.45);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  z-index: 72;
+  animation: intro-skip-pulse 3s ease-in-out infinite;
+}
+@keyframes intro-skip-pulse {
+  0%, 100% { opacity: .45; }
+  50% { opacity: .22; }
+}
+
 .lt-has-portrait .lt-portrait-layer,
 .lt-dialogue .lt-portrait-layer {
   display: block;
