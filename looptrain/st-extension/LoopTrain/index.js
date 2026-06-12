@@ -813,20 +813,16 @@
     };
 
     const start = (e) => {
-      e.preventDefault();
       voiceInputBase = input.value.trimEnd();
       try { recognition.start(); } catch (_) { return; }
       micBtn.classList.add('lt-mic-listening');
     };
     const stop = (e) => {
-      e.preventDefault();
       stopVoiceInput();
     };
-    micBtn.addEventListener('mousedown', start);
-    micBtn.addEventListener('touchstart', start, { passive: false });
-    micBtn.addEventListener('mouseup', stop);
-    micBtn.addEventListener('touchend', stop);
-    micBtn.addEventListener('mouseleave', stop);
+    micBtn.addEventListener('pointerdown', start);
+    micBtn.addEventListener('pointerup', stop);
+    micBtn.addEventListener('pointerleave', stop);
   }
 
   function stopVoiceInput() {
