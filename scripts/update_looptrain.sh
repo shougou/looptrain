@@ -20,6 +20,11 @@ cp -R "$ROOT_DIR/runtime_imports/." "$ST_DIR/looptrain_imports/"
 
 python3 "$ROOT_DIR/scripts/patch_config.py" "$ST_DIR/config.yaml" --listen false
 
+if [ -d "$ST_DIR/.git" ] && [ -f "$ST_DIR/public/index.html" ]; then
+  git -C "$ST_DIR" checkout -- public/index.html
+  echo "[LoopTrain] Restored ST public/index.html before boot-hide injection"
+fi
+
 if [ -f "$ROOT_DIR/scripts/boot-hide.html" ] && [ -f "$ST_DIR/public/index.html" ]; then
   python3 - "$ST_DIR/public/index.html" "$ROOT_DIR/scripts/boot-hide.html" <<'PY'
 from pathlib import Path
@@ -35,6 +40,9 @@ boot_tokens = (
     'lt-boot-fade-in',
     'looptrain:game-ready',
     'looptrain:game-error',
+    'lt-game-ready',
+    'lt-boot-error-msg',
+    'if(o)o.remove',
 )
 lines = index_path.read_text(encoding='utf-8').splitlines()
 clean = []
