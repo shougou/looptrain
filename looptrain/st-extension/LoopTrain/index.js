@@ -811,19 +811,22 @@
       if (micBtn) micBtn.classList.remove('lt-mic-listening');
     };
 
-    micBtn.addEventListener('click', async () => {
+    micBtn.addEventListener('click', () => {
       if (!recognition) { toast('语音识别不可用，请使用 Chrome 浏览器。'); return; }
       if (micBtn.classList.contains('lt-mic-listening')) {
         stopVoiceInput();
         return;
       }
       voiceInputBase = input.value.trimEnd();
+      // Android Chrome often needs an explicit getUserMedia call to trigger the permission dialog.
+      // We fire it without awaiting — if it succeeds, the permission is granted in the background.
+      // recognition.start() triggers its own permission flow on desktop Chrome.
+      if (navigator.mediaDevices?.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(s => s.getTracks().forEach(t => t.stop()))
+          .catch(() => {});
+      }
       try {
-        // Android Chrome requires explicit getUserMedia before SpeechRecognition
-        if (navigator.mediaDevices?.getUserMedia) {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          stream.getTracks().forEach(t => t.stop());
-        }
         recognition.start();
         micBtn.classList.add('lt-mic-listening');
       } catch (e) {
