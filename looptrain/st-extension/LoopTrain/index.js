@@ -187,6 +187,7 @@
     merged.npc_states = Object.assign(clone(local.startState.npc_states), s?.npc_states || {});
     merged.flags = Object.assign(clone(local.startState.flags), s?.flags || {});
     merged.flags.visible_hidden_npcs = unique(merged.flags.visible_hidden_npcs);
+    if (merged.flags.xiaoning_mother_memory_triggered) unlockHiddenNpc(merged, 'xiaoning_mother_hidden');
     merged.known_clues = unique(merged.known_clues || []);
     merged.carried_memory = unique(merged.carried_memory || []);
     merged.unlocked_actions = merged.unlocked_actions || [];
@@ -204,7 +205,7 @@
   function unlockHiddenNpc(s, npcId) { s.flags.visible_hidden_npcs = unique([...(s.flags.visible_hidden_npcs || []), npcId]); }
   function sceneNpcs() {
     const base = local.scenes[state.location]?.npcs || [];
-    const hidden = unique(state.flags?.visible_hidden_npcs).filter(id => local.npcs[id]?.location === state.location);
+    const hidden = Object.keys(local.npcs).filter(id => local.npcs[id]?.hidden && local.npcs[id]?.location === state.location && isHiddenNpcVisible(state, id));
     return unique([...base, ...hidden]);
   }
 

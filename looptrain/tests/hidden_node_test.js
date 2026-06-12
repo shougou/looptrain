@@ -2,6 +2,10 @@
 const assert = require('assert');
 const engine = require('../st-server-plugin/looptrain/engine');
 
+let legacy = engine.normalize({ ...engine.START_STATE, flags: { ...engine.START_STATE.flags, xiaoning_mother_memory_triggered: true } });
+assert.ok(legacy.flags.visible_hidden_npcs.includes('xiaoning_mother_hidden'), 'legacy triggered state should migrate hidden NPC visibility');
+assert.strictEqual(engine.startDialogue(legacy, 'xiaoning_mother_hidden').state.active_npc, 'xiaoning_mother_hidden');
+
 let s = engine.normalize(engine.START_STATE);
 let blocked = engine.startDialogue(s, 'xiaoning_mother_hidden');
 assert.ok(blocked.messages[0].text.includes('记忆'), 'hidden mother should not be directly available before trigger');

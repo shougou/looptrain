@@ -190,6 +190,7 @@ function normalize(state) {
   s.npc_states = Object.assign(clone(START_STATE.npc_states), state?.npc_states || {});
   s.flags = Object.assign(clone(START_STATE.flags), state?.flags || {});
   s.flags.visible_hidden_npcs = unique(s.flags.visible_hidden_npcs);
+  if (s.flags.xiaoning_mother_memory_triggered) unlockHiddenNpc(s, 'xiaoning_mother_hidden');
   s.known_clues = unique(s.known_clues);
   s.carried_memory = unique(s.carried_memory);
   s.unlocked_actions = s.unlocked_actions || [];
