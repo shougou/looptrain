@@ -951,10 +951,24 @@
   function notifyGameReady() {
     requestAnimationFrame(() => {
       const rootEl = document.getElementById('looptrain-root');
-      const ready = rootEl && !rootEl.classList.contains('lt-hidden') && document.body.classList.contains('lt-game-shell');
+      const ready = !!(
+        rootEl &&
+        document.querySelector('.lt-phone') &&
+        document.querySelector('.lt-content') &&
+        !rootEl.classList.contains('lt-hidden') &&
+        document.body.classList.contains('lt-game-shell')
+      );
       if (ready) {
         window.dispatchEvent(new CustomEvent('looptrain:game-ready', { detail: { version: VERSION, readyAt: Date.now() } }));
+        return;
       }
+      window.dispatchEvent(new CustomEvent('looptrain:game-error', {
+        detail: {
+          reason: 'LoopTrain root not visible or game shell not active',
+          rootClass: rootEl?.className || '',
+          bodyClass: document.body.className || '',
+        },
+      }));
     });
   }
 
@@ -999,9 +1013,6 @@
       notifyGameReady();
     }
 
-    document.documentElement.classList.remove('lt-game-boot', 'lt-boot-hide-st');
-    const overlay = document.getElementById('lt-boot-overlay');
-    if (overlay) overlay.remove();
     if (requestedGameShell) {
       appendMessage('system', `LoopTrain v${VERSION} 已启动。${useRemote ? '已连接 Server Plugin。' : '未连接 Server Plugin，使用本地控制层。'} 可在输入区切换“扮演 / 指令”。`, log);
     }
