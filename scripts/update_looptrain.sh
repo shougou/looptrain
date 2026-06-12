@@ -20,4 +20,11 @@ cp -R "$ROOT_DIR/runtime_imports/." "$ST_DIR/looptrain_imports/"
 
 python3 "$ROOT_DIR/scripts/patch_config.py" "$ST_DIR/config.yaml" --listen false
 
+if [ -f "$ROOT_DIR/scripts/boot-hide.html" ] && [ -f "$ST_DIR/public/index.html" ]; then
+  if ! grep -q 'lt-game-boot' "$ST_DIR/public/index.html" 2>/dev/null; then
+    sed -i "/<head>/r $ROOT_DIR/scripts/boot-hide.html" "$ST_DIR/public/index.html"
+    echo "[LoopTrain] Boot-hide overlay injected into ST index.html"
+  fi
+fi
+
 echo "OK: LoopTrain updated. Restart SillyTavern."
