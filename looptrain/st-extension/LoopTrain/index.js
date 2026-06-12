@@ -985,14 +985,15 @@
     bindSTEvents();
     render();
 
+    document.documentElement.classList.remove('lt-game-boot');
+    document.documentElement.classList.remove('lt-boot-hide-st');
     const overlay = document.getElementById('lt-boot-overlay');
     if (overlay) overlay.remove();
-    document.documentElement.classList.remove('lt-boot-hide-st');
-    // Safety: if initialization hangs, force-show after 8 seconds
+    // Safety timeout
     setTimeout(() => {
+      document.documentElement.classList.remove('lt-game-boot', 'lt-boot-hide-st');
       const o = document.getElementById('lt-boot-overlay');
       if (o) o.remove();
-      document.documentElement.classList.remove('lt-boot-hide-st');
     }, 8000);
     if (requestedGameShell) {
       appendMessage('system', `LoopTrain v${VERSION} 已启动。${useRemote ? '已连接 Server Plugin。' : '未连接 Server Plugin，使用本地控制层。'} 可在输入区切换“扮演 / 指令”。`, log);
