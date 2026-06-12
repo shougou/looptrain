@@ -338,7 +338,7 @@ function commitAction(text, state) {
     return { state: s, messages: [{ type: 'system', text: '你假装系鞋带，低头靠近座位下方。声音仍在，但不像来自座位底部。你确认：它更像来自地板夹层。\n【获得线索】声音不来自座位下方' }], suggestions: suggestions(s), goal: currentGoal(s) };
   }
   if (action.intent === 'convince_zhao') return convinceZhao(s);
-  return { state: s, messages: [{ type: 'system', text: '这个行动还不够明确。你可以试着说：和小宁对话、检查座位下方、找赵乘警、试探沈墨寒。' }], suggestions: suggestions(s), goal: currentGoal(s) };
+    return { state: s, messages: [{ type: 'system', text: '你需要更明确地描述你的行动。观察车厢，寻找线索，与周围的人交谈。' }], suggestions: suggestions(s), goal: currentGoal(s) };
 }
 
 function convinceZhao(s) {

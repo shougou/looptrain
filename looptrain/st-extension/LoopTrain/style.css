@@ -121,6 +121,8 @@
 .lt-scene-text { color: rgba(237,231,217,.92); font-size: 14px; }
 .lt-visible-npcs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
 .lt-npc-chip { border: 1px solid rgba(214,168,90,.24); background: rgba(214,168,90,.09); color: #f3dfaa; padding: 6px 10px; border-radius: 999px; font-size: 12px; }
+.lt-scene-chip { border: 1px solid rgba(127,179,213,.32); background: rgba(127,179,213,.10); color: #b3d9f0; padding: 6px 10px; border-radius: 999px; font-size: 12px; cursor: pointer; margin-left: 4px; }
+.lt-scene-chip:hover { border-color: rgba(127,179,213,.55); background: rgba(127,179,213,.18); }
 
 .lt-log {
   margin-top: 12px;

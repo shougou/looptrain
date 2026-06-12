@@ -415,7 +415,7 @@
       const n = local.npcs[npcId];
       if (!n) return '';
       return `<button class="lt-npc-chip" data-template="我走向${n.name}，试着和${n.name}对话。">${n.name}</button>`;
-    }).join('');
+    }).join('') + getSceneTransitions();
     input.placeholder = inputPlaceholder();
     renderSuggestions();
     renderPortrait();
@@ -440,51 +440,24 @@
     const mem = state.loop > 1 && state.carried_memory.length ? `你记得上一轮留下的信息：${state.carried_memory.map(clueName).join('、')}。` : '';
     return `${mem}${scene.text || '1939 年冬，渝江线 307 次夜行列车从重庆驶向江城。窗外远方的火光渐远，车厢里灯光昏黄。'}`;
   }
+  function getSceneTransitions() {
+    const loc = state.location || 'carriage_7';
+    if (loc === 'carriage_7') {
+      return '<button class="lt-scene-chip" data-template="我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。">前往连接处</button>';
+    }
+    return '<button class="lt-scene-chip" data-template="我从连接处回到第七节车厢。">返回第七节车厢</button>';
+  }
+
   function renderSuggestions() {
     const arr = getSuggestions();
     suggestions.innerHTML = arr.map(s => `<button class="lt-chip ${s.template === '__END_DIALOGUE__' ? 'lt-end' : ''}" data-template="${escapeAttr(s.template)}">${escapeHtml(s.label)}</button>`).join('');
   }
   function getSuggestions() {
-    if (state.input_channel === 'command') return getCommandSuggestions();
     if (state.mode === 'dialogue') {
       const n = local.npcs[state.active_npc];
       return (n?.suggestions || []).map(([label, template]) => ({ label, template }));
     }
-    const out = [];
-    const loc = state.location || 'carriage_7';
-    // Scene-specific NPC suggestions
-    if (loc === 'carriage_7') {
-      if (countValidEvidence(state) >= 2) out.push({ label: '说服赵乘警检查地板', template: '我找到赵乘警，说明小宁听见过声音，而且我也确认声音不来自座位，请他检查地板。' });
-      if (state.carried_memory.includes('xiaoning_heard_ticking')) out.push({ label: '直接安抚小宁', template: '我蹲到小宁面前，温和地说：我知道你听见了地板下面的声音，别怕，我只是想确认它。' });
-      out.push(
-        { label: '检查座位下方', template: '我假装系鞋带，低头检查座位下方，判断滴答声来自哪里。' },
-        { label: '和小宁对话', template: '我走到小宁身边，蹲下来和她说话。' },
-        { label: '找赵乘警', template: '我找到赵乘警，压低声音报告第七节车厢的异常。' },
-      );
-    }
-    if (loc === 'connector_7_8') {
-      out.push(
-        { label: '试探沈墨寒', template: '我走向沈墨寒，试探他是否知道连接处发生过什么。' },
-      );
-    }
-    // Scene transition suggestions
-    if (loc === 'carriage_7') {
-      out.push({ label: '前往连接处', template: '我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。' });
-    } else if (loc === 'connector_7_8') {
-      out.push({ label: '返回第七节车厢', template: '我从连接处回到第七节车厢。' });
-    }
-    return out.slice(0, 7);
-  }
-  function getCommandSuggestions() {
-    const base = [
-      { label: '查看线索', template: '查看线索' },
-      { label: '查看人物', template: '查看人物' },
-      { label: '查看状态', template: '查看状态' },
-    ];
-    if (state.mode === 'dialogue') base.unshift({ label: '结束对话', template: '结束对话' });
-    if (lastFailure) base.push({ label: '进入下一轮', template: '进入下一轮' });
-    base.push({ label: '重置本轮', template: '重置本轮' });
-    return base;
+    return [];
   }
 
   function renderPortrait() {
@@ -843,7 +816,7 @@
       if (countValidEvidence(s) >= 2) { s.ap_remaining -= 2; advanceClock(s,2); s.flags.trial_success = true; return { state:s, trial_success:true, messages:[{type:'outcome', html:'<div class="lt-msg-title">试玩版成功</div><div>赵乘警用警棍敲了敲地板。咚。声音是空的。</div><div>餐车方向，传来一小段口琴声。</div>'}] }; }
       addClue(s,'zhao_requires_evidence'); s.ap_remaining -= 1; return { state:s, messages:[{type:'system', text:'赵乘警没有行动：“证据不够。”\n【获得信息】赵乘警需要证据才会行动。'}] };
     }
-    return { state:s, messages:[{type:'system', text:'这个行动还不够明确。你可以试着说：和小宁对话、检查座位下方、找赵乘警、试探沈墨寒。'}] };
+      return { state:s, messages:[{type:'system', text:'你需要更明确地描述你的行动。观察车厢，寻找线索，与周围的人交谈。'}] };
   }
   function localStartDialogue(s, npcId) {
     const npc = local.npcs[npcId];
