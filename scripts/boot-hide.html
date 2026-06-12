@@ -1,4 +1,14 @@
 <!-- LOOPTRAIN_BOOT_SNIPPET_START -->
+<style>
+#lt-boot-overlay{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.45)),url(/scripts/extensions/third-party/LoopTrain/a5813b6e-63a5-429c-87b2-652d33cec056.png) center/cover no-repeat;animation:lt-boot-fade-in .4s ease-out;box-sizing:border-box}
+#lt-boot-overlay .lt-boot-message{color:#f5e6c8;font-size:clamp(28px,6vw,48px);font-weight:700;letter-spacing:.15em;text-shadow:0 2px 20px rgba(0,0,0,.8);animation:lt-boot-pulse 2s ease-in-out infinite;white-space:nowrap}
+#lt-boot-error-msg{color:#f5b0b0;font-size:clamp(14px,3.5vw,20px);margin-top:16px;text-shadow:0 2px 12px rgba(0,0,0,.8)}
+@keyframes lt-boot-pulse{0%,100%{opacity:.52}50%{opacity:1}}
+@keyframes lt-boot-fade-in{0%{opacity:0}to{opacity:1}}
+html.lt-boot-hide-st{overflow:hidden!important;background:#050507!important}
+html.lt-boot-hide-st body{overflow:hidden!important;background:#050507!important}
+html.lt-boot-hide-st body>*:not(#lt-boot-overlay){visibility:hidden!important}
+</style>
 <script>
 (function(){
 var q=location.search,h=location.hash;
@@ -40,14 +50,4 @@ if(m)m.textContent="游戏加载超时，请刷新页面";
 mountBootOverlay();
 })();
 </script>
-<style>
-#lt-boot-overlay{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.45)),url(/scripts/extensions/third-party/LoopTrain/a5813b6e-63a5-429c-87b2-652d33cec056.png) center/cover no-repeat;animation:lt-boot-fade-in .4s ease-out;box-sizing:border-box}
-#lt-boot-overlay .lt-boot-message{color:#f5e6c8;font-size:clamp(28px,6vw,48px);font-weight:700;letter-spacing:.15em;text-shadow:0 2px 20px rgba(0,0,0,.8);animation:lt-boot-pulse 2s ease-in-out infinite;white-space:nowrap}
-#lt-boot-error-msg{color:#f5b0b0;font-size:clamp(14px,3.5vw,20px);margin-top:16px;text-shadow:0 2px 12px rgba(0,0,0,.8)}
-@keyframes lt-boot-pulse{0%,100%{opacity:.52}50%{opacity:1}}
-@keyframes lt-boot-fade-in{0%{opacity:0}to{opacity:1}}
-html.lt-boot-hide-st{overflow:hidden!important;background:#050507!important}
-html.lt-boot-hide-st body{overflow:hidden!important;background:#050507!important}
-html.lt-boot-hide-st body>*:not(#lt-boot-overlay){visibility:hidden!important}
-</style>
 <!-- LOOPTRAIN_BOOT_SNIPPET_END -->
