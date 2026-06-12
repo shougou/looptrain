@@ -932,6 +932,7 @@
     } catch (_) { /* ST event API can vary by version. Overlay still works without events. */ }
   }
   async function init() {
+    document.title = 'LoopTrain';
     loadSettings();
     const requestedGameShell = isGameShellRequested();
     settings.game_shell = requestedGameShell;
