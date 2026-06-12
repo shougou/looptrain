@@ -80,13 +80,14 @@
 
   local.clueTitles = Object.fromEntries(Object.values(local.clueDetails).map(x => [x.id, x.title]));
 
-  let root, phone, log, dialogueLog, portraitImg, input, suggestions, topbar, ngLayer, sceneText, npcWrap, goalEl, channelTabs, introLayer, locationEl;
+  let root, phone, log, dialogueLog, portraitImg, input, suggestions, topbar, ngLayer, sceneText, npcWrap, goalEl, channelTabs, introLayer, locationEl, micBtn;
   let useRemote = false;
   let lastFailure = null;
   let memoryPortraitTimer = null;
   let thinkingEl = null;
   let introRollingTimer = null;
   let csrfToken = null;
+  let recognition = null;
   let state = clone(local.startState);
 
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
@@ -313,6 +314,9 @@
     goalEl = root.querySelector('.lt-current-goal');
     channelTabs = root.querySelector('.lt-channel-tabs');
     introLayer = root.querySelector('.lt-intro');
+    micBtn = root.querySelector('.lt-btn-mic');
+
+    initVoiceInput();
 
     root.querySelector('.lt-btn-send').addEventListener('click', submitInput);
     root.querySelector('.lt-btn-mic').addEventListener('click', handleMic);
@@ -775,7 +779,66 @@
     phone.appendChild(t);
     setTimeout(() => t.remove(), 2200);
   }
-  function handleMic() { toast('语音输入预留：v0.3 先验证 ST 外层控制，后续接 Web Speech / ASR。'); }
+  function initVoiceInput() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      if (micBtn) micBtn.style.display = 'none';
+      return;
+    }
+    recognition = new SR();
+    recognition.lang = 'zh-CN';
+    recognition.interimResults = true;
+    recognition.continuous = true;
+    let silenceTimer = null;
+
+    recognition.onresult = (ev) => {
+      let final = ''; let interim = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const t = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) final += t; else interim += t;
+      }
+      input.value = (input.value.trim() + ' ' + (final || interim)).trim();
+      autoSizeInput();
+      if (final) {
+        clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(() => stopVoiceInput(), 2000);
+      }
+    };
+
+    recognition.onerror = (ev) => {
+      if (ev.error === 'not-allowed') toast('请允许麦克风权限后重试。');
+      else if (ev.error !== 'aborted') toast('语音识别出现问题，请重试。');
+      stopVoiceInput();
+    };
+
+    recognition.onend = () => {
+      if (micBtn && micBtn.classList.contains('lt-mic-listening')) {
+        try { recognition.start(); } catch (_) { stopVoiceInput(); }
+      }
+    };
+  }
+
+  function startVoiceInput() {
+    if (!recognition) return;
+    try {
+      recognition.start();
+      if (micBtn) micBtn.classList.add('lt-mic-listening');
+    } catch (_) { /* already started */ }
+  }
+
+  function stopVoiceInput() {
+    try { recognition.stop(); } catch (_) { /* not running */ }
+    if (micBtn) micBtn.classList.remove('lt-mic-listening');
+  }
+
+  function handleMic() {
+    if (!recognition) return;
+    if (micBtn && micBtn.classList.contains('lt-mic-listening')) {
+      stopVoiceInput();
+    } else {
+      startVoiceInput();
+    }
+  }
 
 
   function successHtml() {
