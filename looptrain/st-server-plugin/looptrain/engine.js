@@ -42,6 +42,7 @@ const NPCS = {
     turn_limit_policy: 'soft_close',
     portrait: 'xiaoning_portrait.png',
     role: 'clue_source',
+    location: 'carriage_7',
     opening: '小宁把旧布娃娃抱得更紧，眼神躲开你。她很轻地说：“你……也听见了吗？”',
     near_limit_hint: '小宁低头看了看窗外，像是不想再说太久。你感觉接下来最好问关键问题。',
     limit_message: '小宁把布娃娃抱得更紧，轻轻摇了摇头。她暂时不愿意再说了。',
@@ -60,6 +61,7 @@ const NPCS = {
     turn_limit_policy: 'evidence_gate',
     portrait: 'zhao_police_portrait.png',
     role: 'authority_gatekeeper',
+    location: 'carriage_7',
     opening: '赵乘警看向你，手搭在警棍旁边：“你最好想清楚再说。列车上散布恐慌，是要负责的。”',
     near_limit_hint: '赵乘警看了一眼怀表：“我不能一直听你讲推测。你最好拿出能查证的证据。”',
     limit_message: '赵乘警打断你：“如果没有新的证据，我不能继续陪你浪费时间。”',
@@ -78,6 +80,7 @@ const NPCS = {
     turn_limit_policy: 'risk_escalation',
     portrait: 'shen_mohan_portrait.png',
     role: 'misdirection_pressure',
+    location: 'connector_7_8',
     opening: '沈墨寒把视线从窗外移到你身上，像是早就等着你开口：“你终于注意到我了。”',
     near_limit_hint: '沈墨寒的眼神冷了下来。你意识到，他不是在回答你，而是在反过来确认你的身份。',
     limit_message: '沈墨寒微微侧过身，声音很低：“你问得太多了。”',
@@ -97,6 +100,7 @@ const NPCS = {
     portrait: 'xiaoning_mother_portrait.png',
     role: 'hidden_memory',
     hidden: true,
+    location: 'carriage_7',
     suggestions: [],
   },
 };
@@ -170,6 +174,11 @@ const CLUE_DETAILS = {
 
 const CLUE_TITLES = Object.fromEntries(Object.values(CLUE_DETAILS).map(x => [x.id, x.title]));
 
+const SCENES = {
+  carriage_7: { name: '第七节车厢', npcs: ['xiaoning','zhao_police'], text: '列车第七节车厢灯光昏黄，乘客们各自闭目或望着窗外。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。地板下方似乎藏着很轻的滴答声。' },
+  connector_7_8: { name: '连接处', npcs: ['shen_mohan'], text: '第七节车厢与第八节车厢之间的连接处。列车晃动时，铁板发出沉闷的声响。灰大衣的沈墨寒站在这里，像是在等人，又像是在观察着什么。' },
+};
+
 function clone(x) { return JSON.parse(JSON.stringify(x)); }
 function unique(arr) { return [...new Set((arr || []).filter(Boolean))]; }
 function normalize(state) {
@@ -180,6 +189,7 @@ function normalize(state) {
   s.carried_memory = unique(s.carried_memory);
   s.unlocked_actions = s.unlocked_actions || [];
   s.input_channel = s.input_channel || 'roleplay';
+  s.location = s.location || 'carriage_7';
   return s;
 }
 function addClue(s, id) { if (id && !s.known_clues.includes(id)) s.known_clues.push(id); }
@@ -195,6 +205,7 @@ function countValidEvidence(s) {
 function clueName(id) { return CLUE_DETAILS[id]?.title || id; }
 function clueDetail(id) { return clone(CLUE_DETAILS[id] || { id, title: id, source: '未知', confidence: 'unknown', usable_with: [], carry_to_next_loop: false }); }
 function npcName(id) { return NPCS[id]?.name || id; }
+function sceneName(id) { return SCENES[id]?.name || id; }
 
 function currentGoal(s) {
   s = normalize(s);
@@ -208,6 +219,8 @@ function currentGoal(s) {
 function parseAction(text) {
   const t = String(text || '').trim();
   if (!t) return { intent: 'empty', confidence: 0 };
+  if (/连接处|8号车厢|八号车厢|8号|八号/.test(t)) return { intent: 'move_to_connector', confidence: 0.88 };
+  if (/第七节|回到车厢|返回车厢/.test(t)) return { intent: 'move_to_carriage_7', confidence: 0.88 };
   if (/赵|乘警|警察/.test(t) && /检查|证据|地板|说服|异常|请他|报告/.test(t)) return { intent: 'convince_zhao', target_npc: 'zhao_police', confidence: 0.9 };
   if (/赵|乘警|警察/.test(t)) return { intent: 'start_dialogue', target_npc: 'zhao_police', confidence: 0.82 };
   if (/沈|灰大衣|墨寒/.test(t)) return { intent: 'start_dialogue', target_npc: 'shen_mohan', confidence: 0.84 };
@@ -220,15 +233,27 @@ function parseAction(text) {
 function suggestions(s) {
   s = normalize(s);
   const out = [];
-  if (countValidEvidence(s) >= 2) out.push({ label: '说服赵乘警检查地板', template: '我找到赵乘警，说明小宁听见过声音，而且我也确认声音不来自座位，请他检查地板。' });
-  if (s.carried_memory.includes('xiaoning_heard_ticking')) out.push({ label: '直接安抚小宁', template: '我蹲到小宁面前，温和地说：我知道你听见了地板下面的声音，别怕，我只是想确认它。' });
-  out.push(
-    { label: '检查座位下方', template: '我假装系鞋带，低头检查座位下方，判断滴答声来自哪里。' },
-    { label: '和小宁对话', template: '我走到小宁身边，蹲下来和她说话。' },
-    { label: '找赵乘警', template: '我找到赵乘警，压低声音报告第七节车厢的异常。' },
-    { label: '试探沈墨寒', template: '我走向沈墨寒，试探他是否知道连接处发生过什么。' },
-    { label: '强制失败测试', template: '我错过了关键时机，进入失败结算。' },
-  );
+  const loc = s.location || 'carriage_7';
+  if (loc === 'carriage_7') {
+    if (countValidEvidence(s) >= 2) out.push({ label: '说服赵乘警检查地板', template: '我找到赵乘警，说明小宁听见过声音，而且我也确认声音不来自座位，请他检查地板。' });
+    if (s.carried_memory.includes('xiaoning_heard_ticking')) out.push({ label: '直接安抚小宁', template: '我蹲到小宁面前，温和地说：我知道你听见了地板下面的声音，别怕，我只是想确认它。' });
+    out.push(
+      { label: '检查座位下方', template: '我假装系鞋带，低头检查座位下方，判断滴答声来自哪里。' },
+      { label: '和小宁对话', template: '我走到小宁身边，蹲下来和她说话。' },
+      { label: '找赵乘警', template: '我找到赵乘警，压低声音报告第七节车厢的异常。' },
+    );
+  }
+  if (loc === 'connector_7_8') {
+    out.push(
+      { label: '试探沈墨寒', template: '我走向沈墨寒，试探他是否知道连接处发生过什么。' },
+    );
+  }
+  if (loc === 'carriage_7') {
+    out.push({ label: '前往连接处', template: '我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。' });
+  } else if (loc === 'connector_7_8') {
+    out.push({ label: '返回第七节车厢', template: '我从连接处回到第七节车厢。' });
+  }
+  out.push({ label: '强制失败测试', template: '我错过了关键时机，进入失败结算。' });
   return out.slice(0, 7);
 }
 function dialogueSuggestions(s) {
@@ -267,6 +292,7 @@ function startDialogue(state, npcId) {
   const s = normalize(state);
   const npc = NPCS[npcId];
   if (!npc || npc.hidden) return { state: s, messages: [{ type: 'system', text: '这个人现在不在第七节车厢。' }], suggestions: suggestions(s), goal: currentGoal(s) };
+  if (npc.location && npc.location !== s.location) return { state: s, messages: [{ type: 'system', text: `${npc.name}不在这里。` }], suggestions: suggestions(s), goal: currentGoal(s) };
   if (s.ap_remaining < npc.cost) return failLoop(s, 'ap_not_enough');
   s.mode = 'dialogue';
   s.active_npc = npcId;
@@ -294,6 +320,16 @@ function startDialogue(state, npcId) {
 function commitAction(text, state) {
   const s = normalize(state);
   const action = parseAction(text || '');
+  if (action.intent === 'move_to_connector') {
+    s.ap_remaining -= 1; advanceClock(s, 1); s.location = 'connector_7_8';
+    const failure = maybeFail(s); if (failure) return failure;
+    return { state: s, messages: [{ type: 'system', text: '你起身穿过过道，走到第七节车厢和第八节车厢之间的连接处。列车晃动让铁板发出沉闷的声响。灰大衣的沈墨寒站在这里。' }], suggestions: suggestions(s), goal: currentGoal(s) };
+  }
+  if (action.intent === 'move_to_carriage_7') {
+    s.ap_remaining -= 1; advanceClock(s, 1); s.location = 'carriage_7';
+    const failure = maybeFail(s); if (failure) return failure;
+    return { state: s, messages: [{ type: 'system', text: '你从连接处回到第七节车厢。过道里灯光明暗不定，小宁还在靠窗的位置，赵乘警仍在查票。地板下方的滴答声依然隐约可闻。' }], suggestions: suggestions(s), goal: currentGoal(s) };
+  }
   if (action.intent === 'start_dialogue') return startDialogue(s, action.target_npc);
   if (action.intent === 'force_fail') return failLoop(s, 'time_out_explosion');
   if (action.intent === 'observe_under_seat') {
@@ -504,8 +540,8 @@ function getClueTitles() { return clone(CLUE_TITLES); }
 function getClueDetails() { return clone(CLUE_DETAILS); }
 
 module.exports = {
-  START_STATE, NPCS, CLUE_TITLES, CLUE_DETAILS,
+  START_STATE, NPCS, SCENES, CLUE_TITLES, CLUE_DETAILS,
   normalize, parseAction, commitAction, startDialogue, dialogueMessage, endDialogue,
   failLoop, nextLoop, suggestions, dialogueSuggestions, countValidEvidence, currentGoal,
-  clueDetail, cleanLlmReply, getNpcs, getClueTitles, getClueDetails,
+  clueDetail, cleanLlmReply, getNpcs, getClueTitles, getClueDetails, sceneName,
 };

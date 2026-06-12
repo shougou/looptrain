@@ -68,9 +68,19 @@
       zhao_requires_evidence: { id: 'zhao_requires_evidence', title: '赵乘警需要证据才会行动', source: '赵乘警反馈', confidence: 'high', usable_with: ['zhao_police','self_planning'], carry_to_next_loop: true },
     },
   };
+  local.scenes = {
+    carriage_7: { name: '第七节车厢', npcs: ['xiaoning','zhao_police'], text: '列车第七节车厢灯光昏黄，乘客们各自闭目或望着窗外。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。地板下方似乎藏着很轻的滴答声。' },
+    connector_7_8: { name: '连接处', npcs: ['shen_mohan'], text: '第七节车厢与第八节车厢之间的连接处。列车晃动时，铁板发出沉闷的声响。灰大衣的沈墨寒站在这里，像是在等人，又像是在观察着什么。' },
+  };
+  // Assign NPC locations
+  local.npcs.xiaoning.location = 'carriage_7';
+  local.npcs.zhao_police.location = 'carriage_7';
+  local.npcs.shen_mohan.location = 'connector_7_8';
+  local.npcs.xiaoning_mother_hidden.location = 'carriage_7';
+
   local.clueTitles = Object.fromEntries(Object.values(local.clueDetails).map(x => [x.id, x.title]));
 
-  let root, phone, log, dialogueLog, portraitImg, input, suggestions, topbar, ngLayer, statusBadge, sceneText, npcWrap, goalEl, channelTabs, introLayer, gameShellToggle;
+  let root, phone, log, dialogueLog, portraitImg, input, suggestions, topbar, ngLayer, statusBadge, sceneText, npcWrap, goalEl, channelTabs, introLayer, locationEl;
   let useRemote = false;
   let lastFailure = null;
   let memoryPortraitTimer = null;
@@ -132,6 +142,7 @@
     if (!root) return;
     if (manual) root.dataset.manuallyOpened = 'true';
     root.classList.remove('lt-hidden');
+    applyGameShell(true);
     render();
   }
 
@@ -181,6 +192,8 @@
   function npcName(id) { return local.npcs[id]?.name || id; }
   function portraitFor(npcId) { return local.npcs[npcId]?.portrait || local.npcs.xiaoning.portrait; }
   function assetUrl(name) { return ASSET_BASE + name; }
+  function sceneName(id) { return local.scenes[id]?.name || id; }
+  function sceneNpcs() { return (local.scenes[state.location]?.npcs || []); }
 
   async function checkRemote() {
     try {
@@ -218,7 +231,6 @@
           <div class="lt-topbar"></div>
           <div class="lt-settings">
             <span class="lt-status-badge">本地控制层</span>
-            <button class="lt-mini-btn lt-game-shell-toggle" data-lt-action="toggle-game-shell">游戏全屏</button>
             <button class="lt-mini-btn" data-lt-action="reset">重置</button>
             <button class="lt-mini-btn" data-lt-action="admin">ST设置</button>
           </div>
@@ -273,12 +285,12 @@
     topbar = root.querySelector('.lt-topbar');
     ngLayer = root.querySelector('.lt-ng');
     statusBadge = root.querySelector('.lt-status-badge');
-    gameShellToggle = root.querySelector('.lt-game-shell-toggle');
     sceneText = root.querySelector('.lt-scene-text');
     npcWrap = root.querySelector('.lt-visible-npcs');
     goalEl = root.querySelector('.lt-current-goal');
     channelTabs = root.querySelector('.lt-channel-tabs');
     introLayer = root.querySelector('.lt-intro');
+    locationEl = root.querySelector('.lt-location');
 
     root.querySelector('.lt-btn-send').addEventListener('click', submitInput);
     root.querySelector('.lt-btn-mic').addEventListener('click', handleMic);
@@ -319,11 +331,6 @@
       }
       const mini = ev.target.closest('[data-lt-action]');
       if (mini) {
-        if (mini.dataset.ltAction === 'toggle-game-shell') {
-          applyGameShell(!settings.game_shell);
-          toast(settings.game_shell ? '已进入 LoopTrain Game Shell，ST 界面已隐藏。' : '已关闭 Game Shell。');
-          return;
-        }
         if (mini.dataset.ltAction === 'admin') {
           closeToAdminSetup();
           return;
@@ -360,7 +367,6 @@
     phone.classList.toggle('lt-dialogue', state.mode === 'dialogue');
     phone.classList.toggle('lt-command-mode', state.input_channel === 'command');
     topbar.innerHTML = `<span><strong>${escapeHtml(state.clock)}</strong>｜AP ${state.ap_remaining}｜第 ${state.loop} 轮</span><span class="lt-mode-pill">${state.mode === 'dialogue' ? '对话：' + npcName(state.active_npc) : '探索'}｜${state.input_channel === 'command' ? '指令' : '扮演'}</span>`;
-    if (gameShellToggle) gameShellToggle.textContent = settings.game_shell ? '退出全屏' : '游戏全屏';
     document.body.classList.toggle('lt-game-shell', !!settings.game_shell);
     if (root) root.classList.toggle('lt-game-shell-root', !!settings.game_shell);
     if (statusBadge) statusBadge.textContent = useRemote ? 'Server Plugin' : '本地控制层';
@@ -387,10 +393,13 @@
       }
     }
     sceneText.textContent = getSceneText();
+    if (locationEl) locationEl.textContent = sceneName(state.location);
     if (goalEl) goalEl.textContent = '当前目标：' + currentGoal();
-    npcWrap.innerHTML = [
-      ['小宁','xiaoning'], ['赵乘警','zhao_police'], ['沈墨寒','shen_mohan']
-    ].map(([name]) => `<button class="lt-npc-chip" data-template="我走向${name}，试着和${name}对话。">${name}</button>`).join('');
+    npcWrap.innerHTML = sceneNpcs().map(npcId => {
+      const n = local.npcs[npcId];
+      if (!n) return '';
+      return `<button class="lt-npc-chip" data-template="我走向${n.name}，试着和${n.name}对话。">${n.name}</button>`;
+    }).join('');
     input.placeholder = inputPlaceholder();
     renderSuggestions();
     renderPortrait();
@@ -411,8 +420,9 @@
 
   function getSceneText() {
     if (state.mode === 'dialogue') return `你正在与${npcName(state.active_npc)}交谈。世界没有停下，你必须从对话里得到可行动的信息。`;
+    const scene = local.scenes[state.location] || {};
     const mem = state.loop > 1 && state.carried_memory.length ? `你记得上一轮留下的信息：${state.carried_memory.map(clueName).join('、')}。` : '';
-    return `${mem}1947 年冬，渝江线 307 次夜行列车正从重庆驶向江城。第七节车厢灯光昏黄，地板下方似乎藏着很轻的滴答声。小宁抱着旧布娃娃，赵乘警正在查票，灰大衣的沈墨寒坐在过道侧。`;
+    return `${mem}${scene.text || '1947 年冬，渝江线 307 次夜行列车正从重庆驶向江城。第七节车厢灯光昏黄。'}`;
   }
   function renderSuggestions() {
     const arr = getSuggestions();
@@ -425,14 +435,28 @@
       return (n?.suggestions || []).map(([label, template]) => ({ label, template }));
     }
     const out = [];
-    if (countValidEvidence(state) >= 2) out.push({ label: '说服赵乘警检查地板', template: '我找到赵乘警，说明小宁听见过声音，而且我也确认声音不来自座位，请他检查地板。' });
-    if (state.carried_memory.includes('xiaoning_heard_ticking')) out.push({ label: '直接安抚小宁', template: '我蹲到小宁面前，温和地说：我知道你听见了地板下面的声音，别怕，我只是想确认它。' });
-    out.push(
-      { label: '检查座位下方', template: '我假装系鞋带，低头检查座位下方，判断滴答声来自哪里。' },
-      { label: '和小宁对话', template: '我走到小宁身边，蹲下来和她说话。' },
-      { label: '找赵乘警', template: '我找到赵乘警，压低声音报告第七节车厢的异常。' },
-      { label: '试探沈墨寒', template: '我走向沈墨寒，试探他是否知道连接处发生过什么。' }
-    );
+    const loc = state.location || 'carriage_7';
+    // Scene-specific NPC suggestions
+    if (loc === 'carriage_7') {
+      if (countValidEvidence(state) >= 2) out.push({ label: '说服赵乘警检查地板', template: '我找到赵乘警，说明小宁听见过声音，而且我也确认声音不来自座位，请他检查地板。' });
+      if (state.carried_memory.includes('xiaoning_heard_ticking')) out.push({ label: '直接安抚小宁', template: '我蹲到小宁面前，温和地说：我知道你听见了地板下面的声音，别怕，我只是想确认它。' });
+      out.push(
+        { label: '检查座位下方', template: '我假装系鞋带，低头检查座位下方，判断滴答声来自哪里。' },
+        { label: '和小宁对话', template: '我走到小宁身边，蹲下来和她说话。' },
+        { label: '找赵乘警', template: '我找到赵乘警，压低声音报告第七节车厢的异常。' },
+      );
+    }
+    if (loc === 'connector_7_8') {
+      out.push(
+        { label: '试探沈墨寒', template: '我走向沈墨寒，试探他是否知道连接处发生过什么。' },
+      );
+    }
+    // Scene transition suggestions
+    if (loc === 'carriage_7') {
+      out.push({ label: '前往连接处', template: '我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。' });
+    } else if (loc === 'connector_7_8') {
+      out.push({ label: '返回第七节车厢', template: '我从连接处回到第七节车厢。' });
+    }
     return out.slice(0, 7);
   }
   function getCommandSuggestions() {
@@ -782,6 +806,8 @@
   function advanceClock(s, n) { const [h,m]=s.clock.split(':').map(Number); const total=h*60+m+n; s.clock=String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0'); }
   function countValidEvidence(s) { return s.known_clues.filter(x => ['ticking_under_floor','xiaoning_heard_ticking','sound_not_from_seat','suspicious_connector_movement'].includes(x)).length; }
   function localParseAction(text) {
+    if (/连接处|8号车厢|八号车厢|8号|八号/.test(text)) return { intent:'move_to_connector' };
+    if (/第七节|回到车厢|返回车厢/.test(text)) return { intent:'move_to_carriage_7' };
     if (/赵|乘警|警察/.test(text) && /检查|证据|地板|说服|异常|请他|报告/.test(text)) return { intent:'convince_zhao' };
     if (/赵|乘警|警察/.test(text)) return { intent:'start_dialogue', target_npc:'zhao_police' };
     if (/沈|灰大衣|墨寒/.test(text)) return { intent:'start_dialogue', target_npc:'shen_mohan' };
@@ -792,6 +818,8 @@
   }
   function localCommitAction(text, st) {
     const s = normalizeState(st); const action = localParseAction(text);
+    if (action.intent === 'move_to_connector') { s.ap_remaining -= 1; advanceClock(s,1); s.location = 'connector_7_8'; return { state:s, messages:[{type:'system', text:'你起身穿过过道，走到第七节车厢和第八节车厢之间的连接处。列车晃动让铁板发出沉闷的声响。灰大衣的沈墨寒站在这里。'}] }; }
+    if (action.intent === 'move_to_carriage_7') { s.ap_remaining -= 1; advanceClock(s,1); s.location = 'carriage_7'; return { state:s, messages:[{type:'system', text:'你从连接处回到第七节车厢。过道里灯光明暗不定，小宁还在靠窗的位置，赵乘警仍在查票。地板下方的滴答声依然隐约可闻。'}] }; }
     if (action.intent === 'start_dialogue') return localStartDialogue(s, action.target_npc);
     if (action.intent === 'force_fail') return localFailLoop(s);
     if (action.intent === 'observe_under_seat') { s.ap_remaining -= 1; advanceClock(s,1); addClue(s,'sound_not_from_seat'); return { state:s, messages:[{type:'system', text:'你假装系鞋带，低头靠近座位下方。声音仍在，但不像来自座位底部。\n【获得线索】声音不来自座位下方'}] }; }
@@ -804,6 +832,7 @@
   function localStartDialogue(s, npcId) {
     const npc = local.npcs[npcId];
     if (!npc) return { state:s, messages:[{type:'system', text:'这个人现在不在第七节车厢。'}] };
+    if (npc.location && npc.location !== s.location) return { state:s, messages:[{type:'system', text:`${npc.name}不在这里。`}] };
     s.mode='dialogue'; s.active_npc=npcId;
     s.dialogue_session={npc_id:npcId, started_at:s.clock, ap_cost:npc.cost, turns:[], turns_used:0, turn_limit:npc.turnLimit||8, near_limit_hint_at:npc.nearLimitHintAt||Math.max(1,(npc.turnLimit||8)-2), near_limit_hint_shown:false, pending_clues:[], pending_events:[]};
     const openings = { xiaoning:'小宁把旧布娃娃抱得更紧，眼神躲开你。她很轻地说：“你……也听见了吗？”', zhao_police:'赵乘警看向你：“你最好想清楚再说。”', shen_mohan:'沈墨寒把视线从窗外移到你身上：“你终于注意到我了。”' };
