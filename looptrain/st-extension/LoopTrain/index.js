@@ -974,7 +974,6 @@
       openLoopTrain(false);
       applyGameShell(true);
     } else if (root) {
-      // Admin Setup default: keep ST fully usable. Only the small show button remains.
       root.classList.add('lt-hidden');
       document.body.classList.remove('lt-game-shell');
       root.classList.remove('lt-game-shell-root');
@@ -985,6 +984,10 @@
     if (initRes?.state) saveState(initRes.state, { skipPersist: true });
     bindSTEvents();
     render();
+
+    document.documentElement.classList.remove('lt-boot-hide-st');
+    // Safety: if initialization hangs, force-show after 8 seconds
+    setTimeout(() => document.documentElement.classList.remove('lt-boot-hide-st'), 8000);
     if (requestedGameShell) {
       appendMessage('system', `LoopTrain v${VERSION} 已启动。${useRemote ? '已连接 Server Plugin。' : '未连接 Server Plugin，使用本地控制层。'} 可在输入区切换“扮演 / 指令”。`, log);
     }
