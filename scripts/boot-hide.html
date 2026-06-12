@@ -5,41 +5,33 @@ var q=location.search,h=location.hash;
 if(!q.includes("looptrain=game")&&!h.includes("looptrain"))return;
 if(document.documentElement.classList.contains("lt-game-ready"))return;
 if(window.__LOOPTRAIN_BOOT__&&window.__LOOPTRAIN_BOOT__.gameReady)return;
-if(document.getElementById("lt-boot-overlay"))return;
 document.documentElement.classList.add("lt-boot-hide-st");
 window.__LOOPTRAIN_BOOT__=window.__LOOPTRAIN_BOOT__||{startedAt:Date.now(),gameReady:false};
 window.addEventListener("looptrain:game-ready",function(){
 window.__LOOPTRAIN_BOOT__.gameReady=true;
-document.documentElement.classList.remove("lt-boot-hide-st");
+document.documentElement.classList.remove("lt-boot-hide-st","lt-game-timeout","lt-game-error");
 document.documentElement.classList.add("lt-game-ready");
-var o=document.getElementById("lt-boot-overlay");
-if(o)o.remove();
 });
 window.addEventListener("looptrain:game-error",function(event){
 console.error("[LoopTrain Boot] game error",event.detail);
 document.documentElement.classList.add("lt-game-error");
-var m=document.getElementById("lt-boot-error-msg");
-if(m)m.textContent="游戏加载失败，请刷新页面";
 });
 setTimeout(function(){
 if(!window.__LOOPTRAIN_BOOT__.gameReady){
 document.documentElement.classList.add("lt-game-timeout");
-var m=document.getElementById("lt-boot-error-msg");
-if(m)m.textContent="游戏加载超时，请刷新页面";
 }
 },12000);
-var d=document.createElement("div");
-d.id="lt-boot-overlay";
-d.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:100%;padding:0 24px"><div style="color:#f5e6c8;font-size:clamp(28px,6vw,48px);font-weight:700;letter-spacing:.15em;animation:lt-boot-pulse 2s ease-in-out infinite;text-shadow:0 2px 20px rgba(0,0,0,.8)">循环列车，加载中...</div><div id="lt-boot-error-msg" style="color:#f5b0b0;font-size:14px;margin-top:16px;text-shadow:0 2px 12px rgba(0,0,0,.8)"></div></div>';
-document.documentElement.appendChild(d);
 })();
 </script>
 <style>
-#lt-boot-overlay{position:fixed;inset:0;z-index:2147483647;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.45)),url(/scripts/extensions/third-party/LoopTrain/a5813b6e-63a5-429c-87b2-652d33cec056.png) center/cover no-repeat;animation:lt-boot-fade-in .4s ease-out}
+html.lt-boot-hide-st{overflow:hidden!important;background:#050507!important}
+html.lt-boot-hide-st body{overflow:hidden!important;background:#050507!important}
+html.lt-boot-hide-st body>*{visibility:hidden!important}
+html.lt-boot-hide-st::before{content:"";position:fixed;inset:0;z-index:2147483647;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.45)),url(/scripts/extensions/third-party/LoopTrain/a5813b6e-63a5-429c-87b2-652d33cec056.png) center/cover no-repeat;animation:lt-boot-fade-in .4s ease-out}
+html.lt-boot-hide-st::after{content:"循环列车，加载中...";position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483648;color:#f5e6c8;font-size:clamp(28px,6vw,48px);font-weight:700;letter-spacing:.15em;text-align:center;text-shadow:0 2px 20px rgba(0,0,0,.8);animation:lt-boot-pulse 2s ease-in-out infinite;white-space:nowrap}
+html.lt-boot-hide-st.lt-game-timeout::after{content:"游戏加载超时，请刷新页面";color:#f5b0b0;font-size:clamp(18px,4vw,28px)}
+html.lt-boot-hide-st.lt-game-error::after{content:"游戏加载失败，请刷新页面";color:#f5b0b0;font-size:clamp(18px,4vw,28px)}
 @keyframes lt-boot-pulse{0%,100%{opacity:.52}50%{opacity:1}}
 @keyframes lt-boot-fade-in{0%{opacity:0}to{opacity:1}}
-html.lt-boot-hide-st{overflow:hidden!important}
-html.lt-boot-hide-st body{overflow:hidden!important;background:#050507!important}
-html.lt-boot-hide-st body>*:not(#lt-boot-overlay){visibility:hidden!important}
 </style>
 <!-- LOOPTRAIN_BOOT_SNIPPET_END -->
