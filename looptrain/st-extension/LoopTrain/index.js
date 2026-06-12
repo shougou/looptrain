@@ -782,6 +782,27 @@
   }
   function initVoiceInput() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isChrome = /Chrome/i.test(navigator.userAgent) && !/Edg/i.test(navigator.userAgent);
+
+    // Android Chrome: Web Speech is broken (Chrome bug crbug.com/41297427)
+    if (isMobile) {
+      if (!micBtn) return;
+      micBtn.addEventListener('click', () => {
+        toast('请使用键盘上的语音输入键（🎤）来输入文字。');
+      });
+      return;
+    }
+
+    // Desktop Chrome: redirect to Edge
+    if (isChrome && !isMobile) {
+      if (!micBtn) return;
+      micBtn.addEventListener('click', () => {
+        toast('Chrome 语音识别不稳定，建议使用 Edge 浏览器打开此页面。');
+      });
+      return;
+    }
+
     if (!SR) {
       if (micBtn) micBtn.style.display = 'none';
       return;
