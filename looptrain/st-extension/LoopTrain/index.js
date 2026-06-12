@@ -89,7 +89,6 @@
   let csrfToken = null;
   let recognition = null;
   let voiceInputBase = '';
-  let listenTimeout = null;
   let state = clone(local.startState);
 
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
@@ -321,7 +320,7 @@
     initVoiceInput();
 
     root.querySelector('.lt-btn-send').addEventListener('click', submitInput);
-    root.querySelector('.lt-btn-mic').addEventListener('click', handleMic);
+    initVoiceInput();
     input.addEventListener('keydown', (ev) => {
       if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submitInput(); }
     });
@@ -788,8 +787,7 @@
     recognition = new SR();
     recognition.lang = 'zh-CN';
     recognition.interimResults = true;
-    recognition.continuous = true;
-    let silenceTimer = null;
+    recognition.continuous = false;
 
     recognition.onresult = (ev) => {
       let transcript = '';
@@ -798,56 +796,39 @@
       }
       input.value = (voiceInputBase + ' ' + transcript).trim();
       autoSizeInput();
-      clearTimeout(listenTimeout);
-      if (ev.results[ev.results.length - 1].isFinal) {
-        voiceInputBase = input.value;
-        clearTimeout(silenceTimer);
-        silenceTimer = setTimeout(() => stopVoiceInput(), 2500);
-      }
     };
 
     recognition.onerror = (ev) => {
       if (ev.error === 'not-allowed') toast('请允许麦克风权限后重试。');
-      else if (ev.error === 'no-speech') { /* 静默，等待继续说话 */ }
-      else if (ev.error !== 'aborted') toast('语音识别出现问题，请重试。');
+      else if (ev.error !== 'aborted' && ev.error !== 'no-speech') toast('语音识别出现问题，请重试。');
       if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') stopVoiceInput();
     };
 
     recognition.onend = () => {
-      if (micBtn && micBtn.classList.contains('lt-mic-listening')) {
-        try { recognition.start(); } catch (_) { stopVoiceInput(); }
-      }
+      if (micBtn) micBtn.classList.remove('lt-mic-listening');
     };
+
+    const start = (e) => { e.preventDefault(); startVoiceInput(); };
+    const stop  = (e) => { e.preventDefault(); stopVoiceInput(); };
+    micBtn.addEventListener('mousedown', start);
+    micBtn.addEventListener('touchstart', start, { passive: false });
+    micBtn.addEventListener('mouseup', stop);
+    micBtn.addEventListener('touchend', stop);
+    micBtn.addEventListener('mouseleave', stop);
   }
 
   function startVoiceInput() {
     if (!recognition) return;
     try {
-      voiceInputBase = input.value.trim();
+      voiceInputBase = input.value.trimEnd();
       recognition.start();
       if (micBtn) micBtn.classList.add('lt-mic-listening');
-      listenTimeout = setTimeout(() => {
-        if (micBtn && micBtn.classList.contains('lt-mic-listening')) {
-          stopVoiceInput();
-          toast('未识别到语音。');
-        }
-      }, 15000);
     } catch (_) { /* already started */ }
   }
 
   function stopVoiceInput() {
-    clearTimeout(listenTimeout);
     try { recognition.stop(); } catch (_) { /* not running */ }
     if (micBtn) micBtn.classList.remove('lt-mic-listening');
-  }
-
-  function handleMic() {
-    if (!recognition) return;
-    if (micBtn && micBtn.classList.contains('lt-mic-listening')) {
-      stopVoiceInput();
-    } else {
-      startVoiceInput();
-    }
   }
 
 
