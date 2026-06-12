@@ -80,7 +80,7 @@
 
   local.clueTitles = Object.fromEntries(Object.values(local.clueDetails).map(x => [x.id, x.title]));
 
-  let root, phone, log, dialogueLog, portraitImg, input, suggestions, topbar, ngLayer, statusBadge, sceneText, npcWrap, goalEl, channelTabs, introLayer, locationEl;
+  let root, phone, log, dialogueLog, portraitImg, input, suggestions, topbar, ngLayer, sceneText, npcWrap, goalEl, channelTabs, introLayer, locationEl;
   let useRemote = false;
   let lastFailure = null;
   let memoryPortraitTimer = null;
@@ -201,7 +201,6 @@
       const j = await r.json();
       useRemote = !!j.ok;
     } catch (_) { useRemote = false; }
-    if (statusBadge) statusBadge.textContent = useRemote ? 'Server Plugin' : '本地控制层';
   }
   async function api(route, body) {
     if (!useRemote) return null;
@@ -214,7 +213,6 @@
     } catch (e) {
       console.warn(`[${EXT}] remote API failed, fallback local`, e);
       useRemote = false;
-      if (statusBadge) statusBadge.textContent = '本地控制层';
       return null;
     }
   }
@@ -229,11 +227,6 @@
         <div class="lt-phone">
           <div class="lt-stage"></div>
           <div class="lt-topbar"></div>
-          <div class="lt-settings">
-            <span class="lt-status-badge">本地控制层</span>
-            <button class="lt-mini-btn" data-lt-action="reset">重置</button>
-            <button class="lt-mini-btn" data-lt-action="admin">ST设置</button>
-          </div>
           <div class="lt-content">
             <div class="lt-card lt-scene-card">
               <div class="lt-location">第七节车厢</div>
@@ -284,12 +277,6 @@
     suggestions = root.querySelector('.lt-suggestions');
     topbar = root.querySelector('.lt-topbar');
     ngLayer = root.querySelector('.lt-ng');
-    statusBadge = root.querySelector('.lt-status-badge');
-    sceneText = root.querySelector('.lt-scene-text');
-    npcWrap = root.querySelector('.lt-visible-npcs');
-    goalEl = root.querySelector('.lt-current-goal');
-    channelTabs = root.querySelector('.lt-channel-tabs');
-    introLayer = root.querySelector('.lt-intro');
     locationEl = root.querySelector('.lt-location');
 
     root.querySelector('.lt-btn-send').addEventListener('click', submitInput);
@@ -331,11 +318,6 @@
       }
       const mini = ev.target.closest('[data-lt-action]');
       if (mini) {
-        if (mini.dataset.ltAction === 'admin') {
-          closeToAdminSetup();
-          return;
-        }
-        if (mini.dataset.ltAction === 'reset') resetGame();
         if (mini.dataset.ltAction === 'intro-start') {
           state.flags.intro_seen = true;
           saveState(state);
@@ -369,7 +351,6 @@
     topbar.innerHTML = `<span><strong>${escapeHtml(state.clock)}</strong>｜AP ${state.ap_remaining}｜第 ${state.loop} 轮</span><span class="lt-mode-pill">${state.mode === 'dialogue' ? '对话：' + npcName(state.active_npc) : '探索'}｜${state.input_channel === 'command' ? '指令' : '扮演'}</span>`;
     document.body.classList.toggle('lt-game-shell', !!settings.game_shell);
     if (root) root.classList.toggle('lt-game-shell-root', !!settings.game_shell);
-    if (statusBadge) statusBadge.textContent = useRemote ? 'Server Plugin' : '本地控制层';
     if (channelTabs) {
       channelTabs.querySelectorAll('[data-channel]').forEach(btn => btn.classList.toggle('lt-active', btn.dataset.channel === state.input_channel));
     }
