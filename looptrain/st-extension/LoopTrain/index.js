@@ -308,6 +308,11 @@
     topbar = root.querySelector('.lt-topbar');
     ngLayer = root.querySelector('.lt-ng');
     locationEl = root.querySelector('.lt-location');
+    sceneText = root.querySelector('.lt-scene-text');
+    npcWrap = root.querySelector('.lt-visible-npcs');
+    goalEl = root.querySelector('.lt-current-goal');
+    channelTabs = root.querySelector('.lt-channel-tabs');
+    introLayer = root.querySelector('.lt-intro');
 
     root.querySelector('.lt-btn-send').addEventListener('click', submitInput);
     root.querySelector('.lt-btn-mic').addEventListener('click', handleMic);
