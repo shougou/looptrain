@@ -88,6 +88,7 @@
   let introRollingTimer = null;
   let csrfToken = null;
   let recognition = null;
+  let voiceInputBase = '';
   let state = clone(local.startState);
 
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
@@ -268,7 +269,7 @@
             <div class="lt-log"></div>
           </div>
           <div class="lt-portrait-layer"><img class="lt-portrait" alt="NPC portrait" /></div>
-          <div class="lt-dialogue-panel"><div class="lt-log lt-dialogue-log"></div></div>
+          <div class="lt-dialogue-panel"><div class="lt-log lt-dialogue-log"></div><div class="lt-dialogue-end"><button class="lt-end-dialogue-btn" data-lt-action="end-dialogue">结束对话</button></div></div>
           <div class="lt-ng"><div class="lt-ng-bg"></div><div class="lt-ng-card"></div></div>
           <div class="lt-intro">
             <div class="lt-intro-card">
@@ -357,6 +358,10 @@
       }
       const mini = ev.target.closest('[data-lt-action]');
       if (mini) {
+        if (mini.dataset.ltAction === 'end-dialogue') {
+          if (state.mode === 'dialogue') endDialogue();
+          return;
+        }
         if (mini.dataset.ltAction === 'intro-start') {
           state.flags.intro_seen = true;
           saveState(state);
@@ -456,13 +461,7 @@
     const arr = getSuggestions();
     suggestions.innerHTML = arr.map(s => `<button class="lt-chip ${s.template === '__END_DIALOGUE__' ? 'lt-end' : ''}" data-template="${escapeAttr(s.template)}">${escapeHtml(s.label)}</button>`).join('');
   }
-  function getSuggestions() {
-    if (state.mode === 'dialogue') {
-      const n = local.npcs[state.active_npc];
-      return (n?.suggestions || []).map(([label, template]) => ({ label, template }));
-    }
-    return [];
-  }
+  function getSuggestions() { return []; }
 
   function renderPortrait() {
     if (!portraitImg) return;
@@ -788,18 +787,18 @@
     recognition = new SR();
     recognition.lang = 'zh-CN';
     recognition.interimResults = true;
-    recognition.continuous = true;
+    recognition.continuous = false;
     let silenceTimer = null;
 
     recognition.onresult = (ev) => {
-      let final = ''; let interim = '';
+      let transcript = '';
       for (let i = ev.resultIndex; i < ev.results.length; i++) {
-        const t = ev.results[i][0].transcript;
-        if (ev.results[i].isFinal) final += t; else interim += t;
+        transcript += ev.results[i][0].transcript;
       }
-      input.value = (input.value.trim() + ' ' + (final || interim)).trim();
+      input.value = (voiceInputBase + ' ' + transcript).trim();
       autoSizeInput();
-      if (final) {
+      if (ev.results[ev.results.length - 1].isFinal) {
+        voiceInputBase = input.value;
         clearTimeout(silenceTimer);
         silenceTimer = setTimeout(() => stopVoiceInput(), 2000);
       }
@@ -821,6 +820,7 @@
   function startVoiceInput() {
     if (!recognition) return;
     try {
+      voiceInputBase = input.value.trim();
       recognition.start();
       if (micBtn) micBtn.classList.add('lt-mic-listening');
     } catch (_) { /* already started */ }

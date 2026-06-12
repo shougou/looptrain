@@ -217,6 +217,18 @@
 }
 .lt-dialogue .lt-dialogue-panel { display: block; }
 .lt-dialogue-panel .lt-log { max-height: none; margin-top: 0; }
+.lt-dialogue-end { display: none; text-align: center; padding: 8px 0 0; }
+.lt-dialogue .lt-dialogue-end { display: block; }
+.lt-end-dialogue-btn {
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: rgba(237,231,217,.45);
+  padding: 4px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.lt-end-dialogue-btn:hover { border-color: rgba(181,71,71,.3); color: #f5b0b0; }
 
 .lt-bottom {
   position: absolute;
