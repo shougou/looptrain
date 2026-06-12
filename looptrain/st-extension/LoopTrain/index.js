@@ -260,6 +260,7 @@
     } catch (e) {
       console.warn(`[${EXT}] remote API failed, fallback local`, e);
       useRemote = false;
+      setTimeout(() => { checkRemote(); }, 30000);
       return null;
     }
   }
