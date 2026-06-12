@@ -86,6 +86,7 @@
   let memoryPortraitTimer = null;
   let thinkingEl = null;
   let introRollingTimer = null;
+  let csrfToken = null;
   let state = clone(local.startState);
 
   function clone(x) { return JSON.parse(JSON.stringify(x)); }
@@ -202,12 +203,41 @@
       useRemote = !!j.ok;
     } catch (_) { useRemote = false; }
   }
+  async function getCsrfToken() {
+    if (csrfToken) return csrfToken;
+    try {
+      const r = await fetch('/csrf-token', { credentials: 'same-origin' });
+      if (r.ok) {
+        const j = await r.json();
+        csrfToken = j.token;
+        return csrfToken;
+      }
+    } catch (_) { /* no CSRF endpoint — server may have it disabled */ }
+    return null;
+  }
   async function api(route, body) {
     if (!useRemote) return null;
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = await getCsrfToken();
+      if (token) headers['X-CSRF-Token'] = token;
       const r = await fetch(`${API_BASE}${route}`, {
-        method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}),
+        method: 'POST', credentials: 'same-origin', headers, body: JSON.stringify(body || {}),
       });
+      // Retry once with fresh token on 403
+      if (r.status === 403) {
+        csrfToken = null;
+        const token2 = await getCsrfToken();
+        if (token2) {
+          headers['X-CSRF-Token'] = token2;
+          const r2 = await fetch(`${API_BASE}${route}`, {
+            method: 'POST', credentials: 'same-origin', headers, body: JSON.stringify(body || {}),
+          });
+          if (!r2.ok) throw new Error(`${r2.status}`);
+          return await r2.json();
+        }
+        throw new Error('403');
+      }
       if (!r.ok) throw new Error(`${r.status}`);
       return await r.json();
     } catch (e) {
