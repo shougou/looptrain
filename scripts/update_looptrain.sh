@@ -41,7 +41,8 @@ boot_tokens = (
     'looptrain:game-ready',
     'looptrain:game-error',
     'lt-game-ready',
-    'lt-boot-error-msg',
+    'lt-boot-',
+    'ltBootLine',
     'if(o)o.remove',
 )
 lines = index_path.read_text(encoding='utf-8').splitlines()
