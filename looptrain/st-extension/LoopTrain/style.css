@@ -549,15 +549,19 @@ body.lt-game-shell #looptrain-show-btn,
 }
 
 #looptrain-root.lt-game-shell-root .lt-phone {
-  position: absolute;
-  inset: 0;
   width: min(100vw, 480px);
-  height: auto;
+  height: 100vh;
   max-height: none;
   border-radius: 0;
   border: 0;
   box-shadow: none;
-  margin: 0 auto;
+}
+
+@media (max-width: 720px) {
+  #looptrain-root.lt-game-shell-root .lt-phone {
+    height: 100dvh;
+    height: 100vh;
+  }
 }
 
 @media (min-width: 720px) {

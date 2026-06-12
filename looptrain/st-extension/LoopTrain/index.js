@@ -138,6 +138,9 @@
       root.classList.toggle('lt-game-shell-root', on);
       if (on) root.classList.remove('lt-hidden');
     }
+    if (on && phone) {
+      phone.style.height = window.innerHeight + 'px';
+    }
     render();
   }
 
