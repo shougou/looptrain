@@ -1,0 +1,24 @@
+{
+  "name": "looptrain_st_source_runtime_v0.4",
+  "type": "source-runtime-validation-package",
+  "docker": false,
+  "sillytavern_source_included": false,
+  "sillytavern_installation": "scripts clone official SillyTavern release branch",
+  "looptrain_version": "0.4.3",
+  "fixes": [
+    "Fixed extension asset path for portraits",
+    "Changed LLM bridge from generateQuietPrompt to generateRaw",
+    "Removed dependency on active ST chat file for NPC replies",
+    "Added browser diagnostics"
+  ],
+  "scripts": [
+    "patch_config.py",
+    "setup_linux.sh",
+    "start_sillytavern.sh",
+    "verify_install.sh",
+    "update_looptrain.sh",
+    "setup_windows.ps1",
+    "start_sillytavern.ps1",
+    "verify_install.ps1"
+  ]
+}

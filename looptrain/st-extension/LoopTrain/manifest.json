@@ -1,0 +1,15 @@
+{
+  "display_name": "LoopTrain Game Mode",
+  "loading_order": 99,
+  "requires": [],
+  "optional": [],
+  "dependencies": [],
+  "js": "index.js",
+  "css": "style.css",
+  "author": "LoopTrain Project",
+  "version": "0.4.3",
+  "homePage": "https://github.com/looptrain/looptrain-st",
+  "auto_update": false,
+  "minimum_client_version": "1.12.0",
+  "description": "LoopTrain Game Mode for SillyTavern: v0.4.3 generateRaw LLM bridge and fixed extension asset path."
+}

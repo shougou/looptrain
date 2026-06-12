@@ -1,0 +1,13 @@
+'use strict';
+const assert = require('assert');
+const engine = require('../st-server-plugin/looptrain/engine');
+let s = engine.normalize(engine.START_STATE);
+s.known_clues.push('xiaoning_heard_ticking', 'zhao_requires_evidence');
+s.clock = '09:00';
+let r = engine.failLoop(s, 'time_out_explosion');
+assert.ok(r.loop_failure_outcome.confirmed_facts.some(x => x.id === 'xiaoning_heard_ticking'));
+r = engine.nextLoop(r);
+assert.strictEqual(r.state.loop, 2);
+assert.ok(r.state.carried_memory.includes('xiaoning_heard_ticking'));
+assert.ok(r.state.known_clues.includes('xiaoning_heard_ticking'));
+console.log('OK failure -> next loop memory carry-over');

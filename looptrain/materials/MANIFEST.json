@@ -1,0 +1,128 @@
+{
+  "package_name": "looptrain_trial_materials_v0.1",
+  "version": "0.1.0",
+  "created_at": "2026-06-11T14:06:31.537984Z",
+  "description": "LoopTrain-ST 试玩版内容物料包：兼容 SillyTavern Character Card V2 / World Info，并包含 LoopTrain 强控制扩展字段。",
+  "trial_scope": {
+    "visible_npcs": [
+      "xiaoning",
+      "zhao_police",
+      "shen_mohan"
+    ],
+    "hidden_npcs": [
+      "xiaoning_mother_hidden"
+    ],
+    "main_scene": "carriage_7",
+    "goal": "证明第七节车厢存在异常，并说服赵乘警检查地板。"
+  },
+  "files": [
+    {
+      "path": "MANIFEST.json",
+      "sha256_16": "0a6122178eed6a4d"
+    },
+    {
+      "path": "README.md",
+      "sha256_16": "6d9212167e71d87b"
+    },
+    {
+      "path": "VALIDATION_RESULT.txt",
+      "sha256_16": "c0a3a149b75b5810"
+    },
+    {
+      "path": "assets/ng/train_explosion_landscape_concept.png",
+      "sha256_16": "fefb610c5e6a1468"
+    },
+    {
+      "path": "assets/portraits/xiaoning_fear.png",
+      "sha256_16": "83ecef433bcf6551"
+    },
+    {
+      "path": "docs/CONTROL_LAYER_NOTES.md",
+      "sha256_16": "6388006fb138a77e"
+    },
+    {
+      "path": "docs/ST_IMPORT_GUIDE.md",
+      "sha256_16": "33a9ce92bbc8c959"
+    },
+    {
+      "path": "docs/TRIAL_EPISODE_DESIGN.md",
+      "sha256_16": "38a96c4a5e9d0894"
+    },
+    {
+      "path": "looptrain/clues/trial_001_clues.json",
+      "sha256_16": "b22180d76c26bdee"
+    },
+    {
+      "path": "looptrain/episode/trial_001.episode.json",
+      "sha256_16": "f3be75d3f2748c75"
+    },
+    {
+      "path": "looptrain/personas/player_persona_underground_worker.md",
+      "sha256_16": "9bf7e72cedf014ea"
+    },
+    {
+      "path": "looptrain/prompts/action_parser_prompt.md",
+      "sha256_16": "b32f651987f7d289"
+    },
+    {
+      "path": "looptrain/prompts/dialogue_outcome_prompt.md",
+      "sha256_16": "23bc034a48b280d8"
+    },
+    {
+      "path": "looptrain/prompts/loop_failure_outcome_prompt.md",
+      "sha256_16": "81358843d5446450"
+    },
+    {
+      "path": "looptrain/prompts/looptrain_system_prompt.md",
+      "sha256_16": "8926388843b7e65d"
+    },
+    {
+      "path": "looptrain/prompts/npc_dialogue_prompt.md",
+      "sha256_16": "cbd4c5a8606c12b5"
+    },
+    {
+      "path": "looptrain/rules/trial_001.rules.json",
+      "sha256_16": "eeac136a20b7664b"
+    },
+    {
+      "path": "looptrain/scenes/carriage_7.scene.json",
+      "sha256_16": "02067980d7587119"
+    },
+    {
+      "path": "looptrain/schemas/episode.schema.json",
+      "sha256_16": "c194fdc8ed1ec7fb"
+    },
+    {
+      "path": "looptrain/schemas/looptrain_character_extension.schema.json",
+      "sha256_16": "0f3191333f4d4063"
+    },
+    {
+      "path": "st_import/character_cards/shen_mohan.card.json",
+      "sha256_16": "eb5d3c83a187cb87"
+    },
+    {
+      "path": "st_import/character_cards/xiaoning.card.json",
+      "sha256_16": "3b26c784de65951f"
+    },
+    {
+      "path": "st_import/character_cards/xiaoning_mother_hidden.card.json",
+      "sha256_16": "d58e971f1bc08f97"
+    },
+    {
+      "path": "st_import/character_cards/zhao_police.card.json",
+      "sha256_16": "7bd3c08b9ea0774b"
+    },
+    {
+      "path": "st_import/world_books/looptrain_trial_character_book.json",
+      "sha256_16": "cf9cb52dc72ae088"
+    },
+    {
+      "path": "st_import/world_info/looptrain_trial_worldinfo.st.json",
+      "sha256_16": "e3a6190ae46ab610"
+    },
+    {
+      "path": "tools/validate_materials.py",
+      "sha256_16": "e4e40c17b9553ae7"
+    }
+  ]
+}

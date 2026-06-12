@@ -1,0 +1,179 @@
+{
+  "name": "LoopTrain Trial World Book - 第七节车厢试玩版",
+  "description": "兼容 Character Card V2 的 CharacterBook / Lorebook 结构；同时包含 extensions.looptrain 游戏字段。",
+  "scan_depth": 4,
+  "token_budget": 1200,
+  "recursive_scanning": false,
+  "extensions": {
+    "looptrain": {
+      "episode_id": "trial_001",
+      "schema_version": "0.1.0"
+    }
+  },
+  "entries": [
+    {
+      "id": 1,
+      "name": "列车与十五分钟循环",
+      "keys": [
+        "列车",
+        "十五分钟",
+        "循环",
+        "08:45",
+        "09:00"
+      ],
+      "content": "本试玩版发生在一列驶向北江铁桥的列车上。玩家从 08:45 醒来，到 09:00 前必须证明第七节车厢存在异常。失败后，环境重置，但玩家可保留已经确认过的记忆。",
+      "enabled": true,
+      "insertion_order": 10,
+      "constant": true,
+      "position": "after_char",
+      "extensions": {
+        "looptrain": {
+          "entry_type": "world_rule",
+          "state_locked": true
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "第七节车厢",
+      "keys": [
+        "第七节车厢",
+        "车厢",
+        "座位",
+        "地板"
+      ],
+      "content": "第七节车厢是试玩版主要场景。这里有小宁、沈墨寒、赵乘警等关键人物。座位附近可以听见微弱滴答声，但初始无法确认来源。",
+      "enabled": true,
+      "insertion_order": 20,
+      "constant": false,
+      "position": "after_char",
+      "extensions": {
+        "looptrain": {
+          "entry_type": "scene",
+          "scene_id": "carriage_7"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "name": "地板下方的滴答声",
+      "keys": [
+        "滴答声",
+        "地板下方",
+        "座位下面",
+        "声音"
+      ],
+      "content": "滴答声不是来自座位下方，而更像来自地板夹层。小宁听见过这个声音，但如果被逼问会害怕，不愿说明。",
+      "enabled": true,
+      "insertion_order": 30,
+      "constant": false,
+      "position": "after_char",
+      "extensions": {
+        "looptrain": {
+          "entry_type": "clue",
+          "clue_id": "ticking_under_floor",
+          "confidence": "high",
+          "can_be_used_with": [
+            "xiaoning",
+            "zhao_police",
+            "connector"
+          ],
+          "unlock_actions": [
+            "ask_zhao_to_check_floor",
+            "inspect_connector_floor"
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "name": "赵乘警需要证据",
+      "keys": [
+        "赵乘警",
+        "证据",
+        "报警",
+        "检查地板"
+      ],
+      "content": "赵乘警不会因为没有证据的报警而封锁车厢。玩家至少需要两条有效证据，才能说服他检查地板或连接处。",
+      "enabled": true,
+      "insertion_order": 40,
+      "constant": false,
+      "position": "after_char",
+      "extensions": {
+        "looptrain": {
+          "entry_type": "rule",
+          "rule_id": "zhao_requires_two_evidence"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "name": "灰大衣纸条",
+      "keys": [
+        "灰大衣",
+        "纸条",
+        "不要相信"
+      ],
+      "content": "玩家口袋里有一张纸条，上面写着“不要相信灰大衣”。沈墨寒穿着灰色长大衣，但这条线索可能是误导。",
+      "enabled": true,
+      "insertion_order": 50,
+      "constant": false,
+      "position": "after_char",
+      "extensions": {
+        "looptrain": {
+          "entry_type": "clue",
+          "clue_id": "gray_coat_note_pressure",
+          "confidence": "ambiguous",
+          "can_be_used_with": [
+            "shen_mohan"
+          ]
+        }
+      }
+    },
+    {
+      "id": 6,
+      "name": "口琴声",
+      "keys": [
+        "口琴",
+        "餐车",
+        "口琴声"
+      ],
+      "content": "在关键时间点，餐车方向会传来一小段口琴声。试玩版中它只是疑点，不直接揭示隐藏敌人。",
+      "enabled": true,
+      "insertion_order": 60,
+      "constant": false,
+      "position": "after_char",
+      "extensions": {
+        "looptrain": {
+          "entry_type": "suspicion",
+          "clue_id": "harmonica_from_dining_car",
+          "confidence": "low",
+          "carry_to_next_loop": true
+        }
+      }
+    },
+    {
+      "id": 7,
+      "name": "小宁妈妈与布娃娃",
+      "keys": [
+        "妈妈",
+        "布娃娃",
+        "一个人",
+        "害怕"
+      ],
+      "content": "小宁的布娃娃来自妈妈。询问这件事可以触发隐藏情感节点，让小宁更信任玩家，但不推进炸弹主线。",
+      "enabled": true,
+      "insertion_order": 70,
+      "constant": false,
+      "position": "after_char",
+      "extensions": {
+        "looptrain": {
+          "entry_type": "hidden_dialogue_node",
+          "node_id": "xiaoning_mother_memory",
+          "advance_main_plot": false,
+          "advance_world_time": false
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+'use strict';
+const assert = require('assert');
+const engine = require('../st-server-plugin/looptrain/engine');
+let s = engine.normalize(engine.START_STATE);
+let r = engine.startDialogue(s, 'xiaoning');
+s = r.state;
+r = engine.dialogueMessage('xiaoning', '别怕，我只是想帮你。', s);
+s = r.state;
+r = engine.dialogueMessage('xiaoning', '你妈妈呢？这个布娃娃是谁给你的？', s);
+s = r.state;
+assert.ok(s.dialogue_session.pending_clues.includes('mother_doll_memory'));
+r = engine.endDialogue(s);
+s = r.state;
+assert.ok(s.known_clues.includes('mother_doll_memory'));
+assert.strictEqual(s.flags.trial_success, false, 'hidden mother node must not advance main plot');
+console.log('OK hidden node: mother memory triggers without main plot success');

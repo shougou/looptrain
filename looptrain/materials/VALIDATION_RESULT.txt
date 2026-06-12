@@ -1,0 +1,196 @@
+OK: all JSON files parsed and ST character cards include extensions.looptrain
+
+
+Character Card PNG Validation
+OK 小宁.STcard.png -> 小宁 (xiaoning)
+OK 小宁妈妈_隐藏节点.STcard.png -> 小宁妈妈 (xiaoning_mother_hidden)
+OK 沈墨寒.STcard.png -> 沈墨寒 (shen_mohan)
+OK 赵乘警.STcard.png -> 赵乘警 (zhao_police)
+
+
+LoopTrain-ST Extension v0.3.1 Validation
+========================================
+
+Validated new items:
+- JS syntax check: OK
+- Opening background intro overlay: added
+- input_channel state field: added
+- Roleplay / Command tabs: added
+- Command router supports: 查看线索 / 查看人物 / 查看状态 / 结束对话 / 失败测试 / 进入下一轮 / 重置本轮
+- Episode card includes 1947 重庆→江城 background and input channel definitions
+
+Command results:
+- node --check st-extension/LoopTrain/index.js: OK
+- node tests/engine_flow_test.js: OK
+- node tests/hidden_node_test.js: OK
+- node tests/all_npc_flow_test.js: OK
+- node tests/failure_next_loop_test.js: OK
+- python tools/validate_package.py: OK
+- python tools/validate_st_cards.py: OK
+
+Known note:
+- Python startup printed an unrelated spreadsheet warmup warning in the sandbox, but validation scripts returned exit code 0.
+
+
+LoopTrain-ST Extension v0.3.2 Validation
+========================================
+
+Validated new items:
+- JS syntax check for UI Extension: OK
+- JS syntax check for Server Plugin engine: OK
+- NPC dialogue turn limits:
+  - 小宁: 10 turns
+  - 赵乘警: 8 turns
+  - 沈墨寒: 8 turns
+  - 小宁妈妈 hidden node: 2 turns
+- Auto close on turn limit: OK
+- Shen Mohan risk escalation on turn limit: OK
+- Enhanced success ending page: OK
+- Enhanced clue objects with source/confidence/usable_with/carry_to_next_loop: OK
+- Current goal prompt in UI scene card: OK
+- ST-to-LoopTrain mapping document: OK
+
+Command results:
+- node --check st-extension/LoopTrain/index.js: OK
+- node --check st-server-plugin/looptrain/engine.js: OK
+- node tests/engine_flow_test.js: OK
+- node tests/hidden_node_test.js: OK
+- node tests/all_npc_flow_test.js: OK
+- node tests/failure_next_loop_test.js: OK
+- node tests/dialogue_turn_limit_test.js: OK
+- python tools/validate_package.py: OK
+- python tools/validate_st_cards.py: OK
+
+Known note:
+- Python startup printed an unrelated spreadsheet warmup warning in the sandbox, but validation scripts returned exit code 0.
+
+
+LoopTrain-ST Extension v0.4-alpha Validation
+============================================
+
+New v0.4-alpha items:
+- Reply source switch: Mock / ST LLM
+- ST LLM bridge via SillyTavern generateQuietPrompt()
+- Game boundary prompt builder
+- LLM output sanitizer
+- Server Plugin dialogueMessage supports llm_reply
+- Engine treats llm_reply as NPC performance only
+- DeepSeek V4 Pro configuration notes added
+- tests/llm_bridge_test.js added
+
+Command results:
+- node --check st-extension/LoopTrain/index.js: OK
+- node --check st-server-plugin/looptrain/engine.js: OK
+- node tests/engine_flow_test.js: OK
+- node tests/dialogue_turn_limit_test.js: OK
+- node tests/llm_bridge_test.js: OK
+- node tests/all_npc_flow_test.js: OK
+- node tests/failure_next_loop_test.js: OK
+- python tools/validate_package.py: OK
+- python tools/validate_st_cards.py: OK
+
+Known note:
+- Python startup printed an unrelated spreadsheet warmup warning in the sandbox, but validation scripts returned exit code 0.
+- ST LLM bridge still requires real SillyTavern runtime verification.
+
+
+LoopTrain-ST Extension v0.4.1 Runtime UI Polish Validation
+==========================================================
+
+New v0.4.1 items:
+- Default Admin Setup mode: LoopTrain no longer blocks ST settings by default.
+- Game Shell mode: use ?looptrain=game or #looptrain to hide ST and show LoopTrain.
+- ST设置 button: exits Game Shell and returns to native ST UI.
+- Cinematic intro shortened into four high-signal beats.
+- Portrait rendering strengthened with lt-has-portrait class, src cache and onerror fallback.
+- Documentation added: docs/V0_4_1_RUNTIME_UI_POLISH.md
+
+Command results:
+- node --check st-extension/LoopTrain/index.js: OK
+- node --check st-server-plugin/looptrain/engine.js: OK
+- node tests/engine_flow_test.js: OK
+- node tests/hidden_node_test.js: OK
+- node tests/all_npc_flow_test.js: OK
+- node tests/failure_next_loop_test.js: OK
+- node tests/dialogue_turn_limit_test.js: OK
+- node tests/llm_bridge_test.js: OK
+- python tools/validate_package.py: OK
+- python tools/validate_st_cards.py: OK
+
+Known note:
+- Python startup may print unrelated spreadsheet warmup warning in this sandbox, but validation scripts return exit code 0.
+- Real SillyTavern DOM hiding and portrait behavior still require browser verification.
+
+
+LoopTrain-ST Extension v0.4.2 Runtime Fix Validation
+====================================================
+
+Bug fixes:
+- / default Admin Setup: root is hidden at createUI().
+- Game Shell only activates when URL contains ?looptrain=game or #looptrain.
+- game_shell is runtime-only and no longer persisted.
+- All data-template buttons are now executable, including scene NPC buttons.
+- Clicking "和小宁对话" / "找赵乘警" / "试探沈墨寒" submits immediately.
+- Portrait trigger strengthened with lt-has-portrait.
+- CSS forces portrait layer visible when lt-has-portrait exists.
+
+Static assertions:
+- root.classList.add('lt-hidden'): OK
+- requestedGameShell = isGameShellRequested(): OK
+- settings.game_shell reset in loadSettings(): OK
+- ev.target.closest('[data-template]'): OK
+- action chips call submitInput(): OK
+- lt-has-portrait trigger exists: OK
+
+Command results:
+- node --check st-extension/LoopTrain/index.js: OK
+- node --check st-server-plugin/looptrain/engine.js: OK
+- node tests/engine_flow_test.js: OK
+- node tests/hidden_node_test.js: OK
+- node tests/all_npc_flow_test.js: OK
+- node tests/failure_next_loop_test.js: OK
+- node tests/dialogue_turn_limit_test.js: OK
+- node tests/llm_bridge_test.js: OK
+- python tools/validate_package.py: OK
+- python tools/validate_st_cards.py: OK
+
+Known limit:
+- I cannot execute your local SillyTavern browser session from this environment.
+- Real browser verification is still required on your machine.
+
+
+LoopTrain-ST Extension v0.4.3 LLM Raw Bridge + Asset Path Fix Validation
+=======================================================================
+
+Confirmed root causes from user browser logs:
+- Portrait images requested from /xiaoning_portrait.png and returned 404.
+- generateQuietPrompt entered ST generation but failed with no chat_name / no chat file and returned empty.
+- DeepSeek provider itself was confirmed working by direct ST test.
+
+Fixes:
+- ASSET_BASE is now fixed to /scripts/extensions/third-party/LoopTrain/.
+- LLM bridge now uses SillyTavern.getContext().generateRaw().
+- generateQuietPrompt is no longer used for LoopTrain NPC replies.
+- Added window.LoopTrain.getDiagnostics() for browser verification.
+- Added docs/V0_4_3_LLM_RAW_ASSET_FIX.md.
+
+Static assertions:
+- fixed ASSET_BASE exists: OK
+- generateRaw bridge exists: OK
+- old generateQuietPrompt call removed: OK
+- getDiagnostics exists: OK
+
+Command results:
+- node --check st-extension/LoopTrain/index.js: OK
+- node --check st-server-plugin/looptrain/engine.js: OK
+- node tests/engine_flow_test.js: OK
+- node tests/hidden_node_test.js: OK
+- node tests/all_npc_flow_test.js: OK
+- node tests/failure_next_loop_test.js: OK
+- node tests/dialogue_turn_limit_test.js: OK
+- node tests/llm_bridge_test.js: OK
+- python tools/validate_package.py: OK
+- python tools/validate_st_cards.py: OK
+
+Known limit:
+- Real browser verification still must be done in the user's local SillyTavern.

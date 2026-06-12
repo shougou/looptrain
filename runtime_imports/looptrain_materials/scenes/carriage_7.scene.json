@@ -1,0 +1,52 @@
+{
+  "schema_version": "0.1.0",
+  "scene_id": "carriage_7",
+  "episode_id": "trial_001",
+  "display_name": "第七节车厢",
+  "description": "试玩版主场景。玩家在这里醒来、观察异常声音、与小宁/赵乘警/沈墨寒对话。",
+  "initial_visible_npcs": [
+    "xiaoning",
+    "shen_mohan",
+    "zhao_police"
+  ],
+  "initial_items": [
+    "gray_coat_note",
+    "half_ticket"
+  ],
+  "ambient_events": [
+    {
+      "clock": "08:45",
+      "text": "车厢灯光轻微晃动，铁轨声稳定而压抑。"
+    },
+    {
+      "clock": "08:48",
+      "text": "沈墨寒离开原来的座位，过道里只剩一阵冷风。"
+    },
+    {
+      "clock": "08:52",
+      "text": "餐车方向传来一小段口琴声。"
+    },
+    {
+      "clock": "09:00",
+      "text": "强光吞没第七节车厢，循环失败。"
+    }
+  ],
+  "suggestions": [
+    {
+      "label": "观察车厢",
+      "template": "我环顾第七节车厢，观察乘客、座位和异常声音。"
+    },
+    {
+      "label": "和小宁对话",
+      "template": "我走到小宁身边，蹲下来和她说话。"
+    },
+    {
+      "label": "找赵乘警",
+      "template": "我找到赵乘警，压低声音报告第七节车厢的异常。"
+    },
+    {
+      "label": "试探沈墨寒",
+      "template": "我靠近沈墨寒，试探他是否注意到第七节车厢连接处的动静。"
+    }
+  ]
+}

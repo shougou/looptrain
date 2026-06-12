@@ -1,0 +1,30 @@
+{
+  "package": "looptrain_st_docs_v0.3.2",
+  "version": "0.3.2",
+  "generated_files": [
+    "AGENT.md",
+    "README.md",
+    "SPEC.md",
+    "PROJECT_DESIGN.md",
+    "UI_UX_DESIGN.md"
+  ],
+  "existing_docs_included": [
+    "CONTROL_FLOW.md",
+    "INSTALL.md",
+    "PROJECT_DESIGN.md",
+    "SPEC.md",
+    "ST_TO_LOOPTRAIN_MAPPING.md",
+    "TECHNICAL_DESIGN.md",
+    "UI_UX_DESIGN.md",
+    "V0_3_1_DEVELOPMENT.md",
+    "V0_3_2_DEVELOPMENT.md",
+    "V0_3_DEVELOPMENT.md"
+  ],
+  "notes": [
+    "README.md includes installation, configuration and run instructions.",
+    "AGENT.md defines AI coding rules and project iron laws.",
+    "SPEC.md defines trial episode gameplay specifications.",
+    "PROJECT_DESIGN.md defines architecture and runtime design.",
+    "UI_UX_DESIGN.md defines the current UX/UI design."
+  ]
+}
