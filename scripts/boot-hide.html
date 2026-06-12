@@ -3,8 +3,11 @@
 (function(){
 var q=location.search,h=location.hash;
 if(!q.includes("looptrain=game")&&!h.includes("looptrain"))return;
+if(document.documentElement.classList.contains("lt-game-ready"))return;
+if(window.__LOOPTRAIN_BOOT__&&window.__LOOPTRAIN_BOOT__.gameReady)return;
+if(document.getElementById("lt-boot-overlay"))return;
 document.documentElement.classList.add("lt-boot-hide-st");
-window.__LOOPTRAIN_BOOT__={startedAt:Date.now(),gameReady:false};
+window.__LOOPTRAIN_BOOT__=window.__LOOPTRAIN_BOOT__||{startedAt:Date.now(),gameReady:false};
 window.addEventListener("looptrain:game-ready",function(){
 window.__LOOPTRAIN_BOOT__.gameReady=true;
 document.documentElement.classList.remove("lt-boot-hide-st");
