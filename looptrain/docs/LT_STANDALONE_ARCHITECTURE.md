@@ -96,7 +96,7 @@ MVP 不连真实 LLM，先跑通 Mock 闭环。前端极简，目标是证明 en
 
 具体工作：
 
-1. 将 `st-server-plugin/looptrain/engine.js` 提取为独立 npm 包或模块。
+1. 将 LoopTrain 核心引擎（`engine.js`）提取为独立 Node.js 模块。
 2. 剥离所有 ST 相关的 import/require 依赖。
 3. 创建独立的测试入口，不依赖 ST 插件加载机制。
 4. 确认 `node tests/*.js` 全部通过。
@@ -183,22 +183,13 @@ node tests/dialogue_turn_limit_test.js # PASS
 
 ```text
 looptrain/
-  # 传统 ST 集成线（保持不变）
-  st-extension/LoopTrain/          # ST UI Extension
-  st-server-plugin/looptrain/      # ST Server Plugin（含 engine.js）
-  st-character-cards/              # ST 角色卡 PNG
+  standalone/                      # SLT 独立运行时 ⭐ 当前主目标
+    server.js                      # Express 本地后端
+    engine.js                      # LoopTrain 裁判引擎
+    public/                        # 无 ST 前端 + 资产
+    tests/                         # standalone smoke tests
   materials/                       # 剧情物料（共享）
-  tests/                           # 现有测试
-  tools/                           # 现有工具
   docs/                            # 文档（含本文）
-
-  # 独立运行时线（新增）
-  standalone/
-    engine/                        # 提取后的独立 engine 模块
-    server/                        # 独立 HTTP Server
-    frontend/                      # 独立前端
-    tests/                         # 独立运行时测试
-    data/                          # 独立数据层
 ```
 
 `materials/` 目录中的剧情物料（剧集、线索、规则、场景）在两条线之间共享。

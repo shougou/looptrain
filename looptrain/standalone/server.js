@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ── API routes (no /api/plugins — standalone) ──
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, engine: 'looptrain', version: '0.4.3', mode: 'standalone' });
+  res.json({ ok: true, engine: 'looptrain', version: '0.5-standalone-mvp', mode: 'standalone' });
 });
 
 app.post('/api/session/init', (req, res) => {
@@ -125,7 +125,7 @@ app.listen(PORT, () => {
   console.log(`  ─────────────────────`);
   console.log(`  Local:  http://localhost:${PORT}`);
   console.log(`  LLM:    ${LLM_ENABLED && DEEPSEEK_API_KEY ? 'enabled (deepseek)' : 'mock only'}`);
-  console.log(`  Engine: v0.4.3\n`);
+  console.log(`  Engine: v0.5.0\n`);
 });
 
 module.exports = app;

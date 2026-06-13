@@ -1,6 +1,6 @@
 # LoopTrain Standalone MVP
 
-LoopTrain 的本地 Node.js 独立原型。**不依赖 SillyTavern**，使用与 ST 插件相同的 engine.js 核心引擎。
+LoopTrain 的本地 Node.js 独立运行时。**不依赖 SillyTavern**。
 
 ## 快速启动
 
@@ -61,7 +61,7 @@ npm run check   # 语法检查（node --check）
 
 ```
 standalone/
-├── engine.js         # 核心引擎（取自 st-server-plugin/looptrain/engine.js）
+├── engine.js         # LoopTrain 裁判引擎
 ├── server.js         # Express 服务器 + API 路由
 ├── package.json
 ├── public/
@@ -84,4 +84,4 @@ standalone/
 
 ## 引擎溯源
 
-`engine.js` 从 `looptrain/st-server-plugin/looptrain/engine.js` 复制，是 LoopTrain-ST v0.4.3 的同一份纯 JS 引擎。所有游戏规则（AP、线索、对话轮数限制、失败结算、记忆继承）均由该引擎统一处理。
+`engine.js` 是 LoopTrain 的裁判引擎。所有游戏规则（AP、线索、对话轮数限制、失败结算、记忆继承）均由该引擎统一处理。
