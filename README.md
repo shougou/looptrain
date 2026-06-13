@@ -117,13 +117,7 @@ npm run dev -- --host 127.0.0.1
 https://looptrain.me/
 ```
 
-当前线上游戏入口仍保留旧路由：
-
-```text
-/play/game -> /?looptrain=game
-```
-
-直到 SLT 生产部署完成并经确认后，才切换 `/play/game` 到 standalone runtime。
+当前线上游戏入口仍处于迁移前状态；本地目标已经切换为 SLT。\n\n直到 SLT 生产部署完成并经确认后，才切换线上 `/play/game` 到 standalone runtime。
 
 ---
 

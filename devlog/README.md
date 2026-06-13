@@ -38,10 +38,10 @@ The website CTA uses a stable internal route:
 
 This route is intentionally deployment-owned. The final game runtime path is not hardcoded in page components.
 
-During deployment, configure Nginx so `/play/game` points to the real LoopTrain game runtime, for example the current ST Game Shell target:
+During deployment, configure Nginx so `/play/game` points to the real SLT runtime:
 
 ```text
-http://127.0.0.1:8000/?looptrain=game
+http://127.0.0.1:3030/
 ```
 
 See:
