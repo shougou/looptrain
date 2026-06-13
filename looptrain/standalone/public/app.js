@@ -98,6 +98,8 @@ function render() {
   // Intro
   const showIntro = !s.flags.intro_seen;
   introLayer.classList.toggle('lt-show', showIntro);
+  suggestionsEl.style.display = showIntro ? 'none' : '';
+  channelTabs.style.display = showIntro ? 'none' : '';
 }
 
 function getSceneText() {
@@ -524,6 +526,8 @@ async function init() {
     if (ev.target.id === 'intro-start-btn') {
       state.flags.intro_seen = true;
       saveState(state);
+      suggestionsEl.style.display = '';
+      channelTabs.style.display = '';
       appendMsg('system',
         '1939 年冬，重庆。日机连日轰炸，渝江线 307 次夜行列车成了离开这座燃烧之城的最后窗口。你在第七节车厢醒来，表面是普通乘客，真实身份是打入敌人内部的地下工作者。口袋里有半张车票、一张写着"不要相信灰大衣"的纸条，以及一枚银色扣子。09:00 前，列车会在北江铁桥前爆炸。',
         logEl
