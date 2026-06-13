@@ -8,9 +8,15 @@ const roadmap: RoadmapPhase[] = [
       '修复移动端体验问题，梳理游戏结构，建立最小可用试玩闭环。',
     tasks: [
       {
+        task: '剥离 ST，建立 Standalone MVP',
+        status: '进行中',
+        description: '已建立本地 standalone 原型，复用 engine.js 跑通 Mock 成功路径和失败/下一轮路径；线上入口暂未切换。',
+        priority: 'high',
+      },
+      {
         task: '隐藏 SillyTavern 原始界面',
         status: '进行中',
-        description: 'Game Shell 模式下完全隐藏 ST 界面，仅显示 LoopTrain 覆盖层。',
+        description: 'Game Shell 模式下完全隐藏 ST 界面；长期目标是 /play/game 进入纯 LT Standalone。',
         priority: 'high',
       },
       {
@@ -43,9 +49,9 @@ const roadmap: RoadmapPhase[] = [
       },
       {
         task: '接入基础音效系统',
-        status: '未开始',
+        status: '进行中',
         description:
-          '先定义音效触发点，再建立最小可用音效系统，优先覆盖按钮、对话、倒计时、爆炸、循环重启、线索发现。',
+          '已完成第一版音效系统设计：AudioManager、audio manifest、事件绑定、声音开关和第一批占位素材清单。',
         priority: 'medium',
       },
       {

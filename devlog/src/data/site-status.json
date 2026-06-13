@@ -5,13 +5,14 @@
     "playLabel": "进入游戏",
     "recommendedDevice": "手机竖屏",
     "stageStatus": "早期试玩版",
-    "stageDescription": "当前版本仍处于早期测试阶段，部分角色、音效、界面和剧情逻辑尚未完成。",
+    "stageDescription": "当前版本仍处于早期测试阶段。已开始剥离 ST 的本地 Standalone MVP 验证，音效系统进入结构设计阶段。",
     "knownIssues": [
       "首次进入可能仍显示 SillyTavern 原始界面。",
       "Server Plugin 未连接时，部分状态无法持久化。",
       "小宁立绘资源可能存在加载失败。",
       "移动端遮罩和开场字幕仍需优化。",
-      "当前版本暂无完整音效系统。"
+      "音效系统仍处于结构设计阶段，尚未接入真实素材。",
+      "Standalone MVP 仍为本地验证版本，线上游戏入口暂未切换。"
     ],
     "feedbackNote": "反馈方式：可以直接联系开发者，或在后续版本开放反馈表单。"
   },
