@@ -16,7 +16,7 @@ let NPC_INFO = {};
 // ── State ──
 let state = null;
 let llmEnabled = false;
-let llmMode = false;
+let llmMode = true; // always use LLM when available, no toggle on prod
 let lastFailure = null;
 let npcCache = null;
 
@@ -35,7 +35,6 @@ const logEl = $('.lt-content .lt-log');
 const dialogueLog = $('.lt-dialogue-log');
 const portraitImg = $('.lt-portrait');
 const inputEl = $('.lt-input');
-const suggestionsEl = $('.lt-suggestions');
 const ngLayer = $('.lt-ng');
 const ngBg = $('.lt-ng-bg');
 const ngCard = $('.lt-ng-card');
@@ -64,12 +63,11 @@ function render() {
   topLeft.innerHTML = `<strong>${esc(s.clock)}</strong>｜AP ${s.ap_remaining}｜第 ${s.loop} 轮`;
   topRight.innerHTML = (s.mode === 'dialogue'
     ? `对话：${npcName(s.active_npc)}｜${s.input_channel === 'command' ? '指令' : '扮演'}`
-    : `探索｜${s.input_channel === 'command' ? '指令' : '扮演'}`)
-    + (llmEnabled ? ` <span class="lt-llm-badge" id="llm-toggle" data-llm="${llmMode ? 'on' : 'off'}">${llmMode ? 'LLM' : 'Mock'}</span>` : '');
+    : `探索｜${s.input_channel === 'command' ? '指令' : '扮演'}`);
 
   locationEl.textContent = sceneName(s.location);
   sceneText.textContent = getSceneText();
-  goalEl.textContent = '当前目标：' + currentGoal();
+  goalEl.textContent = '当前目标：' + (state._goal || '证明第七节车厢存在异常，并说服赵乘警检查地板。');
 
   // NPC chips + transitions
   let npcsHtml = getSceneNpcs().map(id => {
@@ -87,7 +85,6 @@ function render() {
   npcWrap.innerHTML = npcsHtml;
 
   renderPortrait();
-  renderSuggestions();
   inputEl.placeholder = inputPlaceholder();
 
   // Channel tab active state
@@ -98,7 +95,7 @@ function render() {
   // Intro
   const showIntro = !s.flags.intro_seen;
   introLayer.classList.toggle('lt-show', showIntro);
-  suggestionsEl.style.display = showIntro ? 'none' : '';
+  document.querySelector('.lt-dialogue-panel').style.display = showIntro ? 'none' : '';
   channelTabs.style.display = showIntro ? 'none' : '';
   document.querySelector('.lt-content').style.display = showIntro ? 'none' : '';
   document.querySelector('.lt-bottom').style.opacity = showIntro ? '0.3' : '';
@@ -133,13 +130,6 @@ function renderPortrait() {
   }
 }
 
-function renderSuggestions() {
-  const arr = getSuggestions();
-  suggestionsEl.innerHTML = arr.map(s =>
-    `<button class="lt-chip${s.template === '__END_DIALOGUE__' ? ' lt-end' : ''}" data-template="${escAttr(s.template)}">${esc(s.label)}</button>`
-  ).join('');
-}
-
 function inputPlaceholder() {
   if (state.input_channel === 'command') {
     return state.mode === 'dialogue'
@@ -147,38 +137,6 @@ function inputPlaceholder() {
       : '输入指令：查看线索 / 查看人物 / 进入下一轮 / 重置本轮……';
   }
   return state.mode === 'dialogue' ? `对${npcName(state.active_npc)}说些什么……` : '描述你的行动……';
-}
-
-// ── Suggestions ──
-function getSuggestions() {
-  if (state.flags.trial_success) return [];
-  if (state.mode === 'dialogue') return [];
-
-  const out = [];
-  const loc = state.location || 'carriage_7';
-  if (loc === 'carriage_7') {
-    if (countValidEvidence(state) >= 2) {
-      out.push({ label: '说服赵乘警检查地板', template: '我找到赵乘警，说明小宁听见过声音，而且我也确认声音不来自座位，请他检查地板。' });
-    }
-    if (state.carried_memory.includes('xiaoning_heard_ticking')) {
-      out.push({ label: '直接安抚小宁', template: '我蹲到小宁面前，温和地说：我知道你听见了地板下面的声音，别怕，我只是想确认它。' });
-    }
-    out.push(
-      { label: '检查座位下方', template: '我假装系鞋带，低头检查座位下方，判断滴答声来自哪里。' },
-      { label: '和小宁对话', template: '我走到小宁身边，蹲下来和她说话。' },
-      { label: '找赵乘警', template: '我找到赵乘警，压低声音报告第七节车厢的异常。' },
-    );
-  }
-  if (loc === 'connector_7_8') {
-    out.push({ label: '试探沈墨寒', template: '我走向沈墨寒，试探他是否知道连接处发生过什么。' });
-  }
-  if (loc === 'carriage_7') {
-    out.push({ label: '前往连接处', template: '我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。' });
-  } else {
-    out.push({ label: '返回第七节车厢', template: '我从连接处回到第七节车厢。' });
-  }
-  out.push({ label: '强制失败测试', template: '我错过了关键时机，进入失败结算。' });
-  return out.slice(0, 7);
 }
 
 // ── Commands ──
@@ -205,7 +163,7 @@ function handleCommand(text) {
     return true;
   }
   if (/状态|status/.test(t)) {
-    appendHtml('system', `<div class="lt-msg-title">当前状态</div><div>${esc(state.clock)}｜AP ${state.ap_remaining}｜第 ${state.loop} 轮｜${state.mode === 'dialogue' ? '对话：' + npcName(state.active_npc) : '探索'}｜${state.input_channel === 'command' ? '指令' : '扮演'}</div><div class="lt-subtitle">当前目标</div><div>${esc(currentGoal())}</div>`, target);
+    appendHtml('system', `<div class="lt-msg-title">当前状态</div><div>${esc(state.clock)}｜AP ${state.ap_remaining}｜第 ${state.loop} 轮｜${state.mode === 'dialogue' ? '对话：' + npcName(state.active_npc) : '探索'}｜${state.input_channel === 'command' ? '指令' : '扮演'}</div><div class="lt-subtitle">当前目标</div><div>${esc(state._goal || '证明第七节车厢存在异常，并说服赵乘警检查地板。')}</div>`, target);
     return true;
   }
   if (/下一轮|next/.test(t)) {
@@ -321,6 +279,8 @@ function handleResponse(res, inDialogue) {
     state = res.state;
     saveState();
   }
+  if (res.suggestions !== undefined) state._suggestions = res.suggestions;
+  if (res.goal !== undefined) state._goal = res.goal;
   if (res.messages) {
     const target = inDialogue || state.mode === 'dialogue' ? dialogueLog : logEl;
     for (const m of res.messages) {
@@ -427,20 +387,7 @@ function autoSizeInput() {
   inputEl.style.height = Math.min(96, inputEl.scrollHeight) + 'px';
 }
 
-// ── Engine helpers (mirrored from engine.js for frontend-only use) ──
-function countValidEvidence(s) {
-  const valid = ['ticking_under_floor', 'xiaoning_heard_ticking', 'sound_not_from_seat', 'suspicious_connector_movement'];
-  return (s.known_clues || []).filter(x => valid.includes(x)).length;
-}
-
-function currentGoal() {
-  const evidence = countValidEvidence(state);
-  if (state.flags.trial_success) return '试玩版已完成：你证明了第七节车厢存在异常。';
-  if (evidence >= 2) return '证据已足够。现在可以尝试说服赵乘警检查地板。';
-  if (evidence === 1) return '你已经获得 1 条有效证据，还需要更多证据说服赵乘警。';
-  return '证明第七节车厢存在异常，并说服赵乘警检查地板。';
-}
-
+// ── Engine helpers (trivial lookups using NPC/SCENE/Clue caches from API) ──
 function clueName(id) { return (npcCache?.clue_titles || {})[id] || id; }
 function npcName(id) { return NPC_INFO[id]?.name || id; }
 function sceneName(id) { return SCENES[id]?.name || id; }
@@ -457,7 +404,14 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) state = JSON.parse(raw);
   } catch (_) {}
-  if (!state) state = clone(START_STATE);
+  if (!state) { state = clone(START_STATE); return; }
+
+  // Sanitize stale dialogue — no server-side context survives a page reload.
+  // A stuck dialogue mode hides .lt-content and bricks the UI.
+  if (state.mode === 'dialogue') {
+    state.mode = 'explore';
+    state.active_npc = null;
+  }
 }
 
 // ── Content boot ──
@@ -471,7 +425,11 @@ async function bootContent() {
       if (npcsRes.npc_info) NPC_INFO = npcsRes.npc_info;
       npcCache = npcsRes;
     }
-    if (sessionRes?.state) START_STATE = clone(sessionRes.state);
+    if (sessionRes?.state) {
+      START_STATE = clone(sessionRes.state);
+      START_STATE._goal = sessionRes.goal || '';
+      START_STATE._suggestions = sessionRes.suggestions || [];
+    }
     const configRes = await api('/config');
     if (configRes?.llm_enabled) llmEnabled = true;
   } catch (_) {}
@@ -549,7 +507,6 @@ async function init() {
     if (ev.target.id === 'intro-start-btn') {
       state.flags.intro_seen = true;
       saveState(state);
-      suggestionsEl.style.display = '';
       channelTabs.style.display = '';
       document.querySelector('.lt-content').style.display = '';
       document.querySelector('.lt-bottom').style.opacity = '';
@@ -584,12 +541,7 @@ async function init() {
       return;
     }
 
-    // LLM toggle
-    if (ev.target.id === 'llm-toggle') {
-      llmMode = !llmMode;
-      render();
-      return;
-    }
+  // Delete LLM toggle handler — always LLM on prod
   });
 
   // Load NPC data for clue titles
@@ -598,9 +550,7 @@ async function init() {
   });
 
   // Health check
-  api('/health').then(data => {
-    console.log('[LT] Server:', data);
-  });
+  api('/health');
 }
 
 document.addEventListener('DOMContentLoaded', init);

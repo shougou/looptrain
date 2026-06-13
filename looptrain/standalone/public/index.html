@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <base href="/" />
   <title>LoopTrain · 第七节车厢</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -73,9 +74,8 @@
             <button class="lt-channel-tab lt-active" data-channel="roleplay">扮演<span>对话</span></button>
             <button class="lt-channel-tab" data-channel="command">指令<span>行动</span></button>
           </div>
-          <div class="lt-suggestions"></div>
           <div class="lt-input-row">
-            <textarea class="lt-input" rows="1" placeholder="描述你的行动……"></textarea>
+            <textarea class="lt-input" rows="1" placeholder="描述你的行动……" aria-label="游戏输入"></textarea>
             <button class="lt-btn lt-btn-send" id="btn-send">发送</button>
           </div>
         </div>
