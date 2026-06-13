@@ -1,24 +1,22 @@
 {
-  "name": "looptrain_st_source_runtime_v0.4",
-  "type": "source-runtime-validation-package",
-  "docker": false,
-  "sillytavern_source_included": false,
-  "sillytavern_installation": "scripts clone official SillyTavern release branch",
-  "looptrain_version": "0.4.3",
-  "fixes": [
-    "Fixed extension asset path for portraits",
-    "Changed LLM bridge from generateQuietPrompt to generateRaw",
-    "Removed dependency on active ST chat file for NPC replies",
-    "Added browser diagnostics"
-  ],
-  "scripts": [
-    "patch_config.py",
-    "setup_linux.sh",
-    "start_sillytavern.sh",
-    "verify_install.sh",
-    "update_looptrain.sh",
-    "setup_windows.ps1",
-    "start_sillytavern.ps1",
-    "verify_install.ps1"
+  "name": "looptrain_standalone_runtime",
+  "type": "standalone-game-runtime",
+  "local_default_runtime": "SLT",
+  "looptrain_version": "0.5-standalone-mvp",
+  "devlog_site": "devlog/",
+  "game_runtime": "looptrain/standalone/",
+  "start_command": "bash scripts/start_slt.sh",
+  "verify_command": "bash scripts/verify_slt.sh",
+  "online_deploy_policy": "manual confirmation required before switching /play/game",
+  "legacy_st": {
+    "status": "removed from local default workflow",
+    "note": "SillyTavern integration was used for early validation and is no longer the local runtime target. Reusable game content is preserved under looptrain/materials and standalone assets."
+  },
+  "invariants": [
+    "Engine is the sole game-state judge",
+    "LLM output is performance text only",
+    "No API keys in frontend",
+    "Local verification before online deployment",
+    "Do not switch production /play/game without final confirmation"
   ]
 }

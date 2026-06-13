@@ -1,458 +1,146 @@
-# LoopTrain-ST Source Runtime Validation v0.4
+# LoopTrain Standalone Runtime
 
-这是 LoopTrain-ST 的 **源码运行验证包**，不使用 Docker。
+LoopTrain 是一个互动叙事解谜游戏项目。
 
-目标是验证项目架构的底层链路：
-
-```text
-拉取官方 SillyTavern 项目源码
-→ 安装 SillyTavern 运行环境
-→ 安装 LoopTrain UI Extension
-→ 安装 LoopTrain Server Plugin
-→ 启用 enableServerPlugins
-→ 准备角色卡 / 世界书 / 剧情物料
-→ 在 ST 中配置 DeepSeek V4 Pro
-→ 在 ST 内进入 LoopTrain 游戏模式
-→ 切换“回复：ST LLM”
-→ 验证真实 LLM 对话 + LoopTrain 控制层结算
-```
-
-## 1. 为什么不用 Docker
-
-本验证包不采用 Docker，原因是：
-
-1. 更贴近未来云主机部署方式。
-2. 方便直接维护 SillyTavern 项目源码。
-3. 方便跟随 ST 官方 release 分支更新。
-4. 方便排查 ST Extension / Server Plugin / 角色卡 / 世界书问题。
-5. 避免把 ST 包装成黑盒，保持项目底层逻辑清晰。
-
-SillyTavern 官方 Linux/Mac 安装文档也推荐通过 Git 方式克隆 release 分支，并运行 `start.sh` 启动；官方更新文档也说明通过 `git pull` 更新是推荐方式。  
-
-## 2. 包结构
+当前本地开发主线已经切换为：
 
 ```text
-looptrain_st_source_runtime_v0.1/
-  scripts/
-    setup_linux.sh
-    start_sillytavern.sh
-    verify_install.sh
-    update_looptrain.sh
-    setup_windows.ps1
-    start_sillytavern.ps1
-    verify_install.ps1
-    patch_config.py
-
-  looptrain/
-    st-extension/LoopTrain/
-    st-server-plugin/looptrain/
-    st-character-cards/
-    materials/
-    docs/
-    tests/
-    tools/
-
-  runtime_imports/
-    character_cards/
-    world_books/
-    world_info/
-    looptrain_materials/
-    docs/
-
-  workspace/
-    SillyTavern/        # setup 脚本运行后自动生成
+SLT = Standalone LoopTrain
 ```
 
-## 3. Linux / macOS 快速验证
+也就是说，本地运行和验证不再依赖 SillyTavern。
 
-要求：
+---
 
-```text
-git
-Node.js latest LTS
-npm
-python3
-```
+## 当前本地默认入口
 
-执行：
+启动本地 SLT：
 
 ```bash
-cd looptrain_st_source_runtime_v0.1
-bash scripts/setup_linux.sh
-bash scripts/verify_install.sh
-bash scripts/start_sillytavern.sh
+bash scripts/start_slt.sh
 ```
 
-默认会把 SillyTavern 拉到：
+访问：
 
 ```text
-workspace/SillyTavern
+http://127.0.0.1:3030/
 ```
 
-也可以指定目录：
+验证本地 SLT：
 
 ```bash
-ST_DIR=/opt/SillyTavern bash scripts/setup_linux.sh
-ST_DIR=/opt/SillyTavern bash scripts/start_sillytavern.sh
+bash scripts/verify_slt.sh
 ```
 
-## 4. Windows 快速验证
+验证内容包括：
 
-要求：
+- `node --check`
+- standalone engine smoke tests
+- `/api/health`
+- `/api/npcs`
+- 首页 HTML 不包含 `SillyTavern`
+
+---
+
+## 当前架构
 
 ```text
-Git for Windows
-Node.js latest LTS
-Python
-PowerShell
+looptrain/
+  standalone/       # 当前本地默认运行时
+    server.js       # Express 后端，端口 3030
+    engine.js       # LoopTrain 裁判引擎
+    public/         # 独立游戏前端与资产
+    tests/          # standalone smoke tests
+
+  materials/        # 可复用剧情/规则/素材
+  docs/             # 架构文档
+
+devlog/             # looptrain.me 开发日志静态站
+scripts/            # SLT 本地启动/验证脚本
 ```
 
-执行：
+---
 
-```powershell
-cd looptrain_st_source_runtime_v0.1
-powershell -ExecutionPolicy Bypass -File scripts\setup_windows.ps1
-powershell -ExecutionPolicy Bypass -File scripts\verify_install.ps1
-powershell -ExecutionPolicy Bypass -File scripts\start_sillytavern.ps1
+## 当前边界
+
+### SLT 已经具备
+
+- 无 `window.SillyTavern`
+- 无 ST UI
+- 本地 Express 后端
+- 复用 `engine.js`
+- Mock 模式可玩
+- 成功路径可达「试玩版结束」
+- 失败路径可进入下一轮
+
+### SLT 尚未具备
+
+- 真实 LLM Bridge
+- 后端 `.env` API Key 管理
+- 生产进程管理
+- 线上 `/play/game` 切换
+- 内容完全外置化
+- 音效系统实现
+
+---
+
+## 不变铁律
+
+- Engine 是唯一裁判。
+- LLM 只能生成 NPC 表演文本或建议。
+- LLM 不直接修改 AP、线索、状态、成功失败、循环继承。
+- API Key 不进入前端。
+- 本地验证先于线上部署。
+- 未经最终确认，不上传线上、不切换生产 `/play/game`。
+
+---
+
+## Devlog 网站
+
+Devlog 静态站位于：
+
+```text
+devlog/
 ```
 
-## 5. setup 脚本做了什么
-
-`setup_linux.sh` / `setup_windows.ps1` 会执行：
-
-1. 检查 git / node / npm。
-2. 拉取官方 SillyTavern release 分支：
+本地开发：
 
 ```bash
-git clone https://github.com/SillyTavern/SillyTavern.git -b release
+cd devlog
+npm install
+npm run dev -- --host 127.0.0.1
 ```
 
-3. 创建 / 初始化 `config.yaml`。
-4. 执行 `npm install`。
-5. 修改 `config.yaml`：
-
-```yaml
-enableServerPlugins: true
-listen: false
-```
-
-6. 安装 LoopTrain UI Extension 到：
+生产站点：
 
 ```text
-SillyTavern/public/scripts/extensions/third-party/LoopTrain
+https://looptrain.me/
 ```
 
-7. 安装 LoopTrain Server Plugin 到：
+当前线上游戏入口仍保留旧路由：
 
 ```text
-SillyTavern/plugins/looptrain
+/play/game -> /?looptrain=game
 ```
 
-8. 准备导入材料到：
+直到 SLT 生产部署完成并经确认后，才切换 `/play/game` 到 standalone runtime。
 
-```text
-SillyTavern/looptrain_imports/
-```
+---
 
-## 6. 导入材料
+## Legacy ST 说明
 
-启动 ST 后，手动导入：
+历史上的 LoopTrain-ST 验证包已经不再是本地默认运行目标。
 
-### 6.1 角色卡
+旧 ST 相关内容已作为历史参考/可迁移素材处理，不再作为默认本地工作流。
 
-目录：
+如需回看旧集成思路，请查看 Git 历史或相关历史文档。
 
-```text
-SillyTavern/looptrain_imports/character_cards/
-```
+---
 
-包含：
+## 推荐下一步
 
-```text
-小宁.STcard.png
-赵乘警.STcard.png
-沈墨寒.STcard.png
-小宁妈妈_隐藏节点.STcard.png
-```
-
-### 6.2 世界书 / WorldInfo
-
-目录：
-
-```text
-SillyTavern/looptrain_imports/world_books/
-SillyTavern/looptrain_imports/world_info/
-```
-
-导入后建议与当前聊天绑定。
-
-### 6.3 LoopTrain 剧情物料
-
-目录：
-
-```text
-SillyTavern/looptrain_imports/looptrain_materials/
-```
-
-这些用于开发核对，不一定需要 ST UI 手动导入：
-
-```text
-episode/
-clues/
-rules/
-scenes/
-prompts/
-schemas/
-```
-
-## 7. 配置 DeepSeek V4 Pro
-
-在 SillyTavern 中配置模型连接：
-
-```text
-API Type: Chat Completion
-Chat Completion Source: Custom OpenAI-compatible 或 DeepSeek
-Base URL: https://api.deepseek.com
-Model: deepseek-v4-pro
-API Key: 你的 DeepSeek Key
-```
-
-LoopTrain 本身不保存 API Key。模型连接、API Key、世界书、角色卡仍由 ST 管理。
-
-## 8. 验证路径
-
-### 8.1 验证 ST 底座
-
-1. 启动 ST。
-2. 浏览器打开 ST 页面。
-3. 确认角色卡可以导入。
-4. 确认世界书可以导入。
-5. 确认 DeepSeek V4 Pro 可以正常生成普通 ST 回复。
-
-### 8.2 验证 LoopTrain Extension
-
-1. 页面右下角出现 `LoopTrain` 按钮。
-2. 点击后出现手机端游戏覆盖层。
-3. 首次打开显示《第七节车厢》开场背景。
-4. 点击“开始第 1 轮”。
-
-### 8.3 验证 Server Plugin
-
-LoopTrain 顶部状态应显示：
-
-```text
-Server Plugin｜Mock 回复
-```
-
-如果显示 `Local Mock`，说明 Server Plugin 没有加载，需要检查：
-
-```text
-config.yaml 中 enableServerPlugins 是否为 true
-plugins/looptrain 是否存在
-是否已重启 ST
-```
-
-官方 Server Plugins 文档说明：插件位于 ST 的 `plugins` 目录，并且只有 `config.yaml` 中 `enableServerPlugins` 为 `true` 时才会加载。
-
-### 8.4 验证 Mock 闭环
-
-```text
-回复：Mock
-→ 和小宁对话
-→ 提到滴答声
-→ 结束对话
-→ 检查座位下方
-→ 说服赵乘警
-→ 试玩版成功
-```
-
-### 8.5 验证 ST LLM / DeepSeek 闭环
-
-```text
-切换到：回复：ST LLM
-→ 和小宁对话
-→ 自由输入问题
-→ DeepSeek 生成小宁回复
-→ LoopTrain 仍然控制线索、AP、轮数、结算
-```
-
-重点观察：
-
-```text
-LLM 是否只做 NPC 表演
-LLM 是否乱发线索
-LoopTrain 是否清洗系统裁判文本
-对话轮数是否仍然生效
-结束对话后是否正常结算
-```
-
-## 9. 更新 LoopTrain
-
-如果只更新 LoopTrain 扩展，不重新拉取 ST：
-
-```bash
-bash scripts/update_looptrain.sh
-```
-
-Windows：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\setup_windows.ps1
-```
-
-## 10. 云主机部署建议
-
-当前验证默认：
-
-```yaml
-listen: false
-```
-
-适合本地验证。
-
-未来云主机公网部署时，再改成：
-
-```yaml
-listen: true
-```
-
-但必须加：
-
-```text
-反向代理
-HTTPS
-访问密码
-ST 多用户或账号保护
-模型额度保护
-只开放试玩环境
-```
-
-不要把无保护的 ST 直接暴露公网。
-
-## 11. 当前边界
-
-本包不是：
-
-```text
-Docker 一键部署包
-完整公网生产包
-SillyTavern 源码打包副本
-```
-
-本包是：
-
-```text
-源码拉取式 ST 运行环境验证包
-```
-
-它通过脚本拉取官方 ST release 分支，再把 LoopTrain 安装进去。
-
-
-## v0.2 变更：Game Shell / Admin Setup
-
-本验证包已更新到 LoopTrain-ST v0.4.1。
-
-默认访问：
-
-```text
-http://host:8000/
-```
-
-用于 Admin Setup，不自动打开 LoopTrain，避免阻挡 ST 设置。
-
-玩家入口：
-
-```text
-http://host:8000/?looptrain=game
-```
-
-或：
-
-```text
-http://host:8000/#looptrain
-```
-
-会进入 Game Shell，隐藏 SillyTavern 背景，只显示 LoopTrain。
-
-LoopTrain 顶部的：
-
-```text
-ST设置
-```
-
-用于退出 Game Shell，回到 ST 原生界面配置 DeepSeek、角色卡和世界书。
-
-
-## v0.3 变更：v0.4.2 Runtime Fix
-
-本验证包已更新到 LoopTrain-ST v0.4.2。
-
-修正：
-
-```text
-1. http://host:8000/ 默认不显示 LoopTrain 大面板，只保留右下角“进入 LoopTrain”。
-2. http://host:8000/?looptrain=game 才自动进入 Game Shell。
-3. Game Shell 状态不再持久化，避免下次访问 / 继续遮挡 ST。
-4. 场景里的 NPC 按钮现在会直接执行，不再只是填入输入框。
-5. 点击“和小宁对话”应直接进入对话并触发立绘。
-```
-
-如果你已经安装过旧版 ST 环境，解压本包后执行：
-
-```bash
-bash scripts/update_looptrain.sh
-bash scripts/verify_install.sh
-bash scripts/start_sillytavern.sh
-```
-
-Windows：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\setup_windows.ps1
-powershell -ExecutionPolicy Bypass -File scripts\verify_install.ps1
-powershell -ExecutionPolicy Bypass -File scripts\start_sillytavern.ps1
-```
-
-验证地址：
-
-```text
-管理员配置：http://127.0.0.1:8000/
-玩家模式：http://127.0.0.1:8000/?looptrain=game
-```
-
-
-## v0.4 变更：v0.4.3 LLM Raw Bridge + Asset Path Fix
-
-本验证包已更新到 LoopTrain-ST v0.4.3。
-
-修正：
-
-```text
-1. 立绘资源路径固定为 /scripts/extensions/third-party/LoopTrain/
-2. LLM Bridge 从 generateQuietPrompt 改为 generateRaw
-3. 不再依赖 ST 当前 chat_name / chat file
-4. 新增 window.LoopTrain.getDiagnostics()
-```
-
-如果已安装旧版，执行：
-
-```bash
-bash scripts/update_looptrain.sh
-bash scripts/verify_install.sh
-bash scripts/start_sillytavern.sh
-```
-
-验证 Console：
-
-```js
-window.LoopTrain.getDiagnostics()
-```
-
-重点检查：
-
-```text
-assetBase = /scripts/extensions/third-party/LoopTrain/
-portraitNaturalWidth > 0
-hasGenerateRaw = true
-replySource = st_llm
-```
+1. 将 `materials/looptrain/**` 迁入 `standalone/content/`。
+2. 消除 `standalone/public/app.js` 中重复的 `START_STATE / SCENES / NPC_INFO`。
+3. 增加 LLM Bridge，但默认保留 Mock 模式。
+4. 增加 Playwright 本地回归测试。
+5. 本地稳定后，再评估线上 `/play/game` 切换。
