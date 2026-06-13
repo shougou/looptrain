@@ -1,8 +1,0 @@
-{
-  "name": "looptrain-st-server-plugin",
-  "version": "0.4.3",
-  "main": "index.js",
-  "private": true,
-  "description": "LoopTrain v0.4.3 generateRaw LLM bridge + fixed extension asset path",
-  "license": "AGPL-3.0-or-later"
-}
