@@ -298,7 +298,9 @@ async function resetGame() {
   ngLayer.classList.remove('lt-show');
   phone.classList.remove('lt-dialogue', 'lt-command-mode');
   const panel = document.querySelector('.lt-dialogue-panel');
-  if (panel) panel.style.display = '';
+  if (panel) { panel.style.display = 'none'; panel.innerHTML = ''; }
+  const portrait = document.querySelector('.lt-portrait-layer');
+  if (portrait) { portrait.style.display = 'none'; }
   inputEl.value = '';
   autoSizeInput();
   appendMsg('system', '已重置试玩版。开场背景将重新显示。', logEl);
