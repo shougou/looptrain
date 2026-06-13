@@ -1,0 +1,18 @@
+{
+  "name": "looptrain-devlog",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "LoopTrain 开发日志 — 一款互动叙事解谜游戏的长期开发记录",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.9",
+    "astro": "^5.0.0",
+    "typescript": "^5.9.3"
+  }
+}
