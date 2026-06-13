@@ -1,23 +1,26 @@
 {
   "play": {
-    "currentVersion": "v0.4.3",
+    "currentVersion": "v0.5.0-standalone",
     "playUrl": "/play/game",
     "playLabel": "进入游戏",
     "recommendedDevice": "手机竖屏",
-    "stageStatus": "早期试玩版",
-    "stageDescription": "当前版本仍处于早期测试阶段。已开始剥离 ST 的本地 Standalone MVP 验证，音效系统进入结构设计阶段。",
+    "stageStatus": "独立运行时",
+    "stageDescription": "LoopTrain 已从 SillyTavern 剥离为独立运行时。当前阶段重点为状态持久化、音效系统和 NPC 链路补全。",
     "knownIssues": [
-      "首次进入可能仍显示 SillyTavern 原始界面。",
-      "Server Plugin 未连接时，部分状态无法持久化。",
-      "小宁立绘资源可能存在加载失败。",
-      "移动端遮罩和开场字幕仍需优化。",
-      "音效系统仍处于结构设计阶段，尚未接入真实素材。",
-      "Standalone MVP 仍为本地验证版本，线上游戏入口暂未切换。"
+      "音效系统尚未接入真实素材。",
+      "用户状态保持仍为早期方案，刷新页面后无法恢复进度。",
+      "NPC 对话链路仍不完整，部分角色缺少足够交互内容。",
+      "角色素材风格尚未统一，沈墨寒立绘存在加载稳定性问题。",
+      "移动端首屏 UI 仍需真机验证。",
+      "内容尚未完全外置化，素材管理仍需规范。"
     ],
-    "feedbackNote": "反馈方式：可以直接联系开发者，或在后续版本开放反馈表单。"
+    "feedbackNote": "试玩反馈可以直接联系开发者。"
   },
   "site": {
     "lastUpdated": "2026-06-13",
-    "currentPhase": "试玩版稳定"
+    "currentPhase": "独立运行时稳定",
+    "nextFocus": "状态保持、音效系统、NPC 链路、内容外置",
+    "tagline": "一个互动叙事游戏。也是一个 AI 协同开发实验室。",
+    "description": "通过开发这个游戏，探索 AI 与人类如何共同完成复杂软件——状态管理、Prompt 设计、Agent 协作、Runtime 架构、AI Coding 工作流。"
   }
 }

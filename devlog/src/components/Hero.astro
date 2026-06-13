@@ -16,17 +16,17 @@ const { version, playUrl } = Astro.props;
     <div class="hero-badge">
       <VersionBadge version={version} label="Early Playtest" />
     </div>
-    <h1 class="hero-title">LoopTrain 开发日志</h1>
-    <p class="hero-subtitle">一款互动叙事解谜游戏的长期开发记录。</p>
+    <h1 class="hero-title">LoopTrain</h1>
+    <p class="hero-subtitle">一个互动叙事游戏。也是一个 AI 协同开发实验室。</p>
     <p class="hero-desc">
       LoopTrain 是一个移动端互动叙事解谜游戏项目。玩家将在一列即将爆炸的列车上不断循环，通过对话、观察和行动逐步接近事故真相。
     </p>
     <p class="hero-note">
-      当前版本仍处于早期试玩阶段。本站用于记录项目进展、版本更新、设计笔记和后续计划。
+      通过开发这个游戏，探索 AI 与人类如何共同完成复杂软件——状态管理、Prompt 设计、Agent 协作、Runtime 架构、AI Coding 工作流。游戏是实验最自由的载体。
     </p>
     <div class="hero-actions">
       <PlayButton href={playUrl}>开始试玩</PlayButton>
-      <PlayButton href="/devlog" variant="secondary">查看开发日志</PlayButton>
+      <PlayButton href="/ai-notes" variant="secondary">AI 工程笔记</PlayButton>
     </div>
   </div>
 </section>

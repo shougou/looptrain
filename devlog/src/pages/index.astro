@@ -8,11 +8,11 @@ import KnownIssue from '../components/KnownIssue.astro';
 import { SITE_DESCRIPTION } from '../data/site';
 import { getCollection } from 'astro:content';
 import siteStatus from '../data/site-status.json';
+import { sortByPinnedThenDate } from '../lib/contentSort';
 
 const SLUG_RE = /^\d{4}-\d{2}-\d{2}-/;
 const devlogs = await getCollection('devlog');
-const sorted = devlogs
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+const sorted = sortByPinnedThenDate(devlogs)
   .slice(0, 3)
   .map((entry) => ({
     slug: entry.id.replace(SLUG_RE, ''),
@@ -21,6 +21,7 @@ const sorted = devlogs
     summary: entry.data.summary,
     tags: entry.data.tags,
     status: entry.data.status,
+    pinned: entry.data.pinned,
   }));
 
 const play = siteStatus.play;
@@ -41,11 +42,31 @@ const recentIssues = play.knownIssues.slice(0, 3);
       version={play.currentVersion}
       phase={site.currentPhase}
       lastUpdated={site.lastUpdated}
-      nextFocus="结构整理、音效系统、立绘修复、移动端 UI 优化"
+      nextFocus={site.nextFocus}
       issueCount={play.knownIssues.length}
       stageDescription={play.stageDescription}
     />
   </div>
+
+  <!-- Why -->
+  <section class="section l-content-wide">
+    <h2 class="section-title">不只是游戏</h2>
+    <p class="why-text">
+      LoopTrain 对我来说，只是因为好奇，因为好玩，因为一切我说了算，因为我想亲自去探索一个问题：当 AI 成为开发者真正的协作者之后，软件开发最终会演变成什么样子？
+    </p>
+    <p class="why-text">
+      在这里，我没有项目压力，没有商业目标，也不需要迎合任何用户。我可以完全按照自己的兴趣，从零开始构建，也可以随时推翻重来。每一次重构、每一次失败、每一次架构调整，都是一次真实的实验。
+    </p>
+    <p class="why-text">
+      游戏只是实验的载体，而不是最终目的。我更关心的是人与 AI 如何协作、状态如何管理、Agent 如何组织、Prompt 如何设计、复杂系统如何保持可控，以及 AI Coding 的能力边界究竟在哪里。
+    </p>
+    <p class="why-text">
+      我希望把整个探索过程完整地记录下来，包括成功的方法，也包括错误的尝试；包括技术实现，也包括思考过程；包括最终的方案，更包括为什么放弃曾经的方案。
+    </p>
+    <p class="why-text">
+      对我而言，这些开发日志、技术总结、经验和教训，远比游戏本身更有价值。它们不仅记录了一个项目的成长，也记录了一个开发者在 AI 时代重新学习软件工程、重新理解架构设计、重新定义开发方式的全过程。
+    </p>
+  </section>
 
   <!-- Recent Devlog -->
   <section class="section l-content-wide">
@@ -61,7 +82,8 @@ const recentIssues = play.knownIssues.slice(0, 3);
               date={entry.date}
               summary={entry.summary}
               tags={entry.tags}
-              status={entry.status}
+               status={entry.status}
+               pinned={entry.pinned}
             />
           ))}
     </div>
@@ -147,6 +169,14 @@ const recentIssues = play.knownIssues.slice(0, 3);
     color: var(--color-text-muted);
     line-height: 1.8;
     margin: 0;
+    max-width: 680px;
+  }
+
+  .why-text {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.9;
+    margin: 0 0 var(--space-3);
     max-width: 680px;
   }
 

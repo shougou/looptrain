@@ -3,77 +3,63 @@ import type { RoadmapPhase } from '../types/index';
 const roadmap: RoadmapPhase[] = [
   {
     id: 'current',
-    label: '当前阶段：试玩版稳定',
+    label: '当前阶段：独立运行时稳定',
     description:
-      '修复移动端体验问题，梳理游戏结构，建立最小可用试玩闭环。',
+      '纯 LT Standalone Runtime 已上线，建立状态持久化、补全 NPC 链路、接入音效系统。',
     tasks: [
       {
         task: '剥离 ST，建立 Standalone MVP',
-        status: '进行中',
-        description: '已建立本地 standalone 原型，复用 engine.js 跑通 Mock 成功路径和失败/下一轮路径；线上入口暂未切换。',
+        status: '已完成',
+        description: '已建立 standalone runtime，复用 engine.js。线上 /play/game 已切换到纯 LT Standalone，不再显示 SillyTavern 界面。',
         priority: 'high',
       },
       {
-        task: '隐藏 SillyTavern 原始界面',
-        status: '进行中',
-        description: 'Game Shell 模式下完全隐藏 ST 界面；长期目标是 /play/game 进入纯 LT Standalone。',
+        task: '移除 SillyTavern 原始界面暴露',
+        status: '已完成',
+        description: '/play/game 进入纯 LT Standalone，公开入口不再呈现任何 ST UI。',
         priority: 'high',
       },
       {
-        task: '修复移动端遮罩问题',
-        status: '进行中',
-        description:
-          '移动端开场字幕、遮罩在不同屏幕尺寸下的错位和裁剪问题。',
-        priority: 'high',
-      },
-      {
-        task: '修复小宁立绘资源 404',
-        status: '进行中',
-        description:
-          '立绘资源路径指向未部署的旧路径，需统一到 /scripts/extensions/third-party/LoopTrain/。',
-        priority: 'high',
-      },
-      {
-        task: '梳理 LT 控制层和 ST 引擎层边界',
+        task: 'LLM Bridge 接入',
         status: '已完成',
         description:
-          '明确 LoopTrain 控制层的职责范围与 SillyTavern 引擎层的边界。',
+          'DeepSeek + Mock 双模式，API Key 仅在后端环境变量中。',
         priority: 'high',
       },
       {
-        task: 'LLM Raw Bridge 切换',
-        status: '已完成',
-        description:
-          '从 generateQuietPrompt 改为 generateRaw，不依赖 ST 当前 chat_name 或 chat file。',
-        priority: 'medium',
-      },
-      {
-        task: '接入基础音效系统',
+        task: '完善 LT Runtime 状态保持',
         status: '进行中',
         description:
-          '已完成第一版音效系统设计：AudioManager、audio manifest、事件绑定、声音开关和第一批占位素材清单。',
+          '刷新页面后恢复当前轮次、场景、线索、NPC 状态和对话摘要。',
+        priority: 'high',
+      },
+      {
+        task: '内容外置化',
+        status: '进行中',
+        description:
+          '将剧情内容、NPC 配置、场景描述从代码中分离为独立数据文件。',
+        priority: 'high',
+      },
+      {
+        task: '接入音效系统',
+        status: '进行中',
+        description:
+          '已完成音效系统设计，待接入真实音效素材。',
         priority: 'medium',
       },
       {
-        task: '完成基础失败结算卡',
-        status: '未开始',
+        task: '修复角色立绘资源',
+        status: '进行中',
         description:
-          '列车爆炸后显示结算页面，保留已获得线索，允许重新开始循环。',
-        priority: 'medium',
+          '立绘路径已迁移到 /assets/，沈墨寒立绘仍存在加载稳定性问题，需压缩优化。',
+        priority: 'high',
       },
       {
         task: '完成 3 个 NPC + 1 个隐藏 NPC 试玩链路',
         status: '进行中',
         description:
-          '确保小宁、赵乘警、沈墨寒三个 NPC 在试玩版中有完整可触发的对话和行动链路。',
+          '小宁、赵乘警、沈墨寒三个 NPC 的对话和行动链路补全中。',
         priority: 'high',
-      },
-      {
-        task: '优化开场字幕和移动端竖屏表现',
-        status: '未开始',
-        description:
-          '开场字幕的竖屏排版、字体大小、淡入淡出时序在移动端的优化。',
-        priority: 'low',
       },
     ],
   },
@@ -81,7 +67,7 @@ const roadmap: RoadmapPhase[] = [
     id: 'next',
     label: '下一阶段：体验增强',
     description:
-      '在试玩版稳定的基础上，增强视听体验、叙事深度和角色交互。',
+      '在独立运行时稳定的基础上，增强视听体验、叙事深度和角色交互。',
     tasks: [
       {
         task: '增加背景音乐',
@@ -131,9 +117,9 @@ const roadmap: RoadmapPhase[] = [
   },
   {
     id: 'longterm',
-    label: '长期阶段：完整游戏探索',
+    label: '探索方向',
     description:
-      '探索将 LoopTrain 从试玩版发展为完整叙事解谜游戏的可能性。',
+      '这些是长期愿景，不是承诺。随着项目发展可能调整或放弃。',
     tasks: [
       {
         task: '扩展至 10 个以上 NPC',

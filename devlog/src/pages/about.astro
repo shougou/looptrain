@@ -37,15 +37,15 @@ import Layout from '../components/Layout.astro';
       <h2>项目状态</h2>
 
       <p>
-        当前版本：<strong>v0.4.3</strong>，处于「试玩版稳定」阶段。
+        当前版本：<strong>v0.5.0-standalone</strong>，处于「独立运行时稳定」阶段。
       </p>
 
       <p>
-        项目已经建立了基本的技术架构：SillyTavern 作为底层对话引擎，LoopTrain 控制层负责游戏 UI、状态管理和叙事逻辑。玩家可以在移动端竖屏模式下进行对话、探索列车、发现线索、经历循环重启。
+        LoopTrain 已从 SillyTavern 扩展形态迁移为独立运行时。当前游戏入口 /play/game 由 LT Standalone Runtime 驱动，不再依赖 SillyTavern 前端界面。
       </p>
 
       <p>
-        目前项目已知存在以下限制：部分角色立绘资源待修复、音效系统尚未建立、完整的 NPC 对话链路仍在开发中。
+        目前项目已知存在以下限制：部分角色立绘资源存在加载稳定性问题、音效系统尚未接入真实素材、完整的 NPC 对话链路仍在开发中、用户状态保持仍为早期方案。
       </p>
 
       <h2>关于本站</h2>
@@ -61,8 +61,8 @@ import Layout from '../components/Layout.astro';
       <h2>技术栈</h2>
 
       <ul>
-        <li>游戏引擎：SillyTavern + LoopTrain 控制层</li>
-        <li>AI 对话：DeepSeek V4 Pro</li>
+        <li>游戏运行时：LoopTrain Standalone Runtime（Node + Express）</li>
+        <li>AI 对话：DeepSeek + Mock 回退</li>
         <li>开发日志站：Astro + Markdown + Nginx</li>
         <li>目标平台：移动端竖屏</li>
       </ul>

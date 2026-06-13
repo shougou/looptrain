@@ -1,0 +1,104 @@
+---
+/** AI Notes list `/ai-notes` — entries tagged ai-notes, sorted by date desc */
+import Layout from '../../components/Layout.astro';
+import DevlogCard from '../../components/DevlogCard.astro';
+import { getCollection } from 'astro:content';
+import { sortByPinnedThenDate } from '../../lib/contentSort';
+
+const devlogs = await getCollection('devlog');
+const aiNotes = sortByPinnedThenDate(
+  devlogs.filter((entry) => entry.data.tags?.includes('ai-notes'))
+);
+
+const SLUG_RE = /^\d{4}-\d{2}-\d{2}-/;
+const entries = aiNotes.map((entry) => ({
+  slug: entry.id.replace(SLUG_RE, ''),
+  title: entry.data.title,
+  date: entry.data.date.toISOString().slice(0, 10),
+  summary: entry.data.summary,
+  tags: entry.data.tags,
+  status: entry.data.status,
+  pinned: entry.data.pinned,
+}));
+---
+
+<Layout
+  title="AI 工程笔记"
+  description="LoopTrain AI 工程笔记。记录 AI 协同开发过程中的架构决策、Prompt 设计、Agent 协作、状态管理等实践经验与教训。"
+  canonicalURL="/ai-notes"
+>
+  <div class="l-content-wide">
+    <section class="page-header">
+      <h1 class="page-title">AI 工程笔记</h1>
+      <p class="page-desc">
+        通过开发 LoopTrain，探索 AI 与人类如何共同完成复杂软件——架构设计、Prompt 工程、Agent 协作、Runtime 架构、AI Coding 工作流。
+      </p>
+    </section>
+
+    {
+      entries.length === 0 ? (
+        <p class="empty">暂无笔记，即将开始记录。</p>
+      ) : (
+        <div class="devlog-list">
+          {entries.map((entry) => (
+            <DevlogCard
+              slug={entry.slug}
+              title={entry.title}
+              date={entry.date}
+              summary={entry.summary}
+              tags={entry.tags}
+              status={entry.status}
+              pinned={entry.pinned}
+            />
+          ))}
+        </div>
+      )
+    }
+  </div>
+</Layout>
+
+<style>
+  .page-header {
+    margin-top: var(--space-10);
+    margin-bottom: var(--space-8);
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 var(--space-2);
+  }
+
+  .page-desc {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin: 0;
+    max-width: 640px;
+    line-height: 1.7;
+  }
+
+  .devlog-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .empty {
+    font-size: 15px;
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: var(--space-16) 0;
+  }
+
+  @media (min-width: 768px) {
+    .devlog-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-5);
+    }
+
+    .page-title {
+      font-size: 28px;
+    }
+  }
+</style>
