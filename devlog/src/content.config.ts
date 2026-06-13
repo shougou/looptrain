@@ -17,6 +17,7 @@ const devlogCollection = defineCollection({
     ]),
     tags: z.array(z.string()).default([]),
     summary: z.string(),
+    pinned: z.boolean().default(false),
   }),
 });
 
@@ -26,6 +27,7 @@ const changelogCollection = defineCollection({
     version: z.string(),
     date: z.coerce.date(),
     summary: z.string(),
+    pinned: z.boolean().default(false),
   }),
 });
 
@@ -35,6 +37,8 @@ const charactersCollection = defineCollection({
     characterId: z.string(),
     displayName: z.string(),
     publicRole: z.string(),
+    date: z.coerce.date().optional(),
+    pinned: z.boolean().default(false),
     availability: z.enum(['public', 'locked']).default('public'),
     playtestStatus: z
       .enum(['in-playtest', 'planned', 'partial'])

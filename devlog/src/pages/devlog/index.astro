@@ -3,11 +3,10 @@
 import Layout from '../../components/Layout.astro';
 import DevlogCard from '../../components/DevlogCard.astro';
 import { getCollection } from 'astro:content';
+import { sortByPinnedThenDate } from '../../lib/contentSort';
 
 const devlogs = await getCollection('devlog');
-const sorted = devlogs.sort(
-  (a, b) => b.data.date.getTime() - a.data.date.getTime()
-);
+const sorted = sortByPinnedThenDate(devlogs);
 
 const SLUG_RE = /^\d{4}-\d{2}-\d{2}-/;
 const entries = sorted.map((entry) => ({
@@ -17,6 +16,7 @@ const entries = sorted.map((entry) => ({
   summary: entry.data.summary,
   tags: entry.data.tags,
   status: entry.data.status,
+  pinned: entry.data.pinned,
 }));
 ---
 
@@ -46,6 +46,7 @@ const entries = sorted.map((entry) => ({
               summary={entry.summary}
               tags={entry.tags}
               status={entry.status}
+              pinned={entry.pinned}
             />
           ))}
         </div>

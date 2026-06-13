@@ -5,18 +5,22 @@ export interface DevlogFrontmatter {
   status: 'idea' | 'planning' | 'doing' | 'done' | 'paused' | 'cancelled';
   tags: string[];
   summary: string;
+  pinned?: boolean;
 }
 
 export interface ChangelogFrontmatter {
   version: string;
   date: Date;
   summary: string;
+  pinned?: boolean;
 }
 
 export interface CharacterFrontmatter {
   characterId: string;
   displayName: string;
   publicRole: string;
+  date?: Date;
+  pinned?: boolean;
   availability: 'public' | 'locked';
   playtestStatus: 'in-playtest' | 'planned' | 'partial';
   portraitAsset?: string;

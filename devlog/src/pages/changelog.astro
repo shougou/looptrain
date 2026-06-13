@@ -3,13 +3,10 @@
 import Layout from '../components/Layout.astro';
 import ChangelogEntry from '../components/ChangelogEntry.astro';
 import { getCollection, render } from 'astro:content';
+import { sortByPinnedThenDate } from '../lib/contentSort';
 
 const rawEntries = await getCollection('changelog');
-const sorted = rawEntries.sort((a, b) => {
-  const va = a.data.version;
-  const vb = b.data.version;
-  return vb.localeCompare(va, undefined, { numeric: true });
-});
+const sorted = sortByPinnedThenDate(rawEntries);
 
 // Pre-render all entries
 const entries = await Promise.all(
@@ -18,6 +15,7 @@ const entries = await Promise.all(
     return {
       version: entry.data.version,
       date: entry.data.date.toISOString().slice(0, 10),
+      pinned: entry.data.pinned,
       Content,
     };
   })
@@ -43,7 +41,7 @@ const entries = await Promise.all(
       ) : (
         <div class="changelog-list">
           {entries.map((entry) => (
-            <ChangelogEntry version={entry.version} date={entry.date}>
+            <ChangelogEntry version={entry.version} date={entry.date} pinned={entry.pinned}>
               <entry.Content />
             </ChangelogEntry>
           ))}

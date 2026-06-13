@@ -5,23 +5,12 @@
 import Layout from '../components/Layout.astro';
 import CharacterCard from '../components/CharacterCard.astro';
 import { getCollection } from 'astro:content';
+import { sortByPinnedThenDate } from '../lib/contentSort';
 
 const chars = await getCollection('characters');
-
-// Sort: in-playtest first, then planned, then partial
-const statusOrder: Record<string, number> = {
-  'in-playtest': 0,
-  planned: 1,
-  partial: 2,
-};
-
-const publicChars = chars
-  .filter((c) => c.data.availability === 'public')
-  .sort(
-    (a, b) =>
-      (statusOrder[a.data.playtestStatus] ?? 3) -
-      (statusOrder[b.data.playtestStatus] ?? 3)
-  );
+const publicChars = sortByPinnedThenDate(
+  chars.filter((c) => c.data.availability === 'public')
+);
 
 // Locked placeholder: hidden NPC node. Do not expose the actual character name publicly.
 const lockedChars = [
@@ -68,6 +57,7 @@ const lockedChars = [
               summary={char.data.summary}
               publicNotes={char.data.publicNotes}
               portraitAsset={char.data.portraitAsset}
+              pinned={char.data.pinned}
             />
           ))}
 

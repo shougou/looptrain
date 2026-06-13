@@ -3,16 +3,18 @@
 export interface Props {
   version: string;
   date: string;
+  pinned?: boolean;
   children: any;
 }
 
-const { version, date } = Astro.props;
+const { version, date, pinned = false } = Astro.props;
 ---
 
-<article class="changelog-entry">
+<article class={`changelog-entry ${pinned ? 'is-pinned' : ''}`}>
   <header class="entry-header">
     <span class="entry-version">{version}</span>
     <time class="entry-date" datetime={date}>日期：{date}</time>
+    {pinned && <span class="pinned-badge">置顶</span>}
   </header>
   <div class="entry-body">
     <slot />
@@ -26,6 +28,14 @@ const { version, date } = Astro.props;
     border-radius: var(--radius-md);
     padding: var(--space-5);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .changelog-entry.is-pinned {
+    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border-soft));
+    background: linear-gradient(180deg, rgba(214, 168, 90, 0.1), var(--color-bg-panel) 46%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 0 0 1px rgba(214, 168, 90, 0.08);
   }
 
   .entry-header {
@@ -49,6 +59,15 @@ const { version, date } = Astro.props;
     font-family: var(--font-mono);
     font-size: 13px;
     color: var(--color-text-muted);
+  }
+
+  .pinned-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-bg);
+    background: var(--color-accent);
+    border-radius: var(--radius-sm);
+    padding: 1px 7px;
   }
 
   .entry-body :global(h3) {
