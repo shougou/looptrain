@@ -88,6 +88,21 @@ textarea { font: inherit; resize: none; }
 }
 .lt-topbar-left, .lt-topbar-right { display: flex; align-items: center; gap: 4px; }
 
+.lt-llm-badge {
+  font-family: var(--font-mono);
+  font-size: 10px; cursor: pointer;
+  padding: 2px 8px; border-radius: 999px;
+  border: 1px solid var(--lt-gold);
+  color: var(--lt-gold);
+  background: rgba(214,168,90,.1);
+  user-select: none;
+}
+.lt-llm-badge[data-llm=off] {
+  border-color: var(--lt-muted);
+  color: var(--lt-muted);
+  background: rgba(127,127,127,.1);
+}
+
 /* Content area */
 .lt-content {
   position: relative; z-index: 5;

@@ -15,6 +15,8 @@ let NPC_INFO = {};
 
 // ── State ──
 let state = null;
+let llmEnabled = false;
+let llmMode = false;
 let lastFailure = null;
 let npcCache = null;
 
@@ -60,9 +62,10 @@ function render() {
   phone.classList.toggle('lt-dialogue', s.mode === 'dialogue');
   phone.classList.toggle('lt-command-mode', s.input_channel === 'command');
   topLeft.innerHTML = `<strong>${esc(s.clock)}</strong>｜AP ${s.ap_remaining}｜第 ${s.loop} 轮`;
-  topRight.innerHTML = s.mode === 'dialogue'
+  topRight.innerHTML = (s.mode === 'dialogue'
     ? `对话：${npcName(s.active_npc)}｜${s.input_channel === 'command' ? '指令' : '扮演'}`
-    : `探索｜${s.input_channel === 'command' ? '指令' : '扮演'}`;
+    : `探索｜${s.input_channel === 'command' ? '指令' : '扮演'}`)
+    + (llmEnabled ? ` <span class="lt-llm-badge" id="llm-toggle" data-llm="${llmMode ? 'on' : 'off'}">${llmMode ? 'LLM' : 'Mock'}</span>` : '');
 
   locationEl.textContent = sceneName(s.location);
   sceneText.textContent = getSceneText();
@@ -242,8 +245,14 @@ async function submitInput() {
       endDialogue();
       return;
     }
+    let llmReply = '';
+    if (llmEnabled && llmMode) {
+      const llmRes = await api('/llm/npc-reply', { npc_id: state.active_npc, player_text: text, state });
+      if (llmRes?.reply) llmReply = llmRes.reply;
+    }
     const res = await api('/dialogue/message', {
       npc_id: state.active_npc, player_text: text, state,
+      llm_reply: llmReply,
     });
     handleResponse(res, true);
   } else {
@@ -415,6 +424,8 @@ async function bootContent() {
       npcCache = npcsRes;
     }
     if (sessionRes?.state) START_STATE = clone(sessionRes.state);
+    const configRes = await api('/config');
+    if (configRes?.llm_enabled) llmEnabled = true;
   } catch (_) {}
 }
 
@@ -500,6 +511,13 @@ async function init() {
     // Next loop button in NG card
     if (ev.target.id === 'btn-next-loop') {
       await nextLoop();
+      return;
+    }
+
+    // LLM toggle
+    if (ev.target.id === 'llm-toggle') {
+      llmMode = !llmMode;
+      render();
       return;
     }
   });
