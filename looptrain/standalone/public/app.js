@@ -496,10 +496,24 @@ async function init() {
   channelTabs.addEventListener('click', (ev) => {
     const tab = ev.target.closest('[data-channel]');
     if (!tab) return;
-    state.input_channel = tab.dataset.channel === 'command' ? 'command' : 'roleplay';
+    const ch = tab.dataset.channel === 'command' ? 'command' : 'roleplay';
+    state.input_channel = ch;
     saveState();
     render();
     inputEl.focus();
+
+    const target = state.mode === 'dialogue' ? dialogueLog : logEl;
+    if (ch === 'command' && !state.flags.command_hint_seen) {
+      state.flags.command_hint_seen = true;
+      appendHtml('system',
+        '<div class="lt-msg-title">指令模式</div><div>可用指令：</div><ul><li><strong>重置</strong> — 重置本轮，回到开场</li><li>查看线索 — 查看当前线索</li><li>查看人物 — 查看 NPC 信息</li><li>查看状态 — 查看当前状态</li><li>结束对话 — 结束当前对话</li><li>进入下一轮 — 失败后进入下一轮</li></ul>',
+        target);
+    } else if (ch === 'roleplay' && !state.flags.roleplay_hint_seen) {
+      state.flags.roleplay_hint_seen = true;
+      appendHtml('system',
+        '<div class="lt-msg-title">扮演模式</div><div>输入你的行动和对话，与列车上的乘客互动。探索车厢，发现线索，在爆炸前找到真相。</div>',
+        target);
+    }
   });
 
   // Global click delegation
