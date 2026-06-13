@@ -558,10 +558,19 @@ function nextLoop(previous) {
 function getNpcs() { return clone(NPCS); }
 function getClueTitles() { return clone(CLUE_TITLES); }
 function getClueDetails() { return clone(CLUE_DETAILS); }
+function getScenes() { return clone(SCENES); }
+function getNpcInfo() {
+  return Object.fromEntries(
+    Object.entries(NPCS).map(([id, npc]) => [
+      id,
+      { name: npc.name, portrait: npc.portrait, location: npc.location, hidden: !!npc.hidden },
+    ])
+  );
+}
 
 module.exports = {
   START_STATE, NPCS, SCENES, CLUE_TITLES, CLUE_DETAILS,
   normalize, parseAction, commitAction, startDialogue, dialogueMessage, endDialogue,
   failLoop, nextLoop, suggestions, dialogueSuggestions, countValidEvidence, currentGoal,
-  clueDetail, cleanLlmReply, getNpcs, getClueTitles, getClueDetails, sceneName,
+  clueDetail, cleanLlmReply, getNpcs, getClueTitles, getClueDetails, getScenes, getNpcInfo, sceneName,
 };

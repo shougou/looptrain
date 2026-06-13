@@ -8,40 +8,13 @@
 const API_BASE = '/api';
 const ASSET_BASE = '/assets/';
 
-const START_STATE = {
-  episode_id: 'trial_001', mode: 'explore', input_channel: 'roleplay',
-  loop: 1, clock: '08:45', ap_remaining: 10, location: 'carriage_7',
-  active_npc: null, known_clues: ['gray_coat_note_pressure'],
-  carried_memory: [], unlocked_actions: [], dialogue_session: null,
-  last_outcome: null,
-  npc_states: {
-    xiaoning: { trust: 20, fear: 45, suspicion: 0 },
-    zhao_police: { trust: 0, suspicion: 15, requires_evidence: true },
-    shen_mohan: { trust: -10, suspicion: 35, composure: 80 },
-    xiaoning_mother_hidden: { trust: 0, fear: 0, visibility: 'hidden' },
-  },
-  flags: {
-    intro_seen: false, roleplay_hint_seen: false, command_hint_seen: false,
-    zhao_checked_floor: false, trial_success: false,
-    xiaoning_mother_memory_triggered: false, shen_connector_hint_seen: false,
-    visible_hidden_npcs: [],
-  },
-};
-
-const SCENES = {
-  carriage_7: { name: '第七节车厢', npcs: ['xiaoning', 'zhao_police'], text: '列车第七节车厢灯光昏黄。窗外，重庆方向的火光已经渐远。乘客们神色紧张，各自拥着行李。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。地板下方似乎藏着很轻的滴答声。' },
-  connector_7_8: { name: '连接处', npcs: ['shen_mohan'], text: '第七节车厢与第八节车厢之间的连接处。冷风从缝隙中灌入，列车晃动时铁板发出沉闷的声响。灰大衣的沈墨寒站在这里，像是在等人，又像是在观察着什么。远处偶尔还能听见防空警报的余音。' },
-};
-
-const NPC_INFO = {
-  xiaoning: { name: '小宁', portrait: 'xiaoning_portrait.png', location: 'carriage_7', hidden: false },
-  zhao_police: { name: '赵乘警', portrait: 'zhao_police_portrait.png', location: 'carriage_7', hidden: false },
-  shen_mohan: { name: '沈墨寒', portrait: 'shen_mohan_portrait.png', location: 'connector_7_8', hidden: false },
-  xiaoning_mother_hidden: { name: '小宁妈妈', portrait: 'xiaoning_mother_portrait.png', location: 'carriage_7', hidden: true },
-};
+// ── Content loaded from engine API ──
+let START_STATE = null;
+let SCENES = {};
+let NPC_INFO = {};
 
 // ── State ──
-let state = clone(START_STATE);
+let state = null;
 let lastFailure = null;
 let npcCache = null;
 
@@ -427,6 +400,22 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) state = JSON.parse(raw);
   } catch (_) {}
+  if (!state) state = clone(START_STATE);
+}
+
+// ── Content boot ──
+async function bootContent() {
+  try {
+    const [scenesRes, npcsRes, sessionRes] = await Promise.all([
+      api('/scenes'), api('/npcs'), api('/session/init', {}),
+    ]);
+    if (scenesRes?.scenes) SCENES = scenesRes.scenes;
+    if (npcsRes) {
+      if (npcsRes.npc_info) NPC_INFO = npcsRes.npc_info;
+      npcCache = npcsRes;
+    }
+    if (sessionRes?.state) START_STATE = clone(sessionRes.state);
+  } catch (_) {}
 }
 
 // ── Utilities ──
@@ -439,7 +428,8 @@ function esc(s) {
 function escAttr(s) { return String(s || '').replace(/"/g, '&quot;'); }
 
 // ── Event bindings ──
-function init() {
+async function init() {
+  await bootContent();
   loadState();
   render();
 

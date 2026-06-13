@@ -62,7 +62,11 @@ app.get('/api/suggestions', (req, res) => {
 });
 
 app.get('/api/npcs', (_req, res) => {
-  res.json({ npcs: engine.getNpcs(), clue_titles: engine.getClueTitles() });
+  res.json({ npcs: engine.getNpcs(), npc_info: engine.getNpcInfo(), clue_titles: engine.getClueTitles() });
+});
+
+app.get('/api/scenes', (_req, res) => {
+  res.json({ scenes: engine.getScenes() });
 });
 
 // Serve index.html for SPA fallback
