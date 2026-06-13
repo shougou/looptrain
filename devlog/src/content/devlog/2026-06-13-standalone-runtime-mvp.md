@@ -2,7 +2,7 @@
 title: "开始剥离 ST，建立 LoopTrain Standalone MVP"
 date: "2026-06-13T11:30:00+08:00"
 version: "v0.5-standalone-mvp"
-status: "doing"
+status: "done"
 tags:
   - 技术实现
   - 架构调整

@@ -2,7 +2,7 @@
 title: "当前试玩版的问题整理"
 date: "2026-06-13"
 version: "v0.4.3"
-status: "doing"
+status: "done"
 tags:
   - 问题记录
   - 版本进展
