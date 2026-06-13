@@ -1,6 +1,6 @@
 ---
 title: "音效系统第一版方案定稿"
-date: "2026-06-13"
+date: "2026-06-13T23:10:00+08:00"
 version: "v0.5-audio-core"
 status: "planning"
 tags:
