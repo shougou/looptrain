@@ -289,6 +289,7 @@ async function resetGame() {
   logEl.innerHTML = '';
   dialogueLog.innerHTML = '';
   ngLayer.classList.remove('lt-show');
+  phone.classList.remove('lt-dialogue');
   appendMsg('system', '已重置试玩版。开场背景将重新显示。', logEl);
   render();
 }
