@@ -1,10 +1,8 @@
-// LoopTrain Standalone MVP - engine.js
-// ATTRIBUTION: Copied from looptrain/st-server-plugin/looptrain/engine.js
-// Original source: LoopTrain-ST v0.4.3
-// This is the core game engine — pure Node.js, no SillyTavern dependencies.
+// LoopTrain Standalone — engine.js
+// The LoopTrain game engine — pure Node.js, no external dependencies.
 'use strict';
 
-// v0.4-alpha: engine remains the裁判; optional llm_reply is treated as NPC performance text only.
+// v0.5.0: standalone runtime. llm_reply is NPC performance text only.
 
 const START_STATE = {
   episode_id: 'trial_001',
