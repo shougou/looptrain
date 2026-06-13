@@ -144,6 +144,14 @@ textarea { font: inherit; resize: none; }
 .lt-npc-chip:hover, .lt-npc-chip:focus-visible {
   background: rgba(214,168,90,.25);
 }
+.lt-hidden-npc-chip {
+  background: rgba(180,130,210,.1); color: #c0a0d8;
+  border: 1px solid rgba(180,130,210,.25);
+  font-style: italic;
+}
+.lt-hidden-npc-chip:hover, .lt-hidden-npc-chip:focus-visible {
+  background: rgba(180,130,210,.22);
+}
 .lt-scene-chip {
   padding: 6px 14px; border-radius: 999px;
   background: rgba(127,179,213,.1); color: var(--lt-blue);
