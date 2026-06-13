@@ -1,0 +1,158 @@
+---
+/** Characters page `/characters` — public NPC archive cards.
+ *  Spoiler-safe. Locked characters show as placeholder only.
+ */
+import Layout from '../components/Layout.astro';
+import CharacterCard from '../components/CharacterCard.astro';
+import { getCollection } from 'astro:content';
+
+const chars = await getCollection('characters');
+
+// Sort: in-playtest first, then planned, then partial
+const statusOrder: Record<string, number> = {
+  'in-playtest': 0,
+  planned: 1,
+  partial: 2,
+};
+
+const publicChars = chars
+  .filter((c) => c.data.availability === 'public')
+  .sort(
+    (a, b) =>
+      (statusOrder[a.data.playtestStatus] ?? 3) -
+      (statusOrder[b.data.playtestStatus] ?? 3)
+  );
+
+// Locked placeholder: hidden NPC node. Do not expose the actual character name publicly.
+const lockedChars = [
+  {
+    displayName: '隐藏 NPC',
+    publicRole: '隐藏节点',
+    playtestStatus: 'planned',
+    tags: ['隐藏角色'],
+    summary: '',
+    cardSourceStatus: '',
+    spoilerLevel: 'critical',
+  },
+];
+---
+
+<Layout
+  title="角色档案"
+  description="LoopTrain 试玩版中已公开的角色信息。仅展示游戏中可自然获知的公开设定，不涉及核心剧情谜底。"
+  canonicalURL="/characters"
+>
+  <div class="l-content-wide">
+    <section class="page-header">
+      <h1 class="page-title">角色档案</h1>
+      <p class="page-desc">
+        LoopTrain 试玩版中已公开的角色信息。仅展示游戏中可自然获知的公开设定，不涉及核心剧情谜底。
+      </p>
+      <p class="page-spoiler-note">
+        本页面不涉及核心剧情剧透。隐藏设定请在游戏中自行发现。
+      </p>
+    </section>
+
+    {
+      publicChars.length === 0 && lockedChars.length === 0 ? (
+        <p class="empty">角色档案正在整理中，即将公开。</p>
+      ) : (
+        <div class="chars-grid">
+          {publicChars.map((char) => (
+            <CharacterCard
+              displayName={char.data.displayName}
+              publicRole={char.data.publicRole}
+              playtestStatus={char.data.playtestStatus}
+              cardSourceStatus={char.data.cardSourceStatus}
+              tags={char.data.tags}
+              summary={char.data.summary}
+              publicNotes={char.data.publicNotes}
+              portraitAsset={char.data.portraitAsset}
+            />
+          ))}
+
+          {lockedChars.map((char) => (
+            <CharacterCard
+              displayName={char.displayName}
+              publicRole={char.publicRole}
+              playtestStatus={char.playtestStatus}
+              cardSourceStatus=""
+              tags={char.tags}
+              summary="该角色信息暂不公开。"
+              locked={true}
+            />
+          ))}
+        </div>
+      )
+    }
+
+    <p class="page-footer-note">
+      更多角色信息将在后续版本中逐步公开。部分角色设定需要玩家在游戏内通过探索自行发现。
+    </p>
+  </div>
+</Layout>
+
+<style>
+  .page-header {
+    margin-top: var(--space-10);
+    margin-bottom: var(--space-8);
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 var(--space-2);
+  }
+
+  .page-desc {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  .page-spoiler-note {
+    font-size: 12px;
+    color: var(--color-text-subtle);
+    margin: var(--space-1) 0 0;
+  }
+
+  .chars-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .empty {
+    font-size: 15px;
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: var(--space-16) 0;
+  }
+
+  .page-footer-note {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-top: var(--space-10);
+    line-height: 1.6;
+  }
+
+  @media (min-width: 768px) {
+    .chars-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-5);
+    }
+
+    .page-title {
+      font-size: 28px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .chars-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

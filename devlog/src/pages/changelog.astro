@@ -1,0 +1,92 @@
+---
+/** Changelog page `/changelog` — versioned release notes */
+import Layout from '../components/Layout.astro';
+import ChangelogEntry from '../components/ChangelogEntry.astro';
+import { getCollection, render } from 'astro:content';
+
+const rawEntries = await getCollection('changelog');
+const sorted = rawEntries.sort((a, b) => {
+  const va = a.data.version;
+  const vb = b.data.version;
+  return vb.localeCompare(va, undefined, { numeric: true });
+});
+
+// Pre-render all entries
+const entries = await Promise.all(
+  sorted.map(async (entry) => {
+    const { Content } = await render(entry);
+    return {
+      version: entry.data.version,
+      date: entry.data.date.toISOString().slice(0, 10),
+      Content,
+    };
+  })
+);
+---
+
+<Layout
+  title="更新记录"
+  description="LoopTrain 版本更新记录。记录每个版本的新增、修复、变更和已知问题。"
+  canonicalURL="/changelog"
+>
+  <div class="l-content-wide">
+    <section class="page-header">
+      <h1 class="page-title">更新记录</h1>
+      <p class="page-desc">
+        每个版本的详细变更记录。历史版本不会删除，作为项目演化的完整档案。
+      </p>
+    </section>
+
+    {
+      entries.length === 0 ? (
+        <p class="empty">暂无版本记录。</p>
+      ) : (
+        <div class="changelog-list">
+          {entries.map((entry) => (
+            <ChangelogEntry version={entry.version} date={entry.date}>
+              <entry.Content />
+            </ChangelogEntry>
+          ))}
+        </div>
+      )
+    }
+  </div>
+</Layout>
+
+<style>
+  .page-header {
+    margin-top: var(--space-10);
+    margin-bottom: var(--space-8);
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 var(--space-2);
+  }
+
+  .page-desc {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .changelog-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .empty {
+    font-size: 15px;
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: var(--space-16) 0;
+  }
+
+  @media (min-width: 768px) {
+    .page-title {
+      font-size: 28px;
+    }
+  }
+</style>

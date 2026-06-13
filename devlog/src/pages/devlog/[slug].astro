@@ -1,0 +1,168 @@
+---
+/** Devlog detail `/devlog/[slug]` — renders full Markdown entry */
+import Layout from '../../components/Layout.astro';
+import VersionBadge from '../../components/VersionBadge.astro';
+import TagBadge from '../../components/TagBadge.astro';
+import StatusDot from '../../components/StatusDot.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const SLUG_RE = /^\d{4}-\d{2}-\d{2}-/;
+  const entries = await getCollection('devlog');
+  return entries.map((entry) => {
+    const slug = entry.id.replace(SLUG_RE, '');
+    return { params: { slug }, props: { entry } };
+  });
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, date, version, status, tags, summary } = entry.data;
+const SLUG_RE = /^\d{4}-\d{2}-\d{2}-/;
+const slug = entry.id.replace(SLUG_RE, '');
+---
+
+<Layout
+  title={title}
+  description={summary}
+  canonicalURL={`/devlog/${slug}`}
+>
+  <article class="l-content">
+    <a href="/devlog" class="back-link">← 返回开发日志列表</a>
+
+    <header class="article-header">
+      <h1 class="article-title">{title}</h1>
+      <div class="article-meta">
+        <time class="article-date" datetime={date.toISOString().slice(0, 10)}>
+          {date.toISOString().slice(0, 10)}
+        </time>
+        <VersionBadge version={version} />
+        <StatusDot status={status} />
+      </div>
+      <div class="article-tags">
+        {tags.map((t: string) => <TagBadge tag={t} />)}
+      </div>
+    </header>
+
+    <div class="article-body">
+      <Content />
+    </div>
+
+    <footer class="article-footer">
+      <a href="/devlog" class="back-link">← 返回开发日志列表</a>
+    </footer>
+  </article>
+</Layout>
+
+<style>
+  .back-link {
+    display: inline-block;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-4);
+    transition: color var(--transition-fast);
+  }
+
+  .back-link:hover {
+    color: var(--color-accent);
+  }
+
+  .article-header {
+    margin-bottom: var(--space-8);
+  }
+
+  .article-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 var(--space-3);
+  }
+
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-3);
+  }
+
+  .article-date {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--color-text-muted);
+  }
+
+  .article-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .article-body {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--color-text);
+  }
+
+  .article-body :global(h2) {
+    font-size: 20px;
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-border-soft);
+  }
+
+  .article-body :global(h3) {
+    font-size: 17px;
+    margin-top: var(--space-6);
+    margin-bottom: var(--space-2);
+  }
+
+  .article-body :global(p) {
+    margin-bottom: 1em;
+  }
+
+  .article-body :global(hr) {
+    border: none;
+    border-top: 1px solid var(--color-border-soft);
+    margin: var(--space-6) 0;
+  }
+
+  .article-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--space-4) 0;
+    font-size: 14px;
+  }
+
+  .article-body :global(th),
+  .article-body :global(td) {
+    border: 1px solid var(--color-border-soft);
+    padding: var(--space-2) var(--space-3);
+    text-align: left;
+  }
+
+  .article-body :global(th) {
+    background: var(--color-bg-elevated);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    font-size: 13px;
+  }
+
+  .article-footer {
+    margin-top: var(--space-12);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border-soft);
+  }
+
+  @media (min-width: 768px) {
+    .article-title {
+      font-size: 28px;
+    }
+
+    .article-body {
+      font-size: 17px;
+    }
+  }
+</style>

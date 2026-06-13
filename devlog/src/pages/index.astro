@@ -1,0 +1,179 @@
+---
+/** Homepage `/` — Hero + Status + Recent Devlog + Roadmap Summary */
+import Layout from '../components/Layout.astro';
+import Hero from '../components/Hero.astro';
+import StatusCard from '../components/StatusCard.astro';
+import DevlogCard from '../components/DevlogCard.astro';
+import KnownIssue from '../components/KnownIssue.astro';
+import { SITE_DESCRIPTION } from '../data/site';
+import { getCollection } from 'astro:content';
+import siteStatus from '../data/site-status.json';
+
+const SLUG_RE = /^\d{4}-\d{2}-\d{2}-/;
+const devlogs = await getCollection('devlog');
+const sorted = devlogs
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3)
+  .map((entry) => ({
+    slug: entry.id.replace(SLUG_RE, ''),
+    title: entry.data.title,
+    date: entry.data.date.toISOString().slice(0, 10),
+    summary: entry.data.summary,
+    tags: entry.data.tags,
+    status: entry.data.status,
+  }));
+
+const play = siteStatus.play;
+const site = siteStatus.site;
+
+const recentIssues = play.knownIssues.slice(0, 3);
+---
+
+<Layout
+  title="LoopTrain 开发日志"
+  description={SITE_DESCRIPTION}
+  canonicalURL="/"
+>
+  <Hero version={play.currentVersion} playUrl={play.playUrl} />
+
+  <div class="l-content-wide" style="margin-top: var(--space-8)">
+    <StatusCard
+      version={play.currentVersion}
+      phase={site.currentPhase}
+      lastUpdated={site.lastUpdated}
+      nextFocus="结构整理、音效系统、立绘修复、移动端 UI 优化"
+      issueCount={play.knownIssues.length}
+      stageDescription={play.stageDescription}
+    />
+  </div>
+
+  <!-- Recent Devlog -->
+  <section class="section l-content-wide">
+    <div class="section-header">
+      <h2 class="section-title">最近开发日志</h2>
+      <a href="/devlog" class="section-link">查看全部 →</a>
+    </div>
+    <div class="devlog-grid">
+      {sorted.map((entry) => (
+            <DevlogCard
+              slug={entry.slug}
+              title={entry.title}
+              date={entry.date}
+              summary={entry.summary}
+              tags={entry.tags}
+              status={entry.status}
+            />
+          ))}
+    </div>
+  </section>
+
+  <!-- Roadmap Summary -->
+  <section class="section l-content-wide">
+    <div class="section-header">
+      <h2 class="section-title">当前路线</h2>
+      <a href="/roadmap" class="section-link">查看完整路线图 →</a>
+    </div>
+    <p class="roadmap-summary">
+      当前阶段「{site.currentPhase}」：修复移动端体验问题，梳理游戏结构，建立最小可用试玩闭环。下一步将进入「体验增强」阶段，增加音效系统、完善 NPC 时间线和角色对话状态。
+    </p>
+  </section>
+
+  <!-- Known Issues -->
+  <section class="section l-content-wide">
+    <div class="section-header">
+      <h2 class="section-title">已知问题</h2>
+      <span class="section-subtitle">{play.knownIssues.length} 项</span>
+    </div>
+    <div class="issues-list">
+      {recentIssues.map((issue, i) => (
+        <KnownIssue
+          title={issue}
+          priority={i === 0 ? 'high' : 'medium'}
+        />
+      ))}
+      {play.knownIssues.length > 3 && (
+        <a href="/play" class="issues-more">
+          查看全部 {play.knownIssues.length} 项已知问题 →
+        </a>
+      )}
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .section {
+    margin-top: var(--space-10);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .section-subtitle {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-text-subtle);
+  }
+
+  .section-link {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+
+  .section-link:hover {
+    color: var(--color-accent);
+  }
+
+  .devlog-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .roadmap-summary {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.8;
+    margin: 0;
+    max-width: 680px;
+  }
+
+  .issues-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .issues-more {
+    display: inline-block;
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-top: var(--space-2);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .issues-more:hover {
+    color: var(--color-accent);
+  }
+
+  @media (min-width: 768px) {
+    .devlog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-5);
+    }
+  }
+</style>

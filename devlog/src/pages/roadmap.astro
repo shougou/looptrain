@@ -1,0 +1,94 @@
+---
+/** Roadmap page `/roadmap` — three-phase project plan */
+import Layout from '../components/Layout.astro';
+import RoadmapItem from '../components/RoadmapItem.astro';
+import roadmap from '../data/roadmap';
+---
+
+<Layout
+  title="项目路线图"
+  description="LoopTrain 项目路线图。当前阶段、下一阶段和长期探索方向。不使用强日期承诺。"
+  canonicalURL="/roadmap"
+>
+  <div class="l-content-wide">
+    <section class="page-header">
+      <h1 class="page-title">项目路线图</h1>
+      <p class="page-desc">
+        LoopTrain 是个人长期开发项目。路线图按阶段组织，不使用强日期承诺。每完成一项任务后会更新对应状态。
+      </p>
+    </section>
+
+    <div class="roadmap-phases">
+      {roadmap.map((phase) => (
+        <section class="phase-section">
+          <h2 class="phase-title">{phase.label}</h2>
+          <p class="phase-desc">{phase.description}</p>
+          <div class="phase-items">
+            {phase.tasks.map((task) => (
+              <RoadmapItem
+                task={task.task}
+                status={task.status}
+                description={task.description}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .page-header {
+    margin-top: var(--space-10);
+    margin-bottom: var(--space-8);
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 var(--space-2);
+  }
+
+  .page-desc {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin: 0;
+    max-width: 680px;
+    line-height: 1.7;
+  }
+
+  .roadmap-phases {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+  }
+
+  .phase-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-accent);
+    margin: 0 0 var(--space-2);
+  }
+
+  .phase-desc {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin: 0 0 var(--space-5);
+    line-height: 1.6;
+  }
+
+  .phase-items {
+    padding-left: var(--space-1);
+  }
+
+  @media (min-width: 768px) {
+    .page-title {
+      font-size: 28px;
+    }
+
+    .phase-title {
+      font-size: 20px;
+    }
+  }
+</style>

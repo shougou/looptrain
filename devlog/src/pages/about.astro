@@ -1,0 +1,120 @@
+---
+/** About page `/about` — project introduction */
+import Layout from '../components/Layout.astro';
+---
+
+<Layout
+  title="关于 LoopTrain"
+  description="LoopTrain 是一个个人长期开发的互动叙事解谜游戏项目。玩家在一列即将爆炸的列车上循环，通过对话、观察和行动寻找事故背后的真相。"
+  canonicalURL="/about"
+>
+  <div class="l-content">
+    <article class="about-article">
+      <h1 class="about-title">关于 LoopTrain</h1>
+
+      <p>
+        LoopTrain 是一个个人长期开发的互动叙事解谜游戏项目。
+      </p>
+
+      <p>
+        玩家将在一列即将爆炸的列车上不断循环，通过对话、观察和行动寻找事故背后的真相。
+      </p>
+
+      <p>
+        当前项目仍处于早期试玩阶段，核心目标不是快速商业化，而是持续探索一种结合大语言模型、互动叙事和解谜机制的个人游戏创作方式。
+      </p>
+
+      <h2>原创声明</h2>
+
+      <p>
+        LoopTrain 中所有游戏相关构思、机制设计、叙事设计和开发实现，均由我本人结合 AI 工具独立原创完成。
+      </p>
+
+      <p>
+        项目的列车循环场景致敬我喜欢的电影《源代码》（Source Code）。这种致敬仅限于题材氛围和创作启发，LoopTrain 的角色、规则、谜题结构、叙事流程和具体实现均为独立创作。
+      </p>
+
+      <h2>项目状态</h2>
+
+      <p>
+        当前版本：<strong>v0.4.3</strong>，处于「试玩版稳定」阶段。
+      </p>
+
+      <p>
+        项目已经建立了基本的技术架构：SillyTavern 作为底层对话引擎，LoopTrain 控制层负责游戏 UI、状态管理和叙事逻辑。玩家可以在移动端竖屏模式下进行对话、探索列车、发现线索、经历循环重启。
+      </p>
+
+      <p>
+        目前项目已知存在以下限制：部分角色立绘资源待修复、音效系统尚未建立、完整的 NPC 对话链路仍在开发中。
+      </p>
+
+      <h2>关于本站</h2>
+
+      <p>
+        本站（LoopTrain 开发日志）用于记录项目进展、版本更新、设计笔记和后续计划。它不是一个商业游戏官网，而是一个面向个人长期创作的项目档案站。
+      </p>
+
+      <p>
+        所有内容以 Markdown 文件维护，网站为纯静态构建，不依赖数据库或复杂后台。
+      </p>
+
+      <h2>技术栈</h2>
+
+      <ul>
+        <li>游戏引擎：SillyTavern + LoopTrain 控制层</li>
+        <li>AI 对话：DeepSeek V4 Pro</li>
+        <li>开发日志站：Astro + Markdown + Nginx</li>
+        <li>目标平台：移动端竖屏</li>
+      </ul>
+
+      <h2>联系方式</h2>
+
+      <p>
+        如需反馈试玩体验或交流项目方向，可以直接联系开发者。正式反馈渠道将在后续版本中建立。
+      </p>
+    </article>
+  </div>
+</Layout>
+
+<style>
+  .about-article {
+    margin-top: var(--space-10);
+  }
+
+  .about-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 var(--space-6);
+  }
+
+  .about-article :global(h2) {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-3);
+    color: var(--color-accent);
+  }
+
+  .about-article :global(p) {
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 1em;
+  }
+
+  .about-article :global(ul) {
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+  }
+
+  .about-article :global(li) {
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 0.25em;
+  }
+
+  @media (min-width: 768px) {
+    .about-title {
+      font-size: 28px;
+    }
+  }
+</style>

@@ -1,0 +1,145 @@
+---
+/** Play page `/play` — game entry vestibule. One goal: get user into game. */
+import Layout from '../components/Layout.astro';
+import VersionBadge from '../components/VersionBadge.astro';
+import PlayButton from '../components/PlayButton.astro';
+import KnownIssue from '../components/KnownIssue.astro';
+import siteStatus from '../data/site-status.json';
+
+const play = siteStatus.play;
+---
+
+<Layout
+  title="LoopTrain 试玩版"
+  description="LoopTrain 试玩入口。移动端竖屏互动叙事解谜游戏，当前版本 v0.4.3，处于早期试玩阶段。"
+  canonicalURL="/play"
+>
+  <div class="l-content-wide">
+    <section class="play-section">
+      <h1 class="play-title">LoopTrain 试玩版</h1>
+
+      <div class="play-meta">
+        <VersionBadge version={play.currentVersion} label="Early Playtest" />
+        <span class="play-device">推荐设备：{play.recommendedDevice}</span>
+        <span class="play-stage">{play.stageStatus}</span>
+      </div>
+
+      <p class="play-desc">
+        {play.stageDescription}
+        建议使用手机竖屏访问。
+      </p>
+
+      <div class="play-cta">
+        <PlayButton href={play.playUrl}>
+          {play.playLabel}
+        </PlayButton>
+      </div>
+
+      <p class="play-hint">
+        点击按钮进入 LoopTrain 游戏试玩。首次进入可能需要等待加载。
+      </p>
+    </section>
+
+    <section class="play-section">
+      <h2 class="play-section-title">已知问题</h2>
+      <div class="issues-list">
+        {play.knownIssues.map((issue, i) => (
+          <KnownIssue
+            title={issue}
+            priority={i === 0 ? 'high' : 'medium'}
+          />
+        ))}
+      </div>
+    </section>
+
+    <section class="play-section">
+      <h2 class="play-section-title">反馈方式</h2>
+      <p class="play-feedback">{play.feedbackNote}</p>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .play-section {
+    margin-top: var(--space-10);
+  }
+
+  .play-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 var(--space-4);
+  }
+
+  .play-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
+  }
+
+  .play-device,
+  .play-stage {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  .play-desc {
+    font-size: 15px;
+    color: var(--color-text-muted);
+    line-height: 1.8;
+    margin: 0 0 var(--space-6);
+    max-width: 640px;
+  }
+
+  .play-cta {
+    margin-bottom: var(--space-3);
+  }
+
+  .play-cta :global(.btn-primary) {
+    width: 100%;
+  }
+
+  .play-hint {
+    font-size: 13px;
+    color: var(--color-text-subtle);
+    margin: 0 0 var(--space-6);
+  }
+
+  .play-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 var(--space-4);
+  }
+
+  .issues-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .play-feedback {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  @media (min-width: 480px) {
+    .play-cta :global(.btn-primary) {
+      width: auto;
+      min-width: 280px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .play-title {
+      font-size: 28px;
+    }
+
+    .play-desc {
+      font-size: 16px;
+    }
+  }
+</style>

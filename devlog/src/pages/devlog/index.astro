@@ -1,0 +1,99 @@
+---
+/** Devlog list `/devlog` — all entries sorted by date desc */
+import Layout from '../../components/Layout.astro';
+import DevlogCard from '../../components/DevlogCard.astro';
+import { getCollection } from 'astro:content';
+
+const devlogs = await getCollection('devlog');
+const sorted = devlogs.sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+
+const SLUG_RE = /^\d{4}-\d{2}-\d{2}-/;
+const entries = sorted.map((entry) => ({
+  slug: entry.id.replace(SLUG_RE, ''),
+  title: entry.data.title,
+  date: entry.data.date.toISOString().slice(0, 10),
+  summary: entry.data.summary,
+  tags: entry.data.tags,
+  status: entry.data.status,
+}));
+---
+
+<Layout
+  title="开发日志"
+  description="LoopTrain 项目开发日志。记录项目进展、设计判断、技术实现和版本变化的长期开发记录。"
+  canonicalURL="/devlog"
+>
+  <div class="l-content-wide">
+    <section class="page-header">
+      <h1 class="page-title">开发日志</h1>
+      <p class="page-desc">
+        LoopTrain 项目的长期开发记录。每篇日志都会记录真实进展、当前问题和设计判断。
+      </p>
+    </section>
+
+    {
+      entries.length === 0 ? (
+        <p class="empty">暂无开发日志，即将开始记录。</p>
+      ) : (
+        <div class="devlog-list">
+          {entries.map((entry) => (
+            <DevlogCard
+              slug={entry.slug}
+              title={entry.title}
+              date={entry.date}
+              summary={entry.summary}
+              tags={entry.tags}
+              status={entry.status}
+            />
+          ))}
+        </div>
+      )
+    }
+  </div>
+</Layout>
+
+<style>
+  .page-header {
+    margin-top: var(--space-10);
+    margin-bottom: var(--space-8);
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 var(--space-2);
+  }
+
+  .page-desc {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .devlog-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .empty {
+    font-size: 15px;
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: var(--space-16) 0;
+  }
+
+  @media (min-width: 768px) {
+    .devlog-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-5);
+    }
+
+    .page-title {
+      font-size: 28px;
+    }
+  }
+</style>
