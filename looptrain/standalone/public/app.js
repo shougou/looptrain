@@ -317,6 +317,7 @@ function handleResponse(res, inDialogue) {
   if (res.dialogue_outcome) renderDialogueOutcome(res.dialogue_outcome);
   if (res.loop_failure_outcome) renderFailureOutcome(res.loop_failure_outcome);
   if (res.trial_success) toast('试玩版成功');
+  if (res.memory_node) appendMsg('system', '💭 触发隐藏记忆：' + (res.memory_node.title || ''), dialogueLog);
   render();
 }
 
@@ -360,9 +361,15 @@ function appendHtml(type, html, target) {
 }
 
 function scrollBottom(target) {
+  const panel = document.querySelector('.lt-dialogue-panel');
   requestAnimationFrame(() => {
-    target.scrollTop = target.scrollHeight;
-    requestAnimationFrame(() => { target.scrollTop = target.scrollHeight; });
+    if (panel && panel.offsetParent) {
+      panel.scrollTop = panel.scrollHeight;
+    }
+    if (target) {
+      target.scrollTop = target.scrollHeight;
+      requestAnimationFrame(() => { target.scrollTop = target.scrollHeight; });
+    }
   });
 }
 
