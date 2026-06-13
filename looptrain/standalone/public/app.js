@@ -317,8 +317,32 @@ function handleResponse(res, inDialogue) {
   if (res.dialogue_outcome) renderDialogueOutcome(res.dialogue_outcome);
   if (res.loop_failure_outcome) renderFailureOutcome(res.loop_failure_outcome);
   if (res.trial_success) toast('试玩版成功');
-  if (res.memory_node) appendMsg('system', '💭 触发隐藏记忆：' + (res.memory_node.title || ''), dialogueLog);
+  if (res.memory_node) {
+    appendMsg('system', '💭 触发隐藏记忆：' + (res.memory_node.title || ''), dialogueLog);
+    showMemoryPortrait(res.memory_node);
+  }
   render();
+}
+
+function showMemoryPortrait(node) {
+  if (!node.portrait) return;
+  const prev = portraitImg.src;
+  portraitImg.src = ASSET_BASE + node.portrait;
+  portraitImg.style.filter = 'sepia(.3) saturate(.8) brightness(1.15)';
+  portraitImg.style.opacity = '0';
+  requestAnimationFrame(() => {
+    portraitImg.style.transition = 'opacity .5s ease';
+    portraitImg.style.opacity = '1';
+  });
+  setTimeout(() => {
+    portraitImg.style.opacity = '0';
+    setTimeout(() => {
+      portraitImg.src = prev;
+      portraitImg.style.filter = '';
+      portraitImg.style.transition = '';
+      portraitImg.style.opacity = '';
+    }, 500);
+  }, 2000);
 }
 
 function renderDialogueOutcome(out) {
