@@ -96,6 +96,7 @@ textarea { font: inherit; resize: none; }
   color: var(--lt-gold);
   background: rgba(214,168,90,.1);
   user-select: none;
+  pointer-events: auto;
 }
 .lt-llm-badge[data-llm=off] {
   border-color: var(--lt-muted);
@@ -263,7 +264,7 @@ textarea { font: inherit; resize: none; }
 .lt-dialogue .lt-dialogue-panel { display: block; }
 .lt-dialogue-log {
   max-height: none;
-  overflow: visible;
+  overflow-y: auto;
   padding-bottom: 0;
 }
 .lt-dialogue-end {
