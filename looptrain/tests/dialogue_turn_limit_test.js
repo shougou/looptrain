@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const engine = require('../st-server-plugin/looptrain/engine');
+const engine = require('../standalone/engine');
 
 let s = engine.normalize(engine.START_STATE);
 let r = engine.commitAction('我走到小宁身边，蹲下来和她说话。', s);
@@ -22,7 +22,10 @@ assert.strictEqual(r.dialogue_outcome.turn_limit, 10);
 assert.strictEqual(r.dialogue_outcome.turns_used, 10);
 
 s = engine.normalize(engine.START_STATE);
-r = engine.commitAction('我走向沈墨寒，试探他是否知道连接处发生过什么。', s);
+r = engine.commitAction('我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。', s);
+s = r.state;
+assert.strictEqual(s.location, 'connector_7_8');
+r = engine.commitAction('我走向沈墨寒，试探他。', s);
 s = r.state;
 assert.strictEqual(s.dialogue_session.turn_limit, 8);
 for (let i = 0; i < 8; i++) {

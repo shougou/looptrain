@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const engine = require('../st-server-plugin/looptrain/engine');
+const engine = require('../standalone/engine');
 let s = engine.normalize(engine.START_STATE);
 s.known_clues.push('xiaoning_heard_ticking', 'zhao_requires_evidence');
 s.clock = '09:00';

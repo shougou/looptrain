@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const engine = require('../st-server-plugin/looptrain/engine');
+const engine = require('../standalone/engine');
 
 let s = engine.normalize(engine.START_STATE);
 
@@ -12,7 +12,9 @@ r = engine.endDialogue(s); s = r.state;
 assert.ok(s.known_clues.includes('ticking_under_floor'));
 
 // Shen path
-r = engine.commitAction('我走向沈墨寒，试探他是否知道连接处发生过什么。', s); s = r.state;
+r = engine.commitAction('我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。', s); s = r.state;
+assert.strictEqual(s.location, 'connector_7_8');
+r = engine.commitAction('我走向沈墨寒，试探他。', s); s = r.state;
 assert.strictEqual(s.active_npc, 'shen_mohan');
 r = engine.dialogueMessage('shen_mohan', '08:48 前后，你为什么离开座位去了连接处？餐车那段口琴声你也听见了吧？', s); s = r.state;
 r = engine.endDialogue(s); s = r.state;

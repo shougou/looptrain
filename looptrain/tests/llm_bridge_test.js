@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const engine = require('../st-server-plugin/looptrain/engine');
+const engine = require('../standalone/engine');
 
 let s = engine.normalize(engine.START_STATE);
 let r = engine.commitAction('我走到小宁身边，蹲下来和她说话。', s);

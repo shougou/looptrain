@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('assert');
-const engine = require('../st-server-plugin/looptrain/engine');
+const engine = require('../standalone/engine');
 
 let legacy = engine.normalize({ ...engine.START_STATE, flags: { ...engine.START_STATE.flags, xiaoning_mother_memory_triggered: true } });
 assert.ok(legacy.flags.visible_hidden_npcs.includes('xiaoning_mother_hidden'), 'legacy triggered state should migrate hidden NPC visibility');
