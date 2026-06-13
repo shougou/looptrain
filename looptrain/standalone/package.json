@@ -1,0 +1,16 @@
+{
+  "name": "looptrain-standalone",
+  "version": "0.4.3",
+  "description": "LoopTrain Standalone MVP - Local Node prototype without SillyTavern",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/smoke_test.js",
+    "check": "node --check server.js && node --check engine.js && node --check tests/smoke_test.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

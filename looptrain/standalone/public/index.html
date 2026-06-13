@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>LoopTrain · 第七节车厢</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="lt-root">
+    <div class="lt-shell">
+      <div class="lt-phone">
+
+        <!-- Stage background -->
+        <div class="lt-stage"></div>
+
+        <!-- Top bar -->
+        <div class="lt-topbar">
+          <span class="lt-topbar-left"></span>
+          <span class="lt-topbar-right"></span>
+        </div>
+
+        <!-- Main content -->
+        <div class="lt-content">
+          <div class="lt-card lt-scene-card">
+            <div class="lt-location"></div>
+            <div class="lt-scene-text"></div>
+            <div class="lt-current-goal"></div>
+            <div class="lt-visible-npcs"></div>
+          </div>
+          <div class="lt-log"></div>
+        </div>
+
+        <!-- Portrait layer -->
+        <div class="lt-portrait-layer">
+          <img class="lt-portrait" alt="" />
+        </div>
+
+        <!-- Dialogue panel -->
+        <div class="lt-dialogue-panel">
+          <div class="lt-log lt-dialogue-log"></div>
+          <div class="lt-dialogue-end">
+            <button class="lt-end-dialogue-btn" id="end-dialogue-btn">结束对话</button>
+          </div>
+        </div>
+
+        <!-- Failure overlay -->
+        <div class="lt-ng">
+          <div class="lt-ng-bg"></div>
+          <div class="lt-ng-card"></div>
+        </div>
+
+        <!-- Intro overlay -->
+        <div class="lt-intro lt-show">
+          <div class="lt-intro-card">
+            <div class="lt-intro-kicker">渝江线 307 次｜1939 年冬</div>
+            <div class="lt-intro-title">第七节车厢</div>
+            <div class="lt-intro-steps">
+              <div><strong>重庆</strong><span>日机轰炸不断。渝江线 307 次夜行列车，是离开这座燃烧之城最后的窗口。</span></div>
+              <div><strong>身份</strong><span>普通乘客只是伪装，你携带绝密情报前往江城。</span></div>
+              <div><strong>接头</strong><span>代号"扣子"的同志会在列车上出现。</span></div>
+              <div><strong>危机</strong><span>09:00 前，列车将在北江铁桥前爆炸。</span></div>
+            </div>
+            <p class="lt-intro-memory">你只记得爆炸前最后听见的声音——第七节车厢地板下方，传来一阵极轻的滴答声。</p>
+            <button class="lt-intro-btn" id="intro-start-btn">进入第七节车厢</button>
+          </div>
+          <div class="lt-intro-skip">点击任意位置跳过</div>
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="lt-bottom">
+          <div class="lt-channel-tabs">
+            <button class="lt-channel-tab lt-active" data-channel="roleplay">扮演<span>对话</span></button>
+            <button class="lt-channel-tab" data-channel="command">指令<span>行动</span></button>
+          </div>
+          <div class="lt-suggestions"></div>
+          <div class="lt-input-row">
+            <textarea class="lt-input" rows="1" placeholder="描述你的行动……"></textarea>
+            <button class="lt-btn lt-btn-send" id="btn-send">发送</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
