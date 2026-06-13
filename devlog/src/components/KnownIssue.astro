@@ -1,0 +1,81 @@
+---
+/** KnownIssue — a known issue entry with priority styling */
+export interface Props {
+  title: string;
+  priority?: 'high' | 'medium' | 'low';
+}
+
+const { title, priority = 'medium' } = Astro.props;
+
+const priorityLabel: Record<string, string> = {
+  high: '高',
+  medium: '中',
+  low: '低',
+};
+const isHigh = priority === 'high';
+---
+
+<div class={`known-issue ${isHigh ? 'priority-high' : ''}`}>
+  <span class="priority-mark" aria-hidden="true">
+    {isHigh ? '!' : '·'}
+  </span>
+  <span class="issue-title">{title}</span>
+  <span class={`issue-priority ${isHigh ? 'high' : ''}`}>
+    {priorityLabel[priority]}
+  </span>
+</div>
+
+<style>
+  .known-issue {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-border-soft);
+    border-left: 3px solid var(--color-border-soft);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3) var(--space-4);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .known-issue.priority-high {
+    border-left-color: var(--color-danger);
+  }
+
+  .priority-mark {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--color-warning);
+    flex-shrink: 0;
+    font-size: 16px;
+    line-height: 1.4;
+    min-width: 14px;
+    text-align: center;
+  }
+
+  .known-issue.priority-high .priority-mark {
+    color: var(--color-danger);
+  }
+
+  .issue-title {
+    color: var(--color-text);
+    flex: 1;
+  }
+
+  .issue-priority {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-subtle);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-elevated);
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .issue-priority.high {
+    color: var(--color-danger);
+    background: var(--color-danger-soft);
+  }
+</style>

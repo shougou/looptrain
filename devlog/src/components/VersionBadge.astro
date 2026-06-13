@@ -1,0 +1,27 @@
+---
+/** VersionBadge — displays version like "v0.4.3 · Early Playtest" */
+export interface Props {
+  version: string;
+  label?: string;
+}
+
+const { version, label } = Astro.props;
+---
+
+<span class="version-badge">
+  {version}{label ? ` · ${label}` : ''}
+</span>
+
+<style>
+  .version-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-accent);
+    background: var(--color-accent-soft);
+    border: 1px solid rgba(108, 199, 217, 0.3);
+    border-radius: 999px;
+    padding: 2px 10px;
+    white-space: nowrap;
+  }
+</style>

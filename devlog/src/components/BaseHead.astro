@@ -1,0 +1,43 @@
+---
+/** BaseHead — SEO, OG tags, CSS link, viewport */
+export interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  canonicalURL?: string;
+}
+
+const {
+  title,
+  description,
+  ogImage = '/images/og-default.svg',
+  canonicalURL,
+} = Astro.props;
+
+const fullTitle = title.includes('LoopTrain')
+  ? title
+  : `${title} — LoopTrain 开发日志`;
+const siteUrl = 'https://looptrain.me';
+const resolvedCanonical = canonicalURL
+  ? `${siteUrl}${canonicalURL}`
+  : siteUrl;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={resolvedCanonical} />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="alternate icon" href="/favicon.ico" />
+
+<!-- Open Graph -->
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={`${siteUrl}${ogImage}`} />
+<meta property="og:url" content={resolvedCanonical} />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="LoopTrain 开发日志" />
+<meta property="og:locale" content="zh_CN" />
+
+

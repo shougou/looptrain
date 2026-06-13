@@ -1,0 +1,60 @@
+---
+/** Footer — copyright, domain, links */
+import { SITE_DOMAIN, CURRENT_YEAR } from '../data/site';
+---
+
+<footer class="footer">
+  <div class="footer-inner l-container">
+    <p class="footer-text">
+      LoopTrain Devlog · {SITE_DOMAIN}<br />
+      &copy; {CURRENT_YEAR} ·
+      <a href="/about">关于</a> ·
+      <a href="/characters">角色</a>
+    </p>
+    <p class="footer-sub">
+      素材授权记录持续整理中。
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--color-bg-panel);
+    border-top: 1px solid var(--color-border-soft);
+    padding: var(--space-8) var(--space-5);
+    margin-top: var(--space-16);
+  }
+
+  .footer-inner {
+    text-align: center;
+  }
+
+  .footer-text {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin: 0 0 var(--space-2);
+    line-height: 1.6;
+  }
+
+  .footer-sub {
+    font-size: 12px;
+    color: var(--color-text-subtle);
+    margin: 0;
+  }
+
+  .footer a {
+    color: var(--color-text-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .footer a:hover {
+    color: var(--color-accent);
+  }
+
+  @media (min-width: 768px) {
+    .footer {
+      padding: var(--space-10) var(--space-5);
+    }
+  }
+</style>

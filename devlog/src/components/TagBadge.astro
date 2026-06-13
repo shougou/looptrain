@@ -1,0 +1,23 @@
+---
+/** TagBadge — low-saturation tag pill */
+export interface Props {
+  tag: string;
+}
+
+const { tag } = Astro.props;
+---
+
+<span class="tag-badge">{tag}</span>
+
+<style>
+  .tag-badge {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--color-text-subtle);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-sm);
+    padding: 1px 8px;
+    white-space: nowrap;
+  }
+</style>

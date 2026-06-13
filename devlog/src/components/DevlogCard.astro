@@ -1,0 +1,87 @@
+---
+/** DevlogCard — devlog entry card for list pages */
+import TagBadge from './TagBadge.astro';
+import StatusDot from './StatusDot.astro';
+
+export interface Props {
+  slug: string;
+  title: string;
+  date: string;
+  summary: string;
+  tags: string[];
+  status: string;
+}
+
+const { slug, title, date, summary, tags, status } = Astro.props;
+---
+
+<a href={`/devlog/${slug}`} class="devlog-card">
+  <time class="card-date" datetime={date}>{date}</time>
+  <h3 class="card-title">{title}</h3>
+  <p class="card-summary">{summary}</p>
+  <div class="card-meta">
+    <div class="card-tags">
+      {tags.map((t) => <TagBadge tag={t} />)}
+    </div>
+    <StatusDot status={status} />
+  </div>
+</a>
+
+<style>
+  .devlog-card {
+    display: block;
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color var(--transition-normal);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .devlog-card:hover {
+    border-color: var(--color-border);
+  }
+
+  .card-date {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-1);
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0 0 var(--space-2);
+    line-height: 1.4;
+  }
+
+  .card-summary {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0 0 var(--space-3);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+</style>

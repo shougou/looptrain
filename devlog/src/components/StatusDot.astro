@@ -1,0 +1,63 @@
+---
+/** StatusDot — colored status indicator with label.
+ *  Status: planning | doing | done | paused | cancelled
+ */
+export interface Props {
+  status: string;
+}
+
+const { status } = Astro.props;
+
+const statusLabel: Record<string, string> = {
+  idea: '想法',
+  planning: '计划中',
+  doing: '进行中',
+  done: '已完成',
+  paused: '暂停',
+  cancelled: '已取消',
+  '未开始': '未开始',
+  '进行中': '进行中',
+  '已完成': '已完成',
+};
+
+const statusColor: Record<string, string> = {
+  idea: 'var(--color-text-subtle)',
+  planning: 'var(--color-text-muted)',
+  doing: 'var(--color-accent)',
+  done: 'var(--color-success)',
+  paused: 'var(--color-warning)',
+  cancelled: 'var(--color-text-subtle)',
+  '未开始': 'var(--color-text-subtle)',
+  '进行中': 'var(--color-accent)',
+  '已完成': 'var(--color-success)',
+  '暂停': 'var(--color-warning)',
+  '废弃': 'var(--color-text-subtle)',
+};
+
+const label = statusLabel[status] || status;
+const color = statusColor[status] || 'var(--color-text-muted)';
+---
+
+<span class="status-dot" style={`--dot-color: ${color}`}>
+  <span class="dot" aria-hidden="true"></span>
+  {label}
+</span>
+
+<style>
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--dot-color);
+    flex-shrink: 0;
+  }
+</style>

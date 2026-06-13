@@ -1,0 +1,136 @@
+---
+/** Hero — homepage hero section */
+import VersionBadge from './VersionBadge.astro';
+import PlayButton from './PlayButton.astro';
+
+export interface Props {
+  version: string;
+  playUrl: string;
+}
+
+const { version, playUrl } = Astro.props;
+---
+
+<section class="hero">
+  <div class="hero-inner l-container">
+    <div class="hero-badge">
+      <VersionBadge version={version} label="Early Playtest" />
+    </div>
+    <h1 class="hero-title">LoopTrain 开发日志</h1>
+    <p class="hero-subtitle">一款互动叙事解谜游戏的长期开发记录。</p>
+    <p class="hero-desc">
+      LoopTrain 是一个移动端互动叙事解谜游戏项目。玩家将在一列即将爆炸的列车上不断循环，通过对话、观察和行动逐步接近事故真相。
+    </p>
+    <p class="hero-note">
+      当前版本仍处于早期试玩阶段。本站用于记录项目进展、版本更新、设计笔记和后续计划。
+    </p>
+    <div class="hero-actions">
+      <PlayButton href={playUrl}>开始试玩</PlayButton>
+      <PlayButton href="/devlog" variant="secondary">查看开发日志</PlayButton>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding: var(--space-12) 0 var(--space-8);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle scanline overlay (CSS-only texture) */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(108, 199, 217, 0.3) 2px,
+      rgba(108, 199, 217, 0.3) 3px
+    );
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-badge {
+    margin-bottom: var(--space-4);
+  }
+
+  .hero-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 var(--space-2);
+    line-height: 1.3;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+    color: var(--color-text-muted);
+    margin: 0 0 var(--space-4);
+    line-height: 1.5;
+  }
+
+  .hero-desc {
+    font-size: 15px;
+    color: var(--color-text-muted);
+    line-height: 1.8;
+    margin: 0 0 var(--space-4);
+    max-width: 640px;
+  }
+
+  .hero-note {
+    font-size: 14px;
+    color: var(--color-text-subtle);
+    line-height: 1.6;
+    margin: 0 0 var(--space-6);
+    max-width: 600px;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+
+  .hero-actions :global(.btn-primary) {
+    width: 100%;
+  }
+
+  .hero-actions :global(.btn-secondary) {
+    width: 100%;
+  }
+
+  @media (min-width: 480px) {
+    .hero-actions {
+      flex-direction: row;
+    }
+
+    .hero-actions :global(.btn-primary),
+    .hero-actions :global(.btn-secondary) {
+      width: auto;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .hero {
+      padding: var(--space-20) 0 var(--space-12);
+    }
+
+    .hero-title {
+      font-size: 32px;
+    }
+
+    .hero-subtitle {
+      font-size: 18px;
+    }
+  }
+</style>

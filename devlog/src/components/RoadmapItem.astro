@@ -1,0 +1,167 @@
+---
+/** RoadmapItem — a single roadmap task with status indicator */
+export interface Props {
+  task: string;
+  status: string;
+  description: string;
+}
+
+const { task, status, description } = Astro.props;
+
+const statusDotCls: Record<string, string> = {
+  '已完成': 'dot-done',
+  '进行中': 'dot-doing',
+  '未开始': 'dot-pending',
+  '暂停': 'dot-paused',
+  '废弃': 'dot-cancelled',
+};
+const dotCls = statusDotCls[status] || 'dot-pending';
+
+const statusLabelCls: Record<string, string> = {
+  '已完成': 'label-done',
+  '进行中': 'label-doing',
+  '未开始': 'label-pending',
+  '暂停': 'label-paused',
+  '废弃': 'label-cancelled',
+};
+const lblCls = statusLabelCls[status] || 'label-pending';
+---
+
+<div class={`roadmap-item ${status === '废弃' ? 'is-cancelled' : ''}`}>
+  <div class="item-left">
+    <span class={`dot ${dotCls}`} aria-hidden="true"></span>
+    <div class="line" aria-hidden="true"></div>
+  </div>
+  <div class="item-right">
+    <div class="item-header">
+      <span class={`status-label ${lblCls}`}>{status}</span>
+      <strong class="item-task" class:item-cancelled={status === '废弃'}>
+        {task}
+      </strong>
+    </div>
+    <p class="item-desc">{description}</p>
+  </div>
+</div>
+
+<style>
+  .roadmap-item {
+    display: flex;
+    gap: var(--space-3);
+    position: relative;
+  }
+
+  .item-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 16px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .dot-done {
+    background: var(--color-success);
+  }
+
+  .dot-doing {
+    background: var(--color-accent);
+    box-shadow: 0 0 6px var(--color-accent-soft);
+  }
+
+  .dot-pending {
+    background: transparent;
+    border: 2px solid var(--color-border);
+  }
+
+  .dot-paused {
+    background: transparent;
+    border: 2px solid var(--color-warning);
+  }
+
+  .dot-cancelled {
+    background: transparent;
+    border: 2px solid var(--color-text-subtle);
+  }
+
+  .line {
+    width: 1px;
+    flex: 1;
+    background: var(--color-border-soft);
+    margin-top: 4px;
+    min-height: 8px;
+  }
+
+  .item-right {
+    flex: 1;
+    padding-bottom: var(--space-4);
+    min-width: 0;
+  }
+
+  .item-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-1);
+  }
+
+  .status-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+  }
+
+  .label-done {
+    color: var(--color-success);
+    background: rgba(124, 169, 130, 0.12);
+  }
+
+  .label-doing {
+    color: var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+
+  .label-pending {
+    color: var(--color-text-subtle);
+    background: var(--color-bg-elevated);
+  }
+
+  .label-paused {
+    color: var(--color-warning);
+    background: rgba(201, 139, 85, 0.12);
+  }
+
+  .label-cancelled {
+    color: var(--color-text-subtle);
+    background: var(--color-bg-elevated);
+  }
+
+  .item-task {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .item-cancelled {
+    text-decoration: line-through;
+    color: var(--color-text-subtle);
+  }
+
+  .item-desc {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: var(--space-1) 0 0;
+  }
+</style>
