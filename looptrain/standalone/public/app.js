@@ -90,6 +90,11 @@ function render() {
   renderSuggestions();
   inputEl.placeholder = inputPlaceholder();
 
+  // Channel tab active state
+  channelTabs.querySelectorAll('[data-channel]').forEach(tab => {
+    tab.classList.toggle('lt-active', tab.dataset.channel === (s.input_channel === 'command' ? 'command' : 'roleplay'));
+  });
+
   // Intro
   const showIntro = !s.flags.intro_seen;
   introLayer.classList.toggle('lt-show', showIntro);
