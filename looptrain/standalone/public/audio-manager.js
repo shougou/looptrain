@@ -16,7 +16,7 @@ const AudioManager = (function () {
   let busVolumes = {};
   let masterVolume = 1;
   let muted = false;
-  let disabled = false;
+  let disabled = true;   // disabled until init() succeeds
   let unlocked = false;
   let fadeTimers = {};
 
@@ -86,7 +86,7 @@ const AudioManager = (function () {
   }
 
   function play(id) {
-    if (disabled || muted || !unlocked) return;
+    if (disabled || muted) return;
     const el = tracks[id];
     if (!el) { console.warn('[AudioManager] play: unknown track', id); return; }
     el.currentTime = 0;
@@ -103,7 +103,7 @@ const AudioManager = (function () {
   }
 
   function fadeIn(id) {
-    if (disabled || muted || !unlocked) return;
+    if (disabled || muted) return;
     const el = tracks[id];
     if (!el) { console.warn('[AudioManager] fadeIn: unknown track', id); return; }
     const fadeMs = trackMeta[id]?.fadeInMs || 0;

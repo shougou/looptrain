@@ -15,35 +15,48 @@
         <!-- Stage background -->
         <div class="lt-stage"></div>
 
-        <!-- Top bar -->
+        <!-- Top bar: status -->
         <div class="lt-topbar">
           <span class="lt-topbar-left"></span>
           <span class="lt-topbar-right"></span>
           <button class="lt-audio-mute" id="btn-audio-mute" aria-label="关闭声音" title="声音开关">🔊</button>
         </div>
 
-        <!-- Main content -->
+        <!-- Main content: scene-driven -->
         <div class="lt-content">
+          <!-- Scene card -->
           <div class="lt-card lt-scene-card">
             <div class="lt-location"></div>
             <div class="lt-scene-text"></div>
             <div class="lt-current-goal"></div>
             <div class="lt-visible-npcs"></div>
           </div>
+
+          <!-- Latest message (1-2 lines, scene-focused) -->
+          <div class="lt-latest-msg"></div>
+        </div>
+
+        <!-- Log drawer (hidden, slide-up) -->
+        <div class="lt-log-drawer" id="log-drawer">
+          <div class="lt-log-drawer-header">
+            <span>对话记录</span>
+            <button class="lt-log-close" id="log-close">✕</button>
+          </div>
           <div class="lt-log"></div>
         </div>
 
-        <!-- Portrait layer -->
+        <!-- Portrait layer (only during dialogue) -->
         <div class="lt-portrait-layer">
           <img class="lt-portrait" alt="" />
         </div>
 
-        <!-- Dialogue panel -->
+        <!-- Dialogue panel (portrait + latest line + end button) -->
         <div class="lt-dialogue-panel">
-          <div class="lt-log lt-dialogue-log"></div>
-          <div class="lt-dialogue-end">
+          <div class="lt-dialogue-header">
+            <span class="lt-dialogue-npc"></span>
             <button class="lt-end-dialogue-btn" id="end-dialogue-btn">结束对话</button>
           </div>
+          <div class="lt-log lt-dialogue-log"></div>
         </div>
 
         <!-- Failure overlay -->
@@ -69,14 +82,14 @@
           <div class="lt-intro-skip">点击任意位置跳过</div>
         </div>
 
-        <!-- Bottom bar -->
+        <!-- Bottom bar: 3-tab mode -->
         <div class="lt-bottom">
-          <div class="lt-channel-tabs">
-            <button class="lt-channel-tab lt-active" data-channel="roleplay">扮演<span>对话</span></button>
-            <button class="lt-channel-tab" data-channel="command">指令<span>行动</span></button>
+          <div class="lt-mode-tabs">
+            <button class="lt-mode-tab lt-active" data-mode="dialogue">对话</button>
+            <button class="lt-mode-tab" data-mode="action">行动</button>
           </div>
           <div class="lt-input-row">
-            <textarea class="lt-input" rows="1" placeholder="描述你的行动……" aria-label="游戏输入"></textarea>
+            <textarea class="lt-input" rows="1" placeholder="和小宁说些什么……" aria-label="游戏输入"></textarea>
             <button class="lt-btn lt-btn-send" id="btn-send">发送</button>
           </div>
         </div>
