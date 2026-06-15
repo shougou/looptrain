@@ -5,7 +5,7 @@ import StatusDot from '../../components/StatusDot.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('technical');
+  const entries = (await getCollection('technical')).filter((entry) => entry.data.status !== 'planned');
   return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
 }
 

@@ -4,7 +4,9 @@ import DocCard from '../../components/DocCard.astro';
 import { getCollection } from 'astro:content';
 import { sortByPinnedThenDate } from '../../lib/contentSort';
 
-const docs = sortByPinnedThenDate(await getCollection('decisions')).map((entry) => ({
+const docs = sortByPinnedThenDate(
+  (await getCollection('decisions')).filter((entry) => entry.data.status !== 'planned')
+).map((entry) => ({
   href: `/decisions/${entry.id}`,
   title: `${entry.data.decisionId}: ${entry.data.title}`,
   date: entry.data.date.toISOString().slice(0, 10),
