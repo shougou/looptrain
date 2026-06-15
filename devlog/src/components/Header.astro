@@ -3,6 +3,7 @@
 import { NAV_ITEMS } from '../data/site';
 
 const currentPath = Astro.url.pathname;
+const docsChildPrefixes = ['/design', '/technical', '/decisions', '/changelog', '/roadmap'];
 ---
 
 <header class="header">
@@ -20,10 +21,12 @@ const currentPath = Astro.url.pathname;
     <ul class="nav-list">
       {
         NAV_ITEMS.map((item) => {
+          const isDocsChild =
+            item.href === '/docs' && docsChildPrefixes.some((prefix) => currentPath.startsWith(prefix));
           const isActive =
             item.href === '/'
               ? currentPath === '/'
-              : currentPath.startsWith(item.href);
+              : currentPath.startsWith(item.href) || isDocsChild;
           return (
             <li>
               <a
