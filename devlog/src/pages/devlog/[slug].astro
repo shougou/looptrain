@@ -28,7 +28,10 @@ const slug = entry.id.replace(SLUG_RE, '');
   canonicalURL={`/devlog/${slug}`}
 >
   <article class="l-content">
-    <a href="/devlog" class="back-link">← 返回开发日志列表</a>
+    <div class="back-links">
+      <a href="/docs" class="back-link">← 返回文档库</a>
+      <a href="/devlog" class="back-link">返回开发日志列表</a>
+    </div>
 
     <header class="article-header">
       <h1 class="article-title">{title}</h1>
@@ -55,13 +58,19 @@ const slug = entry.id.replace(SLUG_RE, '');
 </Layout>
 
 <style>
+  .back-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-4);
+  }
+
   .back-link {
     display: inline-block;
     font-size: 14px;
     color: var(--color-text-muted);
     text-decoration: none;
-    margin-top: var(--space-8);
-    margin-bottom: var(--space-4);
     transition: color var(--transition-fast);
   }
 
