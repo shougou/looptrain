@@ -25,11 +25,10 @@ npx astro check        # 类型检查
 ## 2. 部署
 
 ```bash
-TS=$(date +%Y%m%d%H%M%S)
-rsync -avz --delete -e 'ssh -o StrictHostKeyChecking=no' \
-  dist/ <USER>@<SERVER_IP>:/var/www/looptrain-devlog/releases/$TS/
-ssh <USER>@<SERVER_IP> "ln -sfn /var/www/looptrain-devlog/releases/$TS /var/www/looptrain-devlog/current"
+bash scripts/deploy_devlog.sh
 ```
+
+该脚本会先 fetch 当前 upstream，若本地分支落后远端则拒绝部署，避免 `rsync --delete` 删除远端已有但本地缺失的文章。脚本通过检查后才会构建、上传 `dist/` 到新 release，并原子切换 `current` 符号链接。
 
 旧版本保留在 `/var/www/looptrain-devlog/releases/`，可按需清理。
 

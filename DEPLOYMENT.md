@@ -27,10 +27,7 @@
 
 ```bash
 # 1. Devlog
-cd devlog && npm run build && npx astro check
-TS=$(date +%Y%m%d%H%M%S)
-rsync -avz --delete -e 'ssh -o StrictHostKeyChecking=no' dist/ <USER>@<SERVER_IP>:/var/www/looptrain-devlog/releases/$TS/
-ssh <USER>@<SERVER_IP> "ln -sfn /var/www/looptrain-devlog/releases/$TS /var/www/looptrain-devlog/current"
+bash scripts/deploy_devlog.sh
 
 # 2. LT 游戏
 rsync -avz --exclude node_modules --exclude tests --exclude .env -e 'ssh -o StrictHostKeyChecking=no' looptrain/standalone/ <USER>@<SERVER_IP>:/var/www/looptrain-standalone/
@@ -105,5 +102,6 @@ ssh <USER>@<SERVER_IP> "nginx -t && nginx -s reload"
 ssh <USER>@<SERVER_IP> "ln -sfn /var/www/looptrain-devlog/releases/<旧时间戳> /var/www/looptrain-devlog/current"
 
 # 本地验证（部署前必跑）
+python3 scripts/check_docs_governance.py
 bash scripts/verify_slt.sh
 ```
