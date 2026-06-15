@@ -1,0 +1,70 @@
+---
+import Layout from '../../components/Layout.astro';
+import DocCard from '../../components/DocCard.astro';
+import { getCollection } from 'astro:content';
+import { sortByPinnedThenDate } from '../../lib/contentSort';
+
+const docs = sortByPinnedThenDate(await getCollection('design')).map((entry) => ({
+  href: `/design/${entry.id}`,
+  title: entry.data.title,
+  date: entry.data.date.toISOString().slice(0, 10),
+  summary: entry.data.summary,
+  tags: entry.data.tags,
+  status: entry.data.status,
+  scope: entry.data.scope,
+  spoilerLevel: entry.data.spoilerLevel,
+  pinned: entry.data.pinned,
+}));
+---
+
+<Layout
+  title="设计文档"
+  description="LoopTrain 的机制、架构、叙事和交互设计文档。"
+  canonicalURL="/design"
+>
+  <div class="l-content-wide">
+    <section class="page-header">
+      <h1 class="page-title">设计文档</h1>
+      <p class="page-desc">
+        记录 LoopTrain 的设计判断、机制边界、架构说明和叙事系统。这里是从 TBD 草稿晋升后的正式设计区。
+      </p>
+    </section>
+
+    <div class="doc-list">
+      {docs.map((doc) => <DocCard {...doc} />)}
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .page-header {
+    margin-top: var(--space-10);
+    margin-bottom: var(--space-8);
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 var(--space-2);
+  }
+
+  .page-desc {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 768px) {
+    .doc-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-5);
+    }
+  }
+</style>

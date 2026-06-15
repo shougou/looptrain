@@ -1,0 +1,119 @@
+---
+import TagBadge from './TagBadge.astro';
+import StatusDot from './StatusDot.astro';
+
+export interface Props {
+  href: string;
+  title: string;
+  date: string;
+  summary: string;
+  tags: string[];
+  status: string;
+  scope: string;
+  spoilerLevel: string;
+  pinned?: boolean;
+}
+
+const {
+  href,
+  title,
+  date,
+  summary,
+  tags,
+  status,
+  scope,
+  spoilerLevel,
+  pinned = false,
+} = Astro.props;
+---
+
+<a href={href} class={`doc-card ${pinned ? 'is-pinned' : ''}`}>
+  <div class="card-kicker">
+    <time class="card-date" datetime={date}>{date}</time>
+    <span class="scope-badge">{scope}</span>
+  </div>
+  <h3 class="card-title">{title}</h3>
+  <p class="card-summary">{summary}</p>
+  <div class="card-meta">
+    <div class="card-tags">
+      {tags.map((tag) => <TagBadge tag={tag} />)}
+      <TagBadge tag={`spoiler:${spoilerLevel}`} />
+    </div>
+    <StatusDot status={status} />
+  </div>
+</a>
+
+<style>
+  .doc-card {
+    display: block;
+    background: var(--color-bg-panel);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color var(--transition-normal);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .doc-card:hover {
+    border-color: var(--color-border);
+  }
+
+  .doc-card.is-pinned {
+    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border-soft));
+    background: linear-gradient(180deg, rgba(108, 199, 217, 0.1), var(--color-bg-panel) 46%);
+  }
+
+  .card-kicker {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: var(--space-1);
+  }
+
+  .card-date,
+  .scope-badge {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  .scope-badge {
+    color: var(--color-accent);
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0 0 var(--space-2);
+    line-height: 1.4;
+  }
+
+  .card-summary {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0 0 var(--space-3);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+</style>

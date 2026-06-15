@@ -1,0 +1,48 @@
+---
+import Layout from '../../components/Layout.astro';
+import TagBadge from '../../components/TagBadge.astro';
+import StatusDot from '../../components/StatusDot.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('technical');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, date, status, version, scope, spoilerLevel, tags, summary, lastVerified } = entry.data;
+---
+
+<Layout title={title} description={summary} canonicalURL={`/technical/${entry.id}`}>
+  <article class="l-content">
+    <a href="/technical" class="back-link">← 返回技术文档</a>
+    <header class="article-header">
+      <h1 class="article-title">{title}</h1>
+      <div class="article-meta">
+        <time datetime={date.toISOString().slice(0, 10)}>{date.toISOString().slice(0, 10)}</time>
+        <span>{version}</span>
+        <span>{scope}</span>
+        <span>verified {lastVerified.toISOString().slice(0, 10)}</span>
+        <span>spoiler:{spoilerLevel}</span>
+        <StatusDot status={status} />
+      </div>
+      <div class="article-tags">{tags.map((tag: string) => <TagBadge tag={tag} />)}</div>
+    </header>
+    <div class="article-body"><Content /></div>
+  </article>
+</Layout>
+
+<style>
+  .back-link { display: inline-block; margin-top: var(--space-8); margin-bottom: var(--space-4); color: var(--color-text-muted); }
+  .article-header { margin-bottom: var(--space-8); }
+  .article-title { font-size: 24px; font-weight: 700; margin: 0 0 var(--space-3); }
+  .article-meta { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-3); font-family: var(--font-mono); font-size: 12px; color: var(--color-text-muted); }
+  .article-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+  .article-body { font-size: 16px; line-height: 1.8; }
+  .article-body :global(h2) { font-size: 20px; margin-top: var(--space-8); margin-bottom: var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--color-border-soft); }
+  .article-body :global(h3) { font-size: 17px; margin-top: var(--space-6); margin-bottom: var(--space-2); }
+  .article-body :global(table) { width: 100%; border-collapse: collapse; margin: var(--space-4) 0; font-size: 14px; }
+  .article-body :global(th), .article-body :global(td) { border: 1px solid var(--color-border-soft); padding: var(--space-2) var(--space-3); text-align: left; }
+  .article-body :global(th) { background: var(--color-bg-elevated); color: var(--color-text-muted); }
+</style>
