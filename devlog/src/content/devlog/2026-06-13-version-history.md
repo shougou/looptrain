@@ -9,8 +9,6 @@ tags:
 summary: "基于 Git 提交记录整理的 LoopTrain 完整版本历史，从 v0.4.3 ST 试玩版到 v0.5.0-standalone 独立运行时。"
 ---
 
-# LoopTrain 版本历史
-
 基于 `looptrain_st_source_runtime_v0.4` 仓库的 Git 提交记录整理（共 84 个提交，2026-06-12 至 2026-06-13）。
 
 ---

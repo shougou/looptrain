@@ -10,8 +10,6 @@ tags:
 summary: "LoopTrain 从 SillyTavern 验证包迁移到独立运行时后，项目文档开始分散在 README、docs、materials、devlog 和 TBD 中。本文记录一次文档治理决策：保留 TBD 作为讨论稿区，把 devlog 作为正式长期文档中心。"
 ---
 
-# 给 LoopTrain 建立文档治理规则
-
 LoopTrain 现在遇到的不是“没有文档”的问题，而是另一个更隐蔽的问题：文档开始变多了。
 
 根目录有 README 和部署总览。`looptrain/` 下面有架构、控制流、UI/UX、部署说明。`materials/` 里有素材和控制层笔记。`devlog/` 自己也有规格、设计、内容模型和开发日志。除此之外，还有 `TBD/`，里面放着还没有定稿的角色和机制设计。

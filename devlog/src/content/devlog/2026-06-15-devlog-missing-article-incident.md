@@ -10,8 +10,6 @@ tags:
 summary: "记录一次真实的 Devlog 文章丢失事故：Narrative State Runtime 文章存在于远端分支和旧线上 release，但本地未同步远端更新，后续部署时被 rsync --delete 从当前线上版本中移除。"
 ---
 
-# 一次 Devlog 文章丢失事故：本地分支落后远端时不要部署
-
 今天发现一个很具体的问题：
 
 ```text
