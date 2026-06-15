@@ -19,6 +19,7 @@ let llmEnabled = false;
 let llmMode = true; // always use LLM when available, no toggle on prod
 let lastFailure = null;
 let npcCache = null;
+let prevAudioState = null;  // for audio event diff detection
 
 function clone(x) { return JSON.parse(JSON.stringify(x)); }
 
@@ -276,8 +277,17 @@ async function startDialogue(npcId) {
 function handleResponse(res, inDialogue) {
   if (!res) return;
   if (res.state) {
+    const prevState = prevAudioState || null;
     state = res.state;
     saveState();
+    // Audio event mapping: derive events from state diff
+    if (prevState) {
+      const events = deriveAudioEvents(prevState, state, res);
+      if (events.length) AudioManager.dispatchAll(events);
+    }
+    prevAudioState = clone(state);
+  } else {
+    if (res.messages) { /* only messages, no state change */ }
   }
   if (res.suggestions !== undefined) state._suggestions = res.suggestions;
   if (res.goal !== undefined) state._goal = res.goal;
@@ -414,6 +424,46 @@ function loadState() {
   }
 }
 
+// ── Audio event mapping ──
+function knownCluesIncreased(prev, next) {
+  return (next.known_clues?.length || 0) > (prev.known_clues?.length || 0);
+}
+
+function crossedLowApThreshold(prev, next) {
+  return (prev.ap_remaining > 3 && next.ap_remaining <= 3);
+}
+
+function recoveredFromLowAp(prev, next) {
+  return (prev.ap_remaining <= 3 && next.ap_remaining > 3);
+}
+
+function deriveAudioEvents(prevState, nextState, res) {
+  const events = [];
+
+  if (knownCluesIncreased(prevState, nextState)) {
+    events.push({ action: 'play', id: 'clue_found' });
+  }
+
+  if (crossedLowApThreshold(prevState, nextState)) {
+    events.push({ action: 'fadeIn', id: 'faint_ticking_loop' });
+  }
+
+  if (recoveredFromLowAp(prevState, nextState)) {
+    events.push({ action: 'fadeOut', id: 'faint_ticking_loop' });
+  }
+
+  if (res.loop_failure_outcome) {
+    events.push({ action: 'fadeOut', id: 'faint_ticking_loop' });
+    events.push({ action: 'play', id: 'explosion_muffled' });
+  }
+
+  if (res.trial_success) {
+    events.push({ action: 'fadeOut', id: 'faint_ticking_loop' });
+  }
+
+  return events;
+}
+
 // ── Content boot ──
 async function bootContent() {
   try {
@@ -447,8 +497,26 @@ function escAttr(s) { return String(s || '').replace(/"/g, '&quot;'); }
 // ── Event bindings ──
 async function init() {
   await bootContent();
+  AudioManager.init();
+
   loadState();
   render();
+
+  // Mute toggle
+  const muteBtn = document.getElementById('btn-audio-mute');
+  if (muteBtn) {
+    muteBtn.addEventListener('click', function () {
+      const nowMuted = !AudioManager.isMuted();
+      AudioManager.setMuted(nowMuted);
+      muteBtn.textContent = nowMuted ? '🔇' : '🔊';
+      muteBtn.setAttribute('aria-label', nowMuted ? '开启声音' : '关闭声音');
+    });
+    // Sync initial state
+    if (AudioManager.isMuted()) {
+      muteBtn.textContent = '🔇';
+      muteBtn.setAttribute('aria-label', '开启声音');
+    }
+  }
 
   // Input
   $('#btn-send').addEventListener('click', submitInput);
@@ -507,6 +575,8 @@ async function init() {
     if (ev.target.id === 'intro-start-btn') {
       state.flags.intro_seen = true;
       saveState(state);
+      AudioManager.unlock();
+      AudioManager.fadeIn('rail_loop_low');
       channelTabs.style.display = '';
       document.querySelector('.lt-content').style.display = '';
       document.querySelector('.lt-bottom').style.opacity = '';
@@ -537,6 +607,7 @@ async function init() {
 
     // Next loop button in NG card
     if (ev.target.id === 'btn-next-loop') {
+      AudioManager.dispatch({ action: 'play', id: 'loop_rewind' });
       await nextLoop();
       return;
     }
