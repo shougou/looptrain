@@ -157,3 +157,21 @@ devlog/src/content/    # 正式长期文档中心
 第 6 步：处理旧 ST 文档 legacy 标记
 第 7 步：长期维护 lastVerified 和 status
 ```
+
+## 13. 当前执行状态
+
+已完成：
+
+- `devlog/docs/spec.md` 已加 Legacy Note。
+- `devlog/docs/content-model.md` 已加 Legacy Note。
+- `technical/api-reference.md` 已创建 planned 占位。
+- `design/llm-bridge.md` 已创建 planned 占位。
+- `technical/testing-guide.md` 已创建 planned 占位。
+- `technical/content-schema.md` 已创建 planned 占位。
+- `technical/deployment-topology.md` 已创建 planned 占位。
+
+仍未执行：
+
+- `looptrain/docs/LT_STANDALONE_ARCHITECTURE.md` 迁移。
+- `looptrain/docs/CONTROL_FLOW.md` 迁移。
+- `looptrain/docs/DEPLOY.md` 合并进正式部署文档。
