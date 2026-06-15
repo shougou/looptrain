@@ -1,8 +1,8 @@
 ---
 title: "音效系统第一版开发规格"
 date: "2026-06-15T20:05:00+08:00"
-status: "planned"
-version: "v0.5-audio-core"
+status: "current"
+version: "v0.5.1"
 lastVerified: "2026-06-15"
 scope: "audio-system"
 spoilerLevel: "none"

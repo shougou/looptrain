@@ -112,6 +112,9 @@ Nginx static site (`/var/www/looptrain-devlog/current`)
 - 旧规范文档 `devlog/docs/spec.md` 和 `devlog/docs/content-model.md` 已加 Legacy Note。
 - 事故复盘文章已记录 `narrative-state-runtime` 丢失原因和修复方式。
 
+- 音效系统 v0.5.1 已完成：AudioManager、manifest、6 个音效素材、事件映射层、静音开关、降级策略均已实现和部署。
+- UI 已刷新为场景驱动布局（v0.5.1 UX Refresh），底部改为对话/行动两栏。
+
 ## 当前正式 collections
 
 | Collection | 用途 | 当前状态 |
