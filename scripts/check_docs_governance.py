@@ -26,9 +26,26 @@ ROOT = Path(__file__).resolve().parents[1]
 TBD_DIR = ROOT / "TBD"
 DEVLOG_DIR = ROOT / "devlog" / "src" / "content" / "devlog"
 CHARACTERS_DIR = ROOT / "devlog" / "src" / "content" / "characters"
+FORMAL_DOC_DIRS = (
+    ROOT / "devlog" / "src" / "content" / "design",
+    ROOT / "devlog" / "src" / "content" / "technical",
+    ROOT / "devlog" / "src" / "content" / "decisions",
+)
 TBD_REQUIRED_FIELDS = ("status", "type", "topic", "created", "updated")
 DEVLOG_REQUIRED_FIELDS = ("title", "date", "version", "status", "summary")
+FORMAL_DOC_REQUIRED_FIELDS = (
+    "title",
+    "date",
+    "status",
+    "version",
+    "lastVerified",
+    "scope",
+    "spoilerLevel",
+    "summary",
+)
 DEVLOG_ALLOWED_STATUS = {"idea", "planning", "doing", "done", "paused", "cancelled"}
+FORMAL_DOC_ALLOWED_STATUS = {"current", "planned", "stale", "legacy", "deprecated"}
+FORMAL_DOC_ALLOWED_SPOILER = {"none", "light", "internal", "core"}
 CHARACTER_ALLOWED_SPOILER = {"none", "mild", "critical"}
 
 LEGACY_PATTERNS = (
@@ -138,6 +155,27 @@ def check_character(path: Path) -> list[Issue]:
     return issues
 
 
+def check_formal_doc(path: Path) -> list[Issue]:
+    frontmatter, text = parse_frontmatter(path)
+    issues = check_required_fields(path, frontmatter, FORMAL_DOC_REQUIRED_FIELDS)
+
+    status = frontmatter.get("status")
+    if status and status not in FORMAL_DOC_ALLOWED_STATUS:
+        issues.append(Issue("ERROR", path, f"formal doc status `{status}` is not allowed"))
+
+    spoiler = frontmatter.get("spoilerLevel")
+    if spoiler and spoiler not in FORMAL_DOC_ALLOWED_SPOILER:
+        issues.append(Issue("ERROR", path, f"formal doc spoilerLevel `{spoiler}` is not allowed"))
+
+    date = frontmatter.get("date")
+    if date and not ISO_DATE_WITH_TIME.match(date):
+        issues.append(Issue("ERROR", path, "formal doc `date` must include time and timezone for stable sorting"))
+
+    issues.extend(check_secrets(path, text))
+    issues.extend(check_legacy_terms(path, text, frontmatter))
+    return issues
+
+
 def check_secrets(path: Path, text: str) -> list[Issue]:
     issues: list[Issue] = []
     for pattern in SECRET_PATTERNS:
@@ -167,6 +205,10 @@ def collect_issues() -> list[Issue]:
 
     for path in markdown_files(CHARACTERS_DIR):
         issues.extend(check_character(path))
+
+    for directory in FORMAL_DOC_DIRS:
+        for path in markdown_files(directory):
+            issues.extend(check_formal_doc(path))
 
     return issues
 

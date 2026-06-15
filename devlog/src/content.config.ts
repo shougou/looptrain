@@ -54,8 +54,45 @@ const charactersCollection = defineCollection({
   }),
 });
 
+const formalDocSchema = z.object({
+  title: z.string(),
+  date: z.coerce.date(),
+  status: z.enum(['current', 'planned', 'stale', 'legacy', 'deprecated']),
+  version: z.string(),
+  lastVerified: z.coerce.date(),
+  scope: z.string(),
+  spoilerLevel: z.enum(['none', 'light', 'internal', 'core']).default('none'),
+  tags: z.array(z.string()).default([]),
+  summary: z.string(),
+  sourceDraft: z.string().optional(),
+  pinned: z.boolean().default(false),
+});
+
+const designCollection = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/design' }),
+  schema: formalDocSchema,
+});
+
+const technicalCollection = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/technical' }),
+  schema: formalDocSchema,
+});
+
+const decisionsCollection = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/decisions' }),
+  schema: formalDocSchema.extend({
+    decisionId: z.string(),
+    deciders: z.array(z.string()).default([]),
+    supersedes: z.array(z.string()).default([]),
+    supersededBy: z.string().optional(),
+  }),
+});
+
 export const collections = {
   devlog: devlogCollection,
   changelog: changelogCollection,
   characters: charactersCollection,
+  design: designCollection,
+  technical: technicalCollection,
+  decisions: decisionsCollection,
 };
