@@ -1,0 +1,45 @@
+{
+  "version": "0.1",
+  "buses": {
+    "master": { "volume": 0.75 },
+    "ambience": { "volume": 0.35 },
+    "sfx": { "volume": 0.7 },
+    "tension": { "volume": 0.25 },
+    "cinematic": { "volume": 0.8 }
+  },
+  "tracks": {
+    "rail_loop_low": {
+      "file": "ambience/rail_loop_low.mp3",
+      "bus": "ambience",
+      "loop": false,
+      "fadeInMs": 800
+    },
+    "faint_ticking_loop": {
+      "file": "tension/faint_ticking_loop.mp3",
+      "bus": "tension",
+      "loop": true,
+      "fadeInMs": 1200,
+      "fadeOutMs": 800
+    },
+    "button_tap": {
+      "file": "sfx/button_tap.wav",
+      "bus": "sfx",
+      "loop": false
+    },
+    "clue_found": {
+      "file": "sfx/clue_found.wav",
+      "bus": "sfx",
+      "loop": false
+    },
+    "explosion_muffled": {
+      "file": "cinematic/explosion_muffled.wav",
+      "bus": "cinematic",
+      "loop": false
+    },
+    "loop_rewind": {
+      "file": "cinematic/loop_rewind.wav",
+      "bus": "cinematic",
+      "loop": false
+    }
+  }
+}
