@@ -130,6 +130,7 @@ def check_tbd(path: Path) -> list[Issue]:
 def check_devlog(path: Path) -> list[Issue]:
     frontmatter, text = parse_frontmatter(path)
     issues = check_required_fields(path, frontmatter, DEVLOG_REQUIRED_FIELDS)
+    issues.extend(check_body_heading_level(path, text))
 
     status = frontmatter.get("status")
     if status and status not in DEVLOG_ALLOWED_STATUS:
@@ -158,6 +159,7 @@ def check_character(path: Path) -> list[Issue]:
 def check_formal_doc(path: Path) -> list[Issue]:
     frontmatter, text = parse_frontmatter(path)
     issues = check_required_fields(path, frontmatter, FORMAL_DOC_REQUIRED_FIELDS)
+    issues.extend(check_body_heading_level(path, text))
 
     status = frontmatter.get("status")
     if status and status not in FORMAL_DOC_ALLOWED_STATUS:
@@ -174,6 +176,17 @@ def check_formal_doc(path: Path) -> list[Issue]:
     issues.extend(check_secrets(path, text))
     issues.extend(check_legacy_terms(path, text, frontmatter))
     return issues
+
+
+def check_body_heading_level(path: Path, text: str) -> list[Issue]:
+    body = text
+    if text.startswith('---'):
+        parts = text.split('---', 2)
+        if len(parts) == 3:
+            body = parts[2]
+    if re.search(r"(?m)^#\s+", body):
+        return [Issue("ERROR", path, "body must start headings at `##`; page title comes from frontmatter")]
+    return []
 
 
 def check_secrets(path: Path, text: str) -> list[Issue]:
