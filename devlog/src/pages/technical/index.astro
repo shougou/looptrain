@@ -32,6 +32,8 @@ const docs = sortByPinnedThenDate(
       </p>
     </section>
 
+    <a href="/docs" class="back-link">← 返回文档库</a>
+
     <div class="doc-list">
       {docs.map((doc) => <DocCard {...doc} />)}
     </div>
@@ -42,6 +44,7 @@ const docs = sortByPinnedThenDate(
   .page-header { margin-top: var(--space-10); margin-bottom: var(--space-8); }
   .page-title { font-size: 24px; font-weight: 700; margin: 0 0 var(--space-2); }
   .page-desc { font-size: 14px; color: var(--color-text-muted); margin: 0; }
+  .back-link { display: inline-block; margin-bottom: var(--space-5); color: var(--color-text-muted); font-size: 14px; }
   .doc-list { display: flex; flex-direction: column; gap: var(--space-4); }
   @media (min-width: 768px) { .doc-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); } }
 </style>
