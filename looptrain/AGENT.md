@@ -236,3 +236,22 @@ bash scripts/verify_slt.sh
 3. 增加 LLM Bridge，但默认保留 Mock。
 4. 增加本地 Playwright 回归测试。
 5. 准备生产部署，但线上切换必须等待最终确认。
+
+---
+
+## 9. 文档治理
+
+任何修改如果改变以下内容，必须同步检查文档影响：
+
+- Engine 规则、AP、线索、循环继承、成功/失败判定。
+- API 路由、请求/响应字段、运行命令、环境变量。
+- LLM Bridge 边界、Prompt、Provider、Mock fallback。
+- 角色、剧情机制、公开状态、路线图、部署方式。
+
+执行完成前运行：
+
+```bash
+python3 scripts/check_docs_governance.py
+```
+
+规则：`TBD/` 只保存讨论稿；正式长期文档进入 `devlog/src/content/`；旧 ST / SillyTavern 内容必须标记为历史或 legacy，不能作为当前 SLT 事实。

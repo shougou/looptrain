@@ -973,3 +973,24 @@ LoopTrain Devlog 的第一阶段目标非常明确：
 所有开发和设计都必须服务于这个目标。
 
 如果某个功能不能增强“试玩入口、开发记录、版本沉淀、长期维护”这四件事，则第一阶段不要做。
+
+---
+
+## 25. 文档治理
+
+Devlog 是 LoopTrain 的正式长期文档中心。新增或修改 `src/content/` 内容时，必须遵守：
+
+- `TBD/` 只用于讨论稿，不代表当前事实。
+- 正式长期文档最终进入 `devlog/src/content/`。
+- 公开内容不得暴露核心悬疑谜底、隐藏身份或关键反转。
+- 旧 ST / SillyTavern 内容只能作为历史资料出现，必须标记为历史或 legacy。
+- Devlog 文章的 `date` 必须包含时间和时区，确保按时间排序稳定。
+- 不得把计划、路线图或探索方向写成确定交付承诺。
+
+内容或结构变更完成前运行：
+
+```bash
+python3 scripts/check_docs_governance.py
+npm run build
+npx astro check
+```

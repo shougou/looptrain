@@ -95,6 +95,18 @@ scripts/            # SLT 本地启动/验证脚本
 
 ---
 
+## 文档治理
+
+任何改变项目事实、运行方式、公开状态、设计判断或剧情设定的迭代，都必须检查文档影响。
+
+```bash
+python3 scripts/check_docs_governance.py
+```
+
+事实源优先级：运行代码 > `MANIFEST.json` > 根 `README.md` > `devlog/src/data/*` > devlog 正式文档 > 旧文档 > `TBD/` 草稿。`TBD/` 只用于讨论稿；正式长期文档最终进入 `devlog/src/content/`。
+
+---
+
 ## Devlog 网站
 
 Devlog 静态站位于：
