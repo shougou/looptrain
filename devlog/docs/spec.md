@@ -6,6 +6,8 @@
 项目性质：个人长期开发项目展示站、开发日志站、版本记录站
 核心目标：记录 LoopTrain 项目的开发进展、设计思考、路线计划与试玩入口。
 
+> Legacy Note: 本文档描述 LoopTrain 早期 ST / SillyTavern 阶段的网站设计，不代表当前 SLT 架构。当前事实以根 `README.md`、`MANIFEST.json`、`devlog/src/data/site-status.json` 和 `devlog/src/content/` 正式文档为准。
+
 ---
 
 # 1. 项目背景

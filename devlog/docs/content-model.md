@@ -4,6 +4,8 @@
 用途：定义 LoopTrain 开发日志网站的信息架构、Markdown 内容模型、发布流程、编辑规范和内容策略。
 受众：内容维护者、AI Coding Agent、前端开发者。
 
+> Legacy Note: 本文档描述 LoopTrain Devlog 早期内容模型草案，部分目录和字段已被 `devlog/src/content.config.ts` 与正式 `design / technical / decisions` collections 取代。当前事实以 `devlog/src/content.config.ts` 和 `devlog/src/content/` 正式文档为准。
+
 > 本文档是"设计文档"，不包含任何实际发布的日志正文。所有示例 Frontmatter 和内容仅为格式参考。
 
 ---
