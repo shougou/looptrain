@@ -1,46 +1,46 @@
 # Companion Runtime Design: 许知微
 
-**Status:** Approved design draft  
-**Date:** 2026-06-15  
-**Scope:** Design only; no implementation plan yet  
-**Source draft:** `TBD/01_new_npc.md`  
-**Spoiler level:** Core/internal. Do not publish as public character material.
+**状态：** 已批准的设计草案  
+**日期：** 2026-06-15  
+**范围：** 仅设计，不包含实现计划  
+**来源草稿：** `TBD/01_new_npc.md`  
+**剧透等级：** Core/internal。不得作为公开角色资料直接发布。
 
-## 1. Goal
+## 1. 目标
 
-Design 许知微 as a future Companion Runtime layer that appears after Memory Runtime is complete. She is not the Memory Runtime itself. She is a player-facing narrative partner that reads a constrained Companion View derived from Memory Runtime and expresses that state through character behavior.
+本设计定义未来的 Companion Runtime 层：许知微。她应该在 Memory Runtime 完成后出现。她不是 Memory Runtime 本身，而是一个面向玩家的 narrative partner：读取由 Memory Runtime 派生出的受限 Companion View，并通过角色行为表达这些状态。
 
-One-sentence principle:
+一句话原则：
 
 ```text
 许知微帮助玩家记住自己已经经历过什么，但不替玩家理解真相。
 ```
 
-## 2. Confirmed decisions
+## 2. 已确认决策
 
-| Decision | Chosen direction |
+| 决策项 | 已确认方向 |
 |---|---|
-| Runtime timing | Implement after Memory Runtime, not during v0.6 |
-| True identity | Fully design internally, strictly hide from player/public docs |
-| Early presence | Medium presence: useful but constrained |
-| Formal name | 许知微 |
-| Information boundary | Read confirmed Knowledge and player-owned Belief; label beliefs as unconfirmed |
-| Proactive behavior | Low-frequency proactive prompts only |
-| Error reasoning | Allowed only in Belief layer, never in Knowledge |
-| Action ability | No early action ability; unlock later through relationship/timeline/runtime maturity |
-| Architecture boundary | Separate Memory Runtime and Companion Runtime specs; connect by Companion View contract |
+| Runtime 时机 | Memory Runtime 完成后再实现，不进入 v0.6 |
+| 真实身份 | 内部完整设计，但对玩家和公开文档严格隐藏 |
+| 早期存在强度 | 中存在：有用，但能力受限 |
+| 正式名字 | 许知微 |
+| 信息边界 | 读取 confirmed Knowledge 和 player-owned Belief，并标明 Belief 未确认 |
+| 主动行为 | 只允许低频主动提醒 |
+| 错误推理 | 只允许存在于 Belief 层，不能进入 Knowledge |
+| 行动能力 | 早期无行动能力；后期随 Relationship / Timeline / Runtime 成熟逐步解锁 |
+| 架构边界 | Memory Runtime 和 Companion Runtime 分离成不同 spec，通过 Companion View contract 连接 |
 
-## 3. Relationship to Memory Runtime
+## 3. 与 Memory Runtime 的关系
 
-The Narrative State Runtime article defines v0.6 as Memory Runtime only:
+`Narrative State Runtime` 文章已经把 v0.6 定义为纯 Memory Runtime：
 
 ```text
 v0.6 只做 Memory Runtime，不加 NPC、不加剧情、不做 UI。
 ```
 
-Therefore 许知微 is not part of v0.6. Her design depends on Memory Runtime being complete enough to provide a safe read-only view.
+因此，许知微不属于 v0.6。她的设计依赖 Memory Runtime 足够成熟，并且能提供安全的只读视图。
 
-Required Memory Runtime layers:
+她至少依赖这些 Memory Runtime 层：
 
 - Event Log
 - Timeline
@@ -52,7 +52,7 @@ Required Memory Runtime layers:
 - Reset modes
 - structured Prompt Builder input
 
-The Companion must never read raw Memory Runtime internals directly. It reads only a constrained view.
+Companion Runtime 不能直接读取 Memory Runtime 的原始内部状态。它只能读取经过裁剪后的 Companion View。
 
 ```text
 Memory Runtime
@@ -66,9 +66,9 @@ Companion Runtime / 许知微
 
 ## 4. Companion View contract
 
-The Companion View is a read-only, player-visible projection of Memory Runtime.
+Companion View 是 Memory Runtime 面向 Companion Runtime 暴露的只读、玩家可见投影。
 
-Allowed fields:
+允许字段：
 
 ```text
 Knowledge.confirmed.visible
@@ -79,7 +79,7 @@ Relationship.visible_state
 Scene.current
 ```
 
-Forbidden fields:
+禁止字段：
 
 ```text
 AuthorTruth
@@ -91,37 +91,37 @@ PrivateDesignNotes
 Raw Event Log when not player-visible
 ```
 
-Invariants:
+不变量：
 
-1. Engine is the only writer of Knowledge, Belief, Relationship, Timeline, Archive, and action outcomes.
-2. Companion Runtime is read-only against Memory Runtime state.
-3. LLM can generate expression text but cannot create facts, update beliefs, or trigger actions.
-4. Any Companion output must be validated before being shown to the player.
+1. Engine 是 Knowledge、Belief、Relationship、Timeline、Archive 和行动结果的唯一写入者。
+2. Companion Runtime 对 Memory Runtime 状态只读。
+3. LLM 可以生成表达文本，但不能创建事实、更新 Belief 或触发行动。
+4. Companion 输出必须先通过验证，才能展示给玩家。
 
-## 5. Role positioning
+## 5. 角色定位
 
-许知微 has three layers.
+许知微有三层身份。
 
-### 5.1 Surface identity
+### 5.1 表层身份
 
-To the player, she is a young journalist traveling on the train.
+玩家看到的是一名列车上的年轻记者。
 
-Player-visible traits:
+玩家可见特征：
 
-- observant
-- curious
-- good at recording details
-- not forceful
-- sometimes wrong
-- useful as a memory companion, not a guide
+- 观察敏锐
+- 好奇
+- 擅长记录细节
+- 不强势
+- 有时会判断错误
+- 可以作为记忆伙伴，但不是攻略者
 
-Public material may describe her as:
+公开资料可以描述她为：
 
 ```text
 年轻记者，观察敏锐，喜欢记录，在列车上与玩家同行。
 ```
 
-Public material must not describe her as:
+公开资料不能描述她为：
 
 ```text
 Narrative Runtime interface
@@ -130,79 +130,81 @@ loop-aware entity
 future key to the mystery
 ```
 
-### 5.2 Functional identity
+### 5.2 功能身份
 
-After Memory Runtime exists, she becomes the natural interface for player cognition:
+Memory Runtime 存在后，她成为玩家认知层的自然入口。
 
-- What has the player confirmed?
-- What does the player currently suspect?
-- What happened in earlier visible timelines?
-- What has been archived across loops?
+她负责帮助玩家回答这些问题：
 
-### 5.3 Hidden identity
+- 玩家已经确认了什么？
+- 玩家当前在怀疑什么？
+- 玩家在之前可见的 Timeline 中经历过什么？
+- 哪些经历已经进入 Archive？
 
-Internally, she is designed as the personified interface of Narrative Runtime. This must remain hidden in early gameplay and public documents.
+### 5.3 隐藏身份
 
-## 6. Early capability boundary
+内部设计上，她是 Narrative Runtime 的人格化接口。这个身份必须在早期玩法和公开文档中隐藏。
 
-Early stage uses medium presence.
+## 6. 早期能力边界
 
-Allowed:
+早期阶段采用中存在策略。
 
-- summarize confirmed clues
-- summarize seen NPCs
-- restate visible timeline events
-- restate player-owned beliefs as unconfirmed
-- ask whether the player wants to organize current notes
-- low-frequency reminders after meaningful state changes
+允许能力：
 
-Forbidden:
+- 总结 confirmed clues
+- 总结已见 NPC
+- 复述 visible timeline events
+- 复述 player-owned Belief，并明确未确认
+- 询问玩家是否需要整理当前记录
+- 在关键状态变化后低频提醒
 
-- tell the player the next action
-- solve a puzzle
-- reveal hidden truth
-- leave player view to investigate
-- trigger world state changes
-- create new clues
-- modify AP, time, NPC state, or loop outcome
+禁止能力：
 
-Example allowed response:
+- 告诉玩家下一步行动
+- 解谜
+- 暴露隐藏真相
+- 离开玩家视野去调查
+- 触发世界状态变化
+- 创造新线索
+- 修改 AP、时间、NPC 状态或循环结果
+
+允许回复示例：
 
 ```text
 目前能确认的是：小宁听到过滴答声；声音不一定来自座位本身。你现在似乎也在怀疑赵乘警，但这还只是推测。
 ```
 
-Example forbidden response:
+禁止回复示例：
 
 ```text
 你下一步应该去检查地板。
 ```
 
-## 7. Knowledge / Belief / Action rules
+## 7. Knowledge / Belief / Action 规则
 
 ### 7.1 Knowledge
 
-Knowledge is confirmed fact.
+Knowledge 是 confirmed fact。
 
-Rules:
+规则：
 
-- Companion cannot create Knowledge.
-- Companion cannot modify Knowledge.
-- Companion can only restate or organize confirmed Knowledge.
-- Belief cannot become Knowledge without Engine confirmation.
+- Companion 不能创建 Knowledge。
+- Companion 不能修改 Knowledge。
+- Companion 只能复述或整理 confirmed Knowledge。
+- Belief 不能升级为 Knowledge，除非 Engine 确认。
 
 ### 7.2 Belief
 
-Belief is inference.
+Belief 是 inference。
 
-Rules:
+规则：
 
-- Belief must carry confidence, source, and uncertainty.
-- Belief can be wrong.
-- Belief can be contradicted by later Knowledge.
-- Companion may express uncertainty, but must not state Belief as fact.
+- Belief 必须带有 confidence、source 和 uncertainty。
+- Belief 可以是错的。
+- Belief 可以被之后的 Knowledge 推翻。
+- Companion 可以表达不确定性，但不能把 Belief 说成事实。
 
-Example shape:
+示例结构：
 
 ```yaml
 belief:
@@ -216,9 +218,9 @@ belief:
 
 ### 7.3 Action
 
-Early action state is locked.
+早期 Action 状态为 locked。
 
-Later action abilities may unlock through:
+后期行动能力可以通过这些条件逐步解锁：
 
 - relationship trust
 - shared loops
@@ -227,144 +229,144 @@ Later action abilities may unlock through:
 - archive depth
 - Companion Action Runtime support
 
-All actions must remain Engine-judged and carry cost, risk, or failure possibility.
+所有行动都必须由 Engine 裁判，并带有 cost、risk 或 failure possibility。
 
-## 8. Proactive behavior
+## 8. 主动行为
 
-许知微 may speak proactively only at low frequency.
+许知微只能低频主动开口。
 
-Allowed triggers:
+允许触发条件：
 
-- new confirmed clue acquired
+- 获得新的 confirmed clue
 - loop reset / new loop start
-- player stalls for a long time
-- player belief conflicts with visible facts
+- 玩家长时间无进展
+- 玩家 Belief 与可见事实冲突
 
-Allowed proactive tone:
+允许主动语气：
 
 ```text
 要不要先把现在知道的事整理一下？
 ```
 
-Forbidden proactive tone:
+禁止主动语气：
 
 ```text
 你应该去找赵乘警。
 ```
 
-## 9. Error reasoning
+## 9. 错误推理
 
-许知微 should remain human, not an oracle. She may be wrong, but only in Belief space.
+许知微应该像人，而不是 oracle。她可以想错，但只能在 Belief 空间里想错。
 
-Rules:
+规则：
 
-- wrong reasoning must never write to Knowledge
-- wrong reasoning must be uncertain
-- wrong reasoning must have confidence below certainty
-- wrong reasoning must be reversible by later facts
-- player must remain the final reasoner
+- 错误推理不能写入 Knowledge。
+- 错误推理必须是不确定的。
+- 错误推理的 confidence 不能接近确定。
+- 错误推理必须能被后续事实推翻。
+- 玩家始终是最终推理者。
 
-Principle:
+原则：
 
 ```text
 许知微可以想错，但系统不能记错。
 ```
 
-## 10. Unlock progression
+## 10. 解锁进程
 
 ### Phase 0: Surface passenger
 
-Timing: before Memory Runtime is complete.
+时机：Memory Runtime 完成前。
 
-Capabilities:
+能力：
 
-- normal NPC dialogue
-- minor observation comments
-- no memory UI
-- no hint system
-- no action ability
+- 普通 NPC 对话
+- 少量观察评论
+- 无 memory UI
+- 无 hint system
+- 无 action ability
 
-Purpose: establish presence and record-oriented personality.
+目的：建立存在感和记录型人格。
 
 ### Phase 1: Record companion
 
-Timing: Knowledge and Belief layers are available.
+时机：Knowledge 和 Belief 层可用。
 
-Capabilities:
+能力：
 
-- summarize confirmed clues
-- summarize seen NPCs
-- label player beliefs as unconfirmed
-- low-frequency prompts to organize records
+- 总结 confirmed clues
+- 总结已见 NPC
+- 将玩家 Belief 标记为 unconfirmed
+- 低频提示整理记录
 
-This is the confirmed medium-presence phase.
+这是已确认的中存在阶段。
 
 ### Phase 2: Memory interface
 
-Timing: Timeline, Archive, and Reset rules are stable.
+时机：Timeline、Archive 和 Reset rules 稳定。
 
-Capabilities:
+能力：
 
-- summarize previous visible loop events
-- compare current loop against visible prior loops
-- reference Archive entries
-- expose lightweight interview notebook behavior
+- 总结之前可见 loop events
+- 对比当前 loop 和可见的之前 loop
+- 引用 Archive entries
+- 轻量表达 interview notebook 行为
 
-Still forbidden: explaining hidden runtime rules before the player confirms them.
+仍然禁止：在玩家确认之前解释隐藏 runtime rules。
 
 ### Phase 3: Collaborative actor
 
-Timing: Relationship and Companion Action Runtime are mature.
+时机：Relationship 和 Companion Action Runtime 成熟。
 
-Capabilities may include:
+能力可能包括：
 
-- asking non-critical questions
-- observing nearby context
-- helping stall an NPC
-- organizing scene records
+- 询问非关键问题
+- 观察附近环境
+- 帮助拖延某个 NPC
+- 整理现场记录
 
-Constraints:
+约束：
 
-- Engine judges all actions
-- actions have time/AP/risk cost
-- no automatic core clue acquisition
-- no puzzle solving on behalf of the player
+- Engine 裁判所有行动
+- 行动有 time / AP / risk cost
+- 不自动获得核心线索
+- 不替玩家完成谜题
 
 ## 11. Spoiler governance
 
-Documents must be split into layers.
+许知微相关文档必须分层。
 
 ### Core draft
 
-Path:
+路径：
 
 ```text
 TBD/01_new_npc.md
 ```
 
-Contains full identity and long-term hidden design. Remains `spoilerLevel: core`.
+内容：完整身份和长期隐藏设计。保持 `spoilerLevel: core`。
 
 ### Formal internal design
 
-Target:
+目标：
 
 ```text
 devlog/src/content/design/companion-runtime.md
 ```
 
-Can contain runtime dependencies and boundaries. Should avoid full final-truth disclosure unless marked internal/core.
+内容：runtime dependency 和 capability boundary。除非标记为 internal/core，否则不写完整最终真相。
 
 ### Public character page
 
-Target:
+目标：
 
 ```text
 devlog/src/content/characters/xu-zhiwei.md
 ```
 
-May contain only surface identity and non-spoiler traits.
+内容：只写表层身份和非剧透特征。
 
-## 12. Out of scope for first implementation
+## 12. 首次实现不包含的范围
 
 - Memory Runtime implementation
 - Companion View Builder implementation
@@ -376,17 +378,17 @@ May contain only surface identity and non-spoiler traits.
 - free-chat assistant mode
 - direct hint / walkthrough system
 
-## 13. Open follow-up design tasks
+## 13. 后续独立设计任务
 
-These should be separate specs or future sections:
+这些应该作为单独 spec 或后续章节处理：
 
 1. Memory-Companion Interface Contract
 2. Companion Output Validator
 3. Companion View schema
-4. Public character profile for 许知微
+4. 许知微公开角色档案
 5. Companion Action Runtime unlock rules
 6. Companion prompt safety tests
 
-## 14. Final summary
+## 14. 总结
 
-许知微 is a future Narrative Partner, not an early menu. She appears after Memory Runtime provides a safe Companion View. She can help the player organize confirmed facts and player-owned beliefs, can be uncertain, can be wrong in Belief space, and can later unlock limited actions through relationship growth. She never owns truth, never writes state, and never bypasses Engine.
+许知微是未来的 Narrative Partner，不是早期菜单。她在 Memory Runtime 提供安全 Companion View 后出现。她可以帮助玩家整理 confirmed facts 和 player-owned beliefs，可以不确定，也可以在 Belief 空间里想错，并在后期通过关系成长逐步解锁有限行动。她不拥有真相，不写入状态，不绕过 Engine。
