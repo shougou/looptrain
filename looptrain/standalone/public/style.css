@@ -108,6 +108,21 @@ textarea { font: inherit; resize: none; }
   background: rgba(127,127,127,.1);
 }
 
+.lt-audio-mute {
+  font-size: 16px; cursor: pointer;
+  padding: 4px 10px; border-radius: 999px;
+  border: 1px solid rgba(237,231,217,.15);
+  color: var(--lt-text);
+  background: rgba(237,231,217,.06);
+  pointer-events: auto;
+  line-height: 1;
+  min-height: 32px; min-width: 36px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.lt-audio-mute:hover, .lt-audio-mute:focus-visible {
+  background: rgba(237,231,217,.14);
+}
+
 /* Content area */
 .lt-content {
   position: relative; z-index: 5;
