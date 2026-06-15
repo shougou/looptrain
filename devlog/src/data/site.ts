@@ -20,13 +20,9 @@ export const CURRENT_YEAR = '2026';
 export const NAV_ITEMS = [
   { label: '首页', href: '/' },
   { label: '试玩', href: '/play' },
+  { label: '项目状态', href: '/roadmap' },
+  { label: '文档库', href: '/docs' },
   { label: '开发日志', href: '/devlog' },
-  { label: '设计', href: '/design' },
-  { label: '技术', href: '/technical' },
-  { label: '决策', href: '/decisions' },
-  { label: 'AI 工程笔记', href: '/ai-notes' },
-  { label: '路线图', href: '/roadmap' },
-  { label: '更新记录', href: '/changelog' },
-  { label: '角色', href: '/characters' },
+  { label: '角色档案', href: '/characters' },
   { label: '关于', href: '/about' },
 ] as const;

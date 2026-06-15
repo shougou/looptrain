@@ -1,0 +1,143 @@
+---
+import Layout from '../components/Layout.astro';
+import { getCollection } from 'astro:content';
+import { sortByPinnedThenDate } from '../lib/contentSort';
+
+const visible = <T extends { data: { status?: string } }>(entries: T[]) =>
+  entries.filter((entry) => entry.data.status !== 'planned');
+
+const [design, technical, decisions, devlogs] = await Promise.all([
+  getCollection('design'),
+  getCollection('technical'),
+  getCollection('decisions'),
+  getCollection('devlog'),
+]);
+
+const currentDesign = visible(sortByPinnedThenDate(design));
+const currentTechnical = visible(sortByPinnedThenDate(technical));
+const currentDecisions = visible(sortByPinnedThenDate(decisions));
+const postmortems = sortByPinnedThenDate(
+  devlogs.filter((entry) => entry.data.tags.includes('部署复盘') || entry.data.tags.includes('事故复盘'))
+);
+const aiNotes = sortByPinnedThenDate(
+  devlogs.filter((entry) => entry.data.tags.includes('ai-notes') || entry.data.tags.includes('AI Coding'))
+);
+
+const SLUG_RE = /^\d{4}-\d{2}-\d{2}-/;
+
+const sections = [
+  {
+    title: '项目状态',
+    description: '当前阶段、路线图和版本记录。',
+    links: [
+      { title: '项目路线图', href: '/roadmap', summary: '阶段性路线，不作为强日期承诺。' },
+      { title: '更新记录', href: '/changelog', summary: '版本变更、修复和历史记录。' },
+    ],
+  },
+  {
+    title: '游戏设计',
+    description: '机制、叙事、架构和设计判断。',
+    links: currentDesign.map((entry) => ({
+      title: entry.data.title,
+      href: `/design/${entry.id}`,
+      summary: entry.data.summary,
+    })),
+  },
+  {
+    title: '技术实现',
+    description: '运行时、部署、测试和内容模型。',
+    links: currentTechnical.map((entry) => ({
+      title: entry.data.title,
+      href: `/technical/${entry.id}`,
+      summary: entry.data.summary,
+    })),
+  },
+  {
+    title: 'AI 工程实验',
+    description: 'AI Coding、Agent 协作和 Prompt / Runtime 实验。',
+    links: aiNotes.map((entry) => ({
+      title: entry.data.title,
+      href: `/devlog/${entry.id.replace(SLUG_RE, '')}`,
+      summary: entry.data.summary,
+    })),
+  },
+  {
+    title: '决策记录',
+    description: '重要选择的背景、替代方案和后果。',
+    links: currentDecisions.map((entry) => ({
+      title: `${entry.data.decisionId}: ${entry.data.title}`,
+      href: `/decisions/${entry.id}`,
+      summary: entry.data.summary,
+    })),
+  },
+  {
+    title: '事故复盘',
+    description: '部署、AI 协作和项目治理中的真实事故记录。',
+    links: postmortems.map((entry) => ({
+      title: entry.data.title,
+      href: `/devlog/${entry.id.replace(SLUG_RE, '')}`,
+      summary: entry.data.summary,
+    })),
+  },
+  {
+    title: 'Legacy',
+    description: '旧 ST / SillyTavern 阶段资料。仅作历史参考，不代表当前事实。',
+    links: [
+      { title: '早期 Devlog Spec', href: '', summary: '保留在仓库 devlog/docs/spec.md 中，不作为线上正式事实源。' },
+      { title: '早期内容模型', href: '', summary: '保留在仓库 devlog/docs/content-model.md 中，已被当前 content.config.ts 和正式 collections 取代。' },
+    ],
+  },
+];
+---
+
+<Layout
+  title="文档库"
+  description="LoopTrain 项目文档中心。按文档类型组织项目状态、设计、技术、决策和事故复盘。"
+  canonicalURL="/docs"
+>
+  <div class="l-content-wide">
+    <section class="page-header">
+      <h1 class="page-title">文档库</h1>
+      <p class="page-desc">
+        这里按文档类型组织项目知识：当前状态、设计、技术、AI 工程实验、决策记录和事故复盘。标签只用于检索，不承担栏目职责。
+      </p>
+    </section>
+
+    <div class="docs-grid">
+      {sections.map((section) => (
+        <section class="docs-section">
+          <h2>{section.title}</h2>
+          <p>{section.description}</p>
+          {section.links.length === 0 ? (
+            <span class="empty">暂无公开文档。</span>
+          ) : (
+            <ul>
+              {section.links.map((link) => (
+                <li>
+                  {link.href ? <a href={link.href}>{link.title}</a> : <strong>{link.title}</strong>}
+                  <span>{link.summary}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ))}
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .page-header { margin-top: var(--space-10); margin-bottom: var(--space-8); }
+  .page-title { font-size: 24px; font-weight: 700; margin: 0 0 var(--space-2); }
+  .page-desc { font-size: 14px; color: var(--color-text-muted); max-width: 720px; margin: 0; }
+  .docs-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-5); }
+  .docs-section { background: var(--color-bg-panel); border: 1px solid var(--color-border-soft); border-radius: var(--radius-md); padding: var(--space-4); }
+  .docs-section h2 { font-size: 17px; margin: 0 0 var(--space-1); color: var(--color-accent); }
+  .docs-section p { color: var(--color-text-muted); font-size: 14px; margin: 0 0 var(--space-3); }
+  .docs-section ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+  .docs-section li { margin: 0; }
+  .docs-section a { display: block; font-weight: 600; margin-bottom: 2px; }
+  .docs-section span { display: block; color: var(--color-text-muted); font-size: 13px; line-height: 1.5; }
+  .empty { color: var(--color-text-subtle); font-family: var(--font-mono); font-size: 13px; }
+  @media (min-width: 768px) { .docs-grid { grid-template-columns: repeat(2, 1fr); } .page-title { font-size: 28px; } }
+</style>
