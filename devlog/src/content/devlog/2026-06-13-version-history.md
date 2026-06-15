@@ -1,6 +1,6 @@
 ---
 title: "版本历史"
-date: "2026-06-13"
+date: "2026-06-13T23:45:00+08:00"
 version: "v0.5.0-standalone"
 status: "done"
 tags:

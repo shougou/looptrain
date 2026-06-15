@@ -10,7 +10,7 @@ tags:
 summary: "LoopTrain 从 SillyTavern 完全剥离，建立独立运行时 SLT。完成上线前全量审计并修复所有发现的问题。UX/UI 从专业前端设计角度全面打磨。"
 ---
 
-LoopTrain 进入 v0.5.0-standalone 时代。今天完成了两件大事：**ST 剥离的收尾工作**和**前端体验的全面打磨**。
+LoopTrain 进入 v0.5.0-standalone 时代。历史说明：本文中的 ST 指早期 SillyTavern 验证架构，不代表当前 SLT 运行时。今天完成了两件大事：**ST 剥离的收尾工作**和**前端体验的全面打磨**。
 
 ## ST 剥离收尾
 

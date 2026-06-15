@@ -1,6 +1,6 @@
 ---
 title: "当前试玩版的问题整理"
-date: "2026-06-13"
+date: "2026-06-13T12:00:00+08:00"
 version: "v0.4.3"
 status: "done"
 tags:
