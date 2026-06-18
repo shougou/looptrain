@@ -40,6 +40,11 @@
       "file": "cinematic/loop_rewind.wav",
       "bus": "cinematic",
       "loop": false
+    },
+    "message_sent": {
+      "file": "sfx/message_sent.wav",
+      "bus": "sfx",
+      "loop": false
     }
   }
 }

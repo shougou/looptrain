@@ -223,6 +223,8 @@ async function submitInput() {
   const inDialogue = state.mode === 'dialogue';
   appendMsg('player', text, inDialogue ? dialogueLog : logEl);
 
+  AudioManager.play('message_sent');
+
   if (isCommand(text)) { handleCommand(text); return; }
 
   if (inDialogue) {
