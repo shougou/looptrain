@@ -110,7 +110,23 @@ function render() {
     btn.id = 'log-toggle';
     btn.className = 'lt-log-toggle';
     btn.textContent = '📋 对话记录';
-    btn.addEventListener('click', function () { logDrawer.classList.add('lt-show'); });
+    btn.addEventListener('click', function () {
+      logDrawer.classList.add('lt-show');
+      // Auto-scroll to bottom when opening log drawer
+      requestAnimationFrame(() => {
+        const log = document.querySelector('.lt-log-drawer .lt-log');
+        if (log) {
+          // Show hint if no messages yet
+          if (!log.children.length) {
+            const hint = document.createElement('div');
+            hint.className = 'lt-msg lt-msg-system';
+            hint.textContent = '当前没有对话记录';
+            log.appendChild(hint);
+          }
+          log.scrollTop = log.scrollHeight;
+        }
+      });
+    });
     latestMsg.after(btn);
   }
 
@@ -157,11 +173,13 @@ function renderPortrait() {
 
 function updateLatestMsg() {
   const playerMsgs = document.querySelectorAll('.lt-dialogue-log .lt-msg-player, .lt-dialogue-log .lt-msg-npc');
-  if (playerMsgs.length) {
+  const isDialogue = state.mode === 'dialogue';
+  // Hide latest preview in dialogue mode because dialogue panel already shows the conversation
+  if (playerMsgs.length && !isDialogue) {
     const last = playerMsgs[playerMsgs.length - 1];
     latestMsg.innerHTML = last.outerHTML;
     latestMsg.classList.add('lt-show');
-  } else if (state.mode !== 'dialogue') {
+  } else {
     latestMsg.classList.remove('lt-show');
   }
 }
