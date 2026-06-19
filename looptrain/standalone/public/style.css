@@ -299,6 +299,11 @@ body.dialogue-active .lt-scene-card {
   flex: 1; overflow-y: auto; padding: 6px 0 0;
   display: flex; flex-direction: column; gap: 6px;
 }
+.lt-dialogue-footer {
+  display: flex; justify-content: flex-end;
+  padding: 6px 0 0;
+  border-top: 1px solid rgba(237,231,217,.06);
+}
 
 /* ── Bottom bar: 3-tab mode ── */
 .lt-bottom {
