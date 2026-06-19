@@ -23,7 +23,7 @@ const LT_LLM_PROVIDER = process.env.LT_LLM_PROVIDER || config.LT_LLM_PROVIDER
 const app = express();
 const PORT = process.env.PORT || 3030;
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── API routes (no /api/plugins — standalone) ──
