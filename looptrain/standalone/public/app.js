@@ -302,7 +302,7 @@ function matchLocalCommand(text) {
 function handleCommand(text) {
   const t = text.trim();
   const inDialogue = state.mode === 'dialogue';
-  const target = inDialogue ? dialogueLog : logEl;
+  const target = inDialogue ? dialogueLog : contentEl;
   const cmd = matchLocalCommand(t);
 
   if (!cmd) { appendMsg('system', '未知指令。输入"帮助"查看可用指令。', target); return true; }
