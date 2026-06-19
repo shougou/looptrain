@@ -120,12 +120,20 @@ textarea { font: inherit; resize: none; }
   margin-bottom: 10px; letter-spacing: 1px;
 }
 .lt-scene-text {
-  font-size: 15px; line-height: 1.8; color: var(--lt-text);
+  font-size: 16px; line-height: 1.8; color: var(--lt-text);
   margin-bottom: 12px;
 }
 .lt-current-goal {
   font-size: 12px; color: var(--lt-blue); margin-bottom: 10px;
   border-left: 2px solid var(--lt-blue); padding-left: 10px;
+  display: none;
+}
+/* Dialogue-active: shrink scene card */
+body.dialogue-active .lt-scene-card {
+  opacity: 0.4;
+  max-height: 80px;
+  overflow: hidden;
+  transition: max-height .3s, opacity .3s;
 }
 .lt-visible-npcs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
 
@@ -133,7 +141,7 @@ textarea { font: inherit; resize: none; }
 .lt-npc-chip {
   padding: 8px 16px; border-radius: 999px;
   background: rgba(214,168,90,.12); color: var(--lt-gold);
-  font-size: 13px; font-weight: 600; border: 1px solid rgba(214,168,90,.3);
+  font-size: 14px; font-weight: 600; border: 1px solid rgba(214,168,90,.3);
   transition: background .15s; min-height: 44px;
   display: inline-flex; align-items: center;
 }
@@ -151,6 +159,10 @@ textarea { font: inherit; resize: none; }
   transition: background .15s; min-height: 44px;
   display: inline-flex; align-items: center;
 }
+
+/* Button type indicators */
+.lt-npc-chip[data-type="person"] { border-color: rgba(214,168,90,.3); }
+.lt-scene-chip[data-type="move"] { border-color: var(--lt-muted); }
 
 /* ── Latest message ── */
 .lt-latest-msg {
@@ -199,7 +211,7 @@ textarea { font: inherit; resize: none; }
 .lt-log { display: flex; flex-direction: column; gap: 8px; }
 .lt-msg {
   padding: 8px 12px; border-radius: 10px;
-  font-size: 13px; line-height: 1.6;
+  font-size: 14px; line-height: 1.6;
   animation: lt-msg-in .2s ease-out;
 }
 @keyframes lt-msg-in { from { opacity: 0; transform: translateY(4px); } }
@@ -230,17 +242,19 @@ textarea { font: inherit; resize: none; }
 .lt-msg li { margin-bottom: 2px; }
 .lt-muted { color: var(--lt-muted); }
 
-/* ── Portrait (dialogue-only floating, above dialogue panel) ── */
+/* ── Portrait (dialogue-only floating, top-right corner) ── */
 .lt-portrait-layer {
   position: absolute; z-index: 9;
-  top: 52px; left: 50%; transform: translateX(-50%);
-  width: 55%; max-width: 220px;
+  top: 10px; right: 10px; left: auto; transform: none;
+  width: 100px; max-width: 100px;
   display: none;
   pointer-events: none;
 }
 .lt-portrait {
   width: 100%; height: auto; display: block;
-  opacity: 0; transition: opacity .4s ease;
+  border-radius: 8px;
+  opacity: 0; transition: opacity .3s ease;
+  border: 1px solid rgba(214,168,90,.2);
 }
 .lt-portrait-layer.lt-show { display: block; }
 .lt-portrait-layer.lt-show .lt-portrait { opacity: 1; }
@@ -405,6 +419,17 @@ textarea { font: inherit; resize: none; }
 }
 @keyframes lt-toast-in { from { opacity: 0; transform: translateX(-50%) translateY(-8px); } }
 
+/* ── Clue badge ── */
+.lt-clue-badge {
+  position: absolute; z-index: 50; top: 60px; left: 50%; transform: translateX(-50%);
+  padding: 6px 16px; border-radius: 999px;
+  background: rgba(110,169,130,.9); color: #fff;
+  font-size: 13px; font-weight: 600;
+  animation: lt-clue-in .3s ease-out;
+  pointer-events: none;
+}
+@keyframes lt-clue-in { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
+
 /* ── Log drawer toggle button (in content) ── */
 .lt-log-toggle {
   display: inline-flex; align-items: center; gap: 4px;
@@ -427,6 +452,9 @@ textarea { font: inherit; resize: none; }
 .lt-goal-bar-text {
   color: var(--lt-gold); font-weight: 600;
   flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lt-goal-progress {
+  color: var(--lt-muted); font-size: 12px; white-space: nowrap;
 }
 .lt-goal-bar-loop {
   color: var(--lt-muted); font-size: 11px; white-space: nowrap;

@@ -78,6 +78,8 @@ function render() {
   const s = state;
   const isDialogue = s.mode === 'dialogue';
 
+  document.body.classList.toggle('dialogue-active', isDialogue);
+
   // Topbar: time / loop / location
   topLeft.innerHTML = `第 ${s.loop} 轮 · ${esc(s.clock)}`;
   topRight.innerHTML = `${sceneName(s.location)} · AP ${s.ap_remaining}`;
@@ -94,12 +96,15 @@ function render() {
     const n = NPC_INFO[id];
     if (!n) return '';
     const cls = n.hidden ? ' lt-hidden-npc-chip' : '';
-    return `<button class="lt-npc-chip${cls}" data-npc-id="${id}">${n.name}</button>`;
+    const verbLabel = id === 'xiaoning' ? '询问小宁' :
+                      id === 'zhao_police' ? '说服赵乘警' :
+                      id === 'shen_mohan' ? '试探沈墨寒' : n.name;
+    return `<button class="lt-npc-chip${cls}" data-npc-id="${id}" data-type="person">${verbLabel}</button>`;
   }).join('');
   if (s.location === 'carriage_7') {
-    npcsHtml += '<button class="lt-scene-chip" data-template="我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。">前往连接处</button>';
+    npcsHtml += '<button class="lt-scene-chip" data-template="我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。" data-type="move">前往连接处</button>';
   } else if (s.location === 'connector_7_8') {
-    npcsHtml += '<button class="lt-scene-chip" data-template="我从连接处回到第七节车厢。">返回第七节车厢</button>';
+    npcsHtml += '<button class="lt-scene-chip" data-template="我从连接处回到第七节车厢。" data-type="move">返回第七节车厢</button>';
   }
   npcWrap.innerHTML = npcsHtml;
 
@@ -217,8 +222,27 @@ function renderGoalBar() {
   const s = state;
   goalBarLoop.textContent = s.loop > 1 ? '第 ' + s.loop + ' 轮' : '';
 
+  var progressEl = document.querySelector('.lt-goal-progress');
+  if (progressEl) {
+    var gd = s._goalData;
+    if (gd && gd.goals && gd.goals.length) {
+      var total = gd.goals.length;
+      var checked = gd.goals.filter(function(g) { return g.checked || g.done; }).length;
+      if (checked >= 0 && total > 0) {
+        progressEl.textContent = checked + '/' + total;
+        progressEl.style.display = '';
+      } else {
+        progressEl.textContent = '';
+        progressEl.style.display = 'none';
+      }
+    } else {
+      progressEl.textContent = '';
+      progressEl.style.display = 'none';
+    }
+  }
+
   // Loop 1 highlight animation
-  const loop = s.loop || 1;
+  var loop = s.loop || 1;
   goalBarEl.classList.toggle('lt-goal-highlight', loop === 1);
 }
 
@@ -473,7 +497,12 @@ function handleResponse(res, inDialogue) {
       else appendMsg(m.type || 'system', m.text || '', target);
     }
   }
-  if (res.dialogue_outcome) renderDialogueOutcome(res.dialogue_outcome);
+  if (res.dialogue_outcome) {
+    if (res.dialogue_outcome.clues_gained && res.dialogue_outcome.clues_gained.length) {
+      showClueBadge(res.dialogue_outcome.clues_gained.length);
+    }
+    renderDialogueOutcome(res.dialogue_outcome);
+  }
   if (res.loop_failure_outcome) renderFailureOutcome(res.loop_failure_outcome);
   if (res.trial_success) toast(APP_STRINGS.trialSuccessToast || '试玩版成功');
   if (res.memory_node) {
@@ -555,6 +584,14 @@ function toast(text) {
   t.textContent = text;
   phone.appendChild(t);
   setTimeout(() => t.remove(), 2200);
+}
+
+function showClueBadge(count) {
+  const badge = document.createElement('div');
+  badge.className = 'lt-clue-badge';
+  badge.textContent = '🧩 线索 +' + count;
+  phone.appendChild(badge);
+  setTimeout(function () { badge.remove(); }, 3000);
 }
 
 function autoSizeInput() {
