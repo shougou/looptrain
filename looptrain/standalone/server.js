@@ -5,6 +5,7 @@ const express = require('express');
 const engine = require('./engine');
 const prompt = require('./llm/prompt');
 const llm = require('./llm/providers');
+const runtime = require('./dist/runtime');
 
 let config = {};
 try { config = require('dotenv').config({ path: path.join(__dirname, '.env') }).parsed || {}; } catch (_) {}
@@ -15,6 +16,9 @@ const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL || config.DEEPSEEK_BASE_
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || config.DEEPSEEK_MODEL || 'deepseek-v4-pro';
 const LLM_MAX_TOKENS = process.env.LLM_MAX_TOKENS || config.LLM_MAX_TOKENS || '512';
 const LLM_TEMPERATURE = process.env.LLM_TEMPERATURE || config.LLM_TEMPERATURE || '0.7';
+
+const LT_LLM_PROVIDER = process.env.LT_LLM_PROVIDER || config.LT_LLM_PROVIDER
+  || (LLM_ENABLED ? 'deepseek' : 'disabled');
 
 const app = express();
 const PORT = process.env.PORT || 3030;
@@ -82,8 +86,57 @@ app.get('/api/scenes', (_req, res) => {
 });
 
 app.get('/api/config', (_req, res) => {
-  res.json({ llm_enabled: LLM_ENABLED && !!DEEPSEEK_API_KEY, llm_provider: config.LLM_PROVIDER || 'deepseek' });
+  res.json({
+    llm_enabled: LLM_ENABLED && !!DEEPSEEK_API_KEY,
+    llm_provider: config.LLM_PROVIDER || 'deepseek',
+    lt_llm_provider: LT_LLM_PROVIDER,
+  });
 });
+
+// ── Runtime v0.6 API routes (spec Section 6) ──
+
+const assistantController = new runtime.AssistantController();
+
+app.post('/api/assistant/ask', async (req, res) => {
+  const { clientState, trigger, playerText, debug } = req.body || {};
+  try {
+    const result = await assistantController.ask({
+      clientState: clientState || {
+        playerId: 'player_default',
+        runId: 'run_default',
+        chapterId: 'chapter-01',
+        episodeId: 'trial-001',
+        loopId: 'loop_0001_default',
+        sceneId: 'scene-carriage-03',
+        snapshotId: null,
+        lastEventId: null,
+        eventSeq: 0,
+        eventsSinceSnapshot: [],
+      },
+      trigger: trigger || 'ASK_ASSISTANT_BUTTON',
+      playerText,
+      locale: 'zh-CN',
+      clientNow: new Date().toISOString(),
+      debug,
+    });
+    res.json(result);
+  } catch (e) {
+    console.error('[LT] /api/assistant/ask error:', e);
+    res.status(500).json({ error: 'assistant_error', message: e.message });
+  }
+});
+
+app.get('/api/assistant/state', (_req, res) => {
+  res.json({
+    buttonVisible: true,
+    buttonLabel: '询问助手',
+    buttonEmphasis: 'high',
+    assistantKnownToPlayer: false,
+    firstContactAvailable: true,
+  });
+});
+
+// ── Legacy LLM bridge ──
 
 app.post('/api/llm/npc-reply', async (req, res) => {
   const { npc_id, player_text, state } = req.body;

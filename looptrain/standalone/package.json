@@ -5,12 +5,19 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node tests/smoke_test.js",
+    "build:runtime": "tsc -p tsconfig.runtime.json",
+    "test:runtime": "npm run build:runtime && node --test \"dist/runtime/**/*.test.js\"",
+    "test:standalone": "node tests/smoke_test.js",
+    "test": "npm run test:runtime && npm run test:standalone",
     "check": "node --check server.js && node --check engine.js && node --check tests/smoke_test.js"
   },
   "dependencies": {
     "express": "^4.21.0",
     "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/node": "^20.14.0"
   },
   "license": "UNLICENSED",
   "private": true
