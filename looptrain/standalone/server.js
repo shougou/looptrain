@@ -100,14 +100,14 @@ app.get('/api/config', (_req, res) => {
 
 app.get('/api/commands', (_req, res) => {
   try {
-    const file = path.join(__dirname, '..', 'looptrain', 'materials', 'runtime', 'commands', 'command-registry.json');
+    const file = path.join(__dirname, '..', 'materials', 'runtime', 'commands', 'command-registry.json');
     res.json(JSON.parse(fs.readFileSync(file, 'utf-8')));
   } catch (_) { res.json({ commands: [] }); }
 });
 
 app.get('/api/xu-dialogue', (_req, res) => {
   try {
-    const file = path.join(__dirname, '..', 'looptrain', 'materials', 'runtime', 'dialogues', 'xu-zhiwei-dialogue.json');
+    const file = path.join(__dirname, '..', 'materials', 'runtime', 'dialogues', 'xu-zhiwei-dialogue.json');
     res.json(JSON.parse(fs.readFileSync(file, 'utf-8')));
   } catch (_) { res.json({ templates: [] }); }
 });
@@ -116,21 +116,21 @@ app.get('/api/xu-dialogue', (_req, res) => {
 
 app.get('/api/intro', (_req, res) => {
   try {
-    const introPath = path.join(__dirname, '..', 'looptrain', 'materials', 'runtime', 'intro', 'intro-text.json');
+    const introPath = path.join(__dirname, '..', 'materials', 'runtime', 'intro', 'intro-text.json');
     const data = JSON.parse(fs.readFileSync(introPath, 'utf-8'));
     res.json(data);
   } catch (_) {
     res.json({
       kicker: '渝江线 307 次｜1939 年冬',
-      title: '第七节车厢',
+      title: '二号车厢',
       steps: [
         { role: '重庆', text: '日机轰炸不断。渝江线 307 次夜行列车，是离开这座燃烧之城最后的窗口。' },
         { role: '身份', text: '普通乘客只是伪装，你携带绝密情报前往江城。' },
         { role: '接头', text: '代号"扣子"的同志会在列车上出现。' },
         { role: '危机', text: '09:00 前，列车将在北江铁桥前爆炸。' },
       ],
-      memory: '你只记得爆炸前最后听见的声音——第七节车厢地板下方，传来一阵极轻的滴答声。',
-      buttonLabel: '进入第七节车厢',
+      memory: '你只记得爆炸前最后听见的声音——二号车厢地板下方，传来一阵极轻的滴答声。',
+      buttonLabel: '进入二号车厢',
       skipLabel: '点击任意位置跳过',
     });
   }
@@ -138,7 +138,7 @@ app.get('/api/intro', (_req, res) => {
 
 app.get('/api/app-strings', (_req, res) => {
   try {
-    const stringsPath = path.join(__dirname, '..', 'looptrain', 'materials', 'runtime', 'intro', 'app-strings.json');
+    const stringsPath = path.join(__dirname, '..', 'materials', 'runtime', 'intro', 'app-strings.json');
     const data = JSON.parse(fs.readFileSync(stringsPath, 'utf-8'));
     res.json(data);
   } catch (_) {
@@ -154,7 +154,7 @@ app.get('/api/app-strings', (_req, res) => {
       noDialogueRecord: '当前没有对话记录',
       noNewClues: '没有获得新线索',
       noWorldEvents: '世界仍在继续推进',
-      emptyGoals: '证明第七节车厢存在异常，并说服赵乘警检查地板。',
+      emptyGoals: '证明二号车厢存在异常，并说服赵乘警检查地板。',
     });
   }
 });
