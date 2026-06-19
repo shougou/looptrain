@@ -1,0 +1,18 @@
+{
+  "clueDescriptions": {
+    "clue.explosion_time_1415": "爆炸固定发生在十四点十五分",
+    "clue.xiaoning_nervous": "小宁从三号车厢回来后一直很紧张",
+    "clue.xiaoning_heard_metal_sound": "小宁在爆炸前听到三号车厢传来奇怪的碰撞声",
+    "clue.gray_passenger_entered_carriage_3": "那个灰衣人在爆炸前进入过三号车厢",
+    "clue.canvas_bag_on_luggage_rack": "三号车厢行李架上有一个旧帆布包",
+    "clue.gray_passenger_returned_without_bag": "灰衣人从三号车厢回来后手里没有包",
+    "clue.conductor_can_clear_carriage": "赵乘警有权清空车厢"
+  },
+  "adviceTemplates": [
+    { "id": "advice_default", "text": "下一轮可以试试不同的调查方向" },
+    { "id": "advice_ask_xiaoning", "text": "下一轮优先和小宁谈谈——她似乎知道些什么" },
+    { "id": "advice_check_carriage_3", "text": "下一轮直接调查三号车厢——那是异常最集中的地方" },
+    { "id": "advice_track_gray", "text": "下一轮跟踪灰衣人——弄清楚他在三号车厢做了什么" },
+    { "id": "advice_persuade_zhao", "text": "证据已经够了。下一轮直接说服赵乘警清空三号车厢" }
+  ]
+}

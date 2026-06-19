@@ -1,0 +1,20 @@
+{
+  "name": "灰衣乘客",
+  "cost": 3,
+  "turn_limit": 6,
+  "near_limit_hint_at": 4,
+  "turn_limit_policy": "risk_escalation",
+  "portrait": "shen_mohan_portrait.png",
+  "role": "suspicious_figure",
+  "hidden": false,
+  "location": "carriage_3",
+  "opening": "灰衣乘客把视线从窗外移到你身上。他没有说话，只是看着你，像是在判断你记得多少。",
+  "near_limit_hint": "灰衣乘客的眼神沉了下来。你意识到，他似乎也在试探你。",
+  "limit_message": "灰衣乘客微微侧过身，声音很低：\"你问得太多了。\"",
+  "suggestions": [
+    { "label": "反问试探", "template": "我看着他的眼睛：你刚才为什么一直盯着三号车厢？" },
+    { "label": "提到帆布包", "template": "我试探地说：三号车厢行李架上那个旧帆布包——你知道那是谁的。" },
+    { "label": "提起口琴声", "template": "我故意说：餐车方向的口琴声，你也听见了吧？" },
+    { "label": "结束对话", "template": "__END_DIALOGUE__" }
+  ]
+}

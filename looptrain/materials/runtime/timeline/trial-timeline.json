@@ -1,0 +1,13 @@
+{
+  "events": [
+    { "time": "14:00", "type": "WAKE_UP", "description": "主角醒来，许知微提醒循环已开始" },
+    { "time": "14:02", "type": "NPC_MOVEMENT", "description": "小宁从三号车厢方向回来，神情紧张" },
+    { "time": "14:04", "type": "NPC_MOVEMENT", "description": "灰衣乘客经过二号车厢，手里没有包" },
+    { "time": "14:06", "type": "NPC_MOVEMENT", "description": "灰衣乘客进入三号车厢" },
+    { "time": "14:08", "type": "AMBIENT_SOUND", "description": "三号车厢行李架传出轻微金属碰撞声" },
+    { "time": "14:10", "type": "NPC_AVAILABLE", "description": "赵乘警经过二号车厢，可被拦下" },
+    { "time": "14:12", "type": "NPC_MOVEMENT", "description": "灰衣乘客回到二号车厢，手里仍然没有包" },
+    { "time": "14:13", "type": "AMBIENT_EVENT", "description": "列车进入山洞，车厢灯光短暂闪烁" },
+    { "time": "14:15", "type": "EXPLOSION", "description": "爆炸发生" }
+  ]
+}
