@@ -144,3 +144,22 @@ export type {
   PromptBeliefItem,
 } from './prompt/PromptMemoryContext';
 export { buildPromptContext } from './prompt/PromptMemoryContextBuilder';
+
+// ── Goal Engine (v0.7.0) ──────────────────────────────────────
+export type {
+  GoalCondition,
+  GoalDefinition,
+  GoalInstanceState,
+  GoalEngineResult,
+  GoalFeedback,
+  GoalRuntimeState,
+} from './goal/GoalTypes';
+
+export { evaluateCondition } from './goal/GoalEvaluator';
+export { generateFeedback } from './goal/GoalFeedback';
+export { GoalEngine } from './goal/GoalEngine';
+
+// ── Command System (v0.7.0) ────────────────────────────────────
+export type { CommandDefinition } from './command/CommandRegistry';
+export { CommandRegistry } from './command/CommandRegistry';
+export { matchCommand } from './command/CommandMatcher';

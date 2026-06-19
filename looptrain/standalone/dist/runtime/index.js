@@ -6,7 +6,7 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MemoryProjector = exports.MemoryEventDraftAppender = exports.InMemoryMemoryStorage = exports.ProfileStore = exports.ArchiveStore = exports.TimelineStore = exports.RelationshipStore = exports.BeliefStore = exports.KnowledgeStore = exports.filterForbiddenContent = exports.isPermanentlyForbidden = exports.filterBySpoilerPolicy = exports.checkSpoilerAccess = exports.isAllowedExtension = exports.isAllowedContentDir = exports.validateContentPath = exports.RuntimeContentLoader = exports.AssistantController = exports.getFallbackTemplate = exports.renderResponse = exports.validateAll = exports.validateTone = exports.validateClues = exports.validateActions = exports.validateSchema = exports.DisabledLLMProvider = exports.MockLLMProvider = exports.planActions = exports.ActionRegistryLoader = exports.getPolicy = exports.classifyIntent = exports.filterBySpoilerLevel = exports.isSpoilerSafe = exports.applyVisibilityFilter = exports.buildCompanionView = exports.generateViewId = exports.generateSnapshotId = exports.generateEventId = exports.generateLoopId = exports.generateRunId = exports.generatePlayerId = exports.RuntimeId = exports.failure = exports.success = exports.DisabledProviderError = exports.ValidationError = exports.RuntimeError = exports.fromTimestamp = exports.toISOString = exports.nowISO = void 0;
-exports.buildPromptContext = exports.applyReset = exports.planReset = exports.getResetPolicy = exports.validateMigration = exports.LegacyStandaloneStateMigrator = exports.MemoryRuntime = void 0;
+exports.matchCommand = exports.CommandRegistry = exports.GoalEngine = exports.generateFeedback = exports.evaluateCondition = exports.buildPromptContext = exports.applyReset = exports.planReset = exports.getResetPolicy = exports.validateMigration = exports.LegacyStandaloneStateMigrator = exports.MemoryRuntime = void 0;
 var time_1 = require("./shared/time");
 Object.defineProperty(exports, "nowISO", { enumerable: true, get: function () { return time_1.nowISO; } });
 Object.defineProperty(exports, "toISOString", { enumerable: true, get: function () { return time_1.toISOString; } });
@@ -108,3 +108,13 @@ var ResetApplier_1 = require("./reset/ResetApplier");
 Object.defineProperty(exports, "applyReset", { enumerable: true, get: function () { return ResetApplier_1.applyReset; } });
 var PromptMemoryContextBuilder_1 = require("./prompt/PromptMemoryContextBuilder");
 Object.defineProperty(exports, "buildPromptContext", { enumerable: true, get: function () { return PromptMemoryContextBuilder_1.buildPromptContext; } });
+var GoalEvaluator_1 = require("./goal/GoalEvaluator");
+Object.defineProperty(exports, "evaluateCondition", { enumerable: true, get: function () { return GoalEvaluator_1.evaluateCondition; } });
+var GoalFeedback_1 = require("./goal/GoalFeedback");
+Object.defineProperty(exports, "generateFeedback", { enumerable: true, get: function () { return GoalFeedback_1.generateFeedback; } });
+var GoalEngine_1 = require("./goal/GoalEngine");
+Object.defineProperty(exports, "GoalEngine", { enumerable: true, get: function () { return GoalEngine_1.GoalEngine; } });
+var CommandRegistry_1 = require("./command/CommandRegistry");
+Object.defineProperty(exports, "CommandRegistry", { enumerable: true, get: function () { return CommandRegistry_1.CommandRegistry; } });
+var CommandMatcher_1 = require("./command/CommandMatcher");
+Object.defineProperty(exports, "matchCommand", { enumerable: true, get: function () { return CommandMatcher_1.matchCommand; } });

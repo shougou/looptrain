@@ -1,0 +1,16 @@
+{
+  "goals": [
+    {
+      "id": "goal.collect_evidence",
+      "title": "收集证据说服赵乘警",
+      "description": "证明第七节车厢存在异常",
+      "completionCondition": {
+        "all": [
+          { "clueKnown": "xiaoning_heard_ticking" },
+          { "clueKnown": "ticking_under_floor" }
+        ]
+      },
+      "loopRange": [1, 10]
+    }
+  ]
+}

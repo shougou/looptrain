@@ -1,0 +1,39 @@
+{
+  "templates": [
+    {
+      "intent": "welcome_first",
+      "condition": "loop_1_start",
+      "text": "你注意到我了？我叫许知微，报社的。习惯记东西——这趟车不太对劲，我想你也有同感。\n\n你可以随时使用指令来推进调查。试试输入「查看人物」——看看列车上都有谁。"
+    },
+    {
+      "intent": "welcome_loop2",
+      "condition": "loop_2_start",
+      "text": "又回到这个时间了。别急——至少我们记得上一轮发现的东西。输入「查看记忆」可以回顾。"
+    },
+    {
+      "intent": "welcome_loop3",
+      "condition": "loop_3_start",
+      "text": "这次我们直接行动。你已经很熟练了——需要我帮忙的时候随时叫我。"
+    },
+    {
+      "intent": "clue_summary",
+      "condition": "has_clues",
+      "text": "目前能确认的是这些线索。要不要整理一下？输入「查看线索」随时可以回顾。"
+    },
+    {
+      "intent": "goal_complete",
+      "condition": "goal_completed",
+      "text": "目标完成了。这条信息有价值——它不会随着循环消失。"
+    },
+    {
+      "intent": "stall_hint",
+      "condition": "player_stalled",
+      "text": "要不要先把知道的事整理一下？输入「帮助」可以看到现在能做什么。"
+    },
+    {
+      "intent": "command_help",
+      "condition": "help_requested",
+      "text": "你可以随时使用下面的指令。我帮你整理了一下：\n\n📋 信息查询：查看线索、查看人物、查看状态、查看任务\n🧠 记忆系统：查看记忆、查看时间线、查看推测\n⚡ 行动指令：结束对话、进入下一轮、重置本轮、重置游戏"
+    }
+  ]
+}

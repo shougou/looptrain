@@ -98,6 +98,20 @@ app.get('/api/config', (_req, res) => {
   });
 });
 
+app.get('/api/commands', (_req, res) => {
+  try {
+    const file = path.join(__dirname, '..', '..', 'looptrain', 'materials', 'runtime', 'commands', 'command-registry.json');
+    res.json(JSON.parse(fs.readFileSync(file, 'utf-8')));
+  } catch (_) { res.json({ commands: [] }); }
+});
+
+app.get('/api/xu-dialogue', (_req, res) => {
+  try {
+    const file = path.join(__dirname, '..', '..', 'looptrain', 'materials', 'runtime', 'dialogues', 'xu-zhiwei-dialogue.json');
+    res.json(JSON.parse(fs.readFileSync(file, 'utf-8')));
+  } catch (_) { res.json({ templates: [] }); }
+});
+
 // ── Content API endpoints ──
 
 app.get('/api/intro', (_req, res) => {

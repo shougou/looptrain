@@ -1,0 +1,16 @@
+{
+  "commands": [
+    { "id": "view_clues", "category": "information", "triggers": ["查看线索","线索","clue"], "label": "查看线索", "description": "查看已获得的所有线索", "availableWhen": "always" },
+    { "id": "view_characters", "category": "information", "triggers": ["查看人物","人物","npc","角色","都有谁"], "label": "查看人物", "description": "查看当前场景中的角色", "availableWhen": "always" },
+    { "id": "view_status", "category": "information", "triggers": ["查看状态","状态","status"], "label": "查看状态", "description": "查看当前时间、行动点和循环轮数", "availableWhen": "always" },
+    { "id": "view_goal", "category": "information", "triggers": ["查看任务","任务","目标","goal","我要做什么"], "label": "查看任务", "description": "查看当前行动目标", "availableWhen": "always" },
+    { "id": "view_memory", "category": "memory", "triggers": ["查看记忆","记忆","我记得","memory","回顾"], "label": "查看记忆", "description": "回顾跨循环保留的记忆", "availableWhen": "has_carryover" },
+    { "id": "view_timeline", "category": "memory", "triggers": ["查看时间线","时间线","timeline","之前","上轮"], "label": "查看时间线", "description": "回顾之前循环的关键事件", "availableWhen": "loop_gt_1" },
+    { "id": "view_beliefs", "category": "memory", "triggers": ["查看推测","推测","怀疑","belief"], "label": "查看推测", "description": "查看当前持有的推测和怀疑", "availableWhen": "has_beliefs" },
+    { "id": "end_dialogue", "category": "action", "triggers": ["结束对话","结束","不聊了","end"], "label": "结束对话", "description": "结束当前对话", "availableWhen": "in_dialogue" },
+    { "id": "next_loop", "category": "action", "triggers": ["进入下一轮","下一轮","next"], "label": "进入下一轮", "description": "失败结算后进入新循环", "availableWhen": "after_failure" },
+    { "id": "reset_loop", "category": "action", "triggers": ["重置本轮","重新开始本轮"], "label": "重置本轮", "description": "重置当前循环", "availableWhen": "always" },
+    { "id": "reset_game", "category": "action", "triggers": ["重置游戏","重来","restart","重新开始"], "label": "重置游戏", "description": "完全重置游戏进度", "availableWhen": "always" },
+    { "id": "ask_xu", "category": "interaction", "triggers": ["询问许知微","许知微","助手","help","帮助"], "label": "询问许知微", "description": "向调查助手许知微寻求建议", "availableWhen": "always" }
+  ]
+}

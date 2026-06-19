@@ -1,0 +1,29 @@
+{
+  "id": "xu_zhiwei",
+  "name": "许知微",
+  "role": "companion",
+  "type": "assistant_npc",
+  "portrait": "xu_zhiwei_portrait.png",
+  "identity": {
+    "age": 23,
+    "occupation": "《渝江日报》见习记者",
+    "personality": ["观察敏锐", "好奇心强", "温和", "偶尔判断错误"],
+    "quirk": "随身携带牛皮笔记本，习惯边说边记"
+  },
+  "narrative": {
+    "first_meeting": "她在第七节车厢靠过道的座位上，正往笔记本上写着什么。看到你注意到她，她抬起头：'你也是去江城的？这趟车的气氛……不太对。'",
+    "self_introduction": "我叫许知微，报社的。习惯记东西——你不会介意我把刚才的事记下来吧？说不定什么时候用得上。"
+  },
+  "capabilities": {
+    "phase": "record_companion",
+    "can_summarize_clues": true,
+    "can_summarize_npcs": true,
+    "can_reference_beliefs": true,
+    "can_compare_loops": false,
+    "can_take_actions": false
+  },
+  "constraints": {
+    "max_proactive_per_loop": 2,
+    "max_proactive_per_clue": 1
+  }
+}

@@ -22,6 +22,8 @@ let llmMode = true;
 let lastFailure = null;
 let npcCache = null;
 let prevAudioState = null;
+let COMMANDS = [];
+let XU_DIALOGUES = null;
 
 function clone(x) { return JSON.parse(JSON.stringify(x)); }
 
@@ -50,6 +52,10 @@ const ngCard = $('.lt-ng-card');
 const introLayer = $('.lt-intro');
 const contentEl = $('.lt-content');
 const bottomEl = $('.lt-bottom');
+const goalBarEl = $('.lt-goal-bar');
+const goalBarText = $('.lt-goal-bar-text');
+const goalBarLoop = $('.lt-goal-bar-loop');
+const commandBarEl = $('.lt-command-bar');
 
 // ── API ──
 async function api(route, body) {
@@ -79,9 +85,11 @@ function render() {
   // Scene card
   locationEl.textContent = sceneName(s.location);
   sceneText.textContent = getSceneText();
-  goalEl.textContent = '当前目标：' + (state._goal || '证明第七节车厢存在异常，并说服赵乘警检查地板。');
+  goalEl.textContent = '当前目标：' + goalDisplayText();
 
-  // NPC chips
+  // Goal bar (v0.7)
+  renderGoalBar();
+  renderCommandBar();
   let npcsHtml = getSceneNpcs().map(id => {
     const n = NPC_INFO[id];
     if (!n) return '';
@@ -193,38 +201,103 @@ function inputPlaceholder() {
   return '你要做什么？例如：检查座位下方';
 }
 
-// ── Commands ──
-function isCommand(text) {
-  return /^(查看|打开|结束|进入|重置|失败测试|显示)/.test(text);
+// ── Goal display helpers (v0.7) ──
+function goalDisplayText() {
+  if (!state._goalData) return state._goal || '证明第七节车厢存在异常，并说服赵乘警检查地板。';
+  const g = state._goalData;
+  if (typeof g === 'string') return g;
+  if (g.goals && g.goals.length) return g.goals[0].title || '';
+  return state._goal || '';
+}
+
+function renderGoalBar() {
+  if (!goalBarText || !goalBarLoop) return;
+  const text = goalDisplayText();
+  goalBarText.textContent = '📋 ' + (text || '当前目标');
+  const s = state;
+  goalBarLoop.textContent = s.loop > 1 ? '第 ' + s.loop + ' 轮' : '';
+
+  // Loop 1 highlight animation
+  const loop = s.loop || 1;
+  goalBarEl.classList.toggle('lt-goal-highlight', loop === 1);
+}
+
+function renderCommandBar() {
+  if (!commandBarEl) return;
+  const loop = state.loop || 1;
+  // 3-loop learning curve: visible loops 1-3, hidden loop 4+
+  if (loop <= 3) {
+    commandBarEl.style.display = '';
+    commandBarEl.classList.toggle('lt-cmd-highlight', loop === 1);
+  } else {
+    commandBarEl.style.display = 'none';
+  }
+}
+
+function showGoalFeedback(prevTitle, newTitle, memoryNote) {
+  if (!prevTitle || prevTitle === newTitle) return;
+  const fb = document.querySelector('.lt-goal-feedback');
+  if (!fb) return;
+
+  const titleEl = fb.querySelector('.lt-fb-title');
+  const descEl = fb.querySelector('.lt-fb-desc');
+  const memoryEl = fb.querySelector('.lt-fb-memory');
+  const nextEl = fb.querySelector('.lt-fb-next');
+
+  if (titleEl) titleEl.textContent = '✅ 目标完成';
+  if (descEl) descEl.textContent = prevTitle || '';
+  if (memoryEl) memoryEl.textContent = memoryNote || '🧠 该信息已加入下一轮记忆';
+  if (nextEl) nextEl.textContent = newTitle ? '📋 新目标：' + newTitle : '';
+
+  fb.style.display = '';
+  fb.classList.add('lt-fb-show');
+  setTimeout(function () {
+    fb.classList.remove('lt-fb-show');
+    setTimeout(function () { fb.style.display = 'none'; }, 400);
+  }, 4000);
+}
+
+// ── Commands (v0.7.0 command registry) ──
+function matchLocalCommand(text) {
+  const t = (text || '').trim();
+  if (!t) return null;
+  const tl = t.toLowerCase();
+  for (const cmd of COMMANDS) {
+    for (const trigger of cmd.triggers) {
+      if (trigger.toLowerCase() === tl) return cmd;
+    }
+  }
+  for (const cmd of COMMANDS) {
+    for (const trigger of cmd.triggers) {
+      if (tl.includes(trigger.toLowerCase())) return cmd;
+    }
+  }
+  return null;
 }
 
 function handleCommand(text) {
   const t = text.trim();
   const inDialogue = state.mode === 'dialogue';
   const target = inDialogue ? dialogueLog : logEl;
+  const cmd = matchLocalCommand(t);
 
-  if (/结束|end/.test(t)) {
-    if (inDialogue) endDialogue(); else appendMsg('system', '当前不在对话中。', target);
-    return true;
+  if (!cmd) { appendMsg('system', '未知指令。输入"帮助"查看可用指令。', target); return true; }
+
+  switch (cmd.id) {
+    case 'view_clues': showClues(target); return true;
+    case 'view_characters': showCharacters(target); return true;
+    case 'view_status': showStatus(target); return true;
+    case 'view_goal': showGoal(target); return true;
+    case 'view_memory': showMemory(target); return true;
+    case 'view_timeline': showTimeline(target); return true;
+    case 'view_beliefs': showBeliefs(target); return true;
+    case 'end_dialogue': if (inDialogue) endDialogue(); else appendMsg('system', '当前不在对话中。', target); return true;
+    case 'next_loop': if (lastFailure) nextLoop(); else appendMsg('system', '只有失败结算后才能进入下一轮。', target); return true;
+    case 'reset_loop': resetLoop(); return true;
+    case 'reset_game': if (confirm('确定要重置游戏吗？所有进度将丢失。')) resetGame(); return true;
+    case 'ask_xu': showXuPanel(target); return true;
+    default: return false;
   }
-  if (/线索|clue/.test(t)) { showClues(target); return true; }
-  if (/人物|npc|角色/.test(t)) {
-    const summaries = APP_STRINGS.npcSummaries || {};
-    appendHtml('system', '<div class="lt-msg-title">人物</div><ul><li>' + (summaries.xiaoning || '小宁：线索来源') + '</li><li>' + (summaries.zhao || '赵乘警：证据门槛') + '</li><li>' + (summaries.shen || '沈墨寒：灰大衣男人') + '</li><li>' + (summaries.mother || '小宁妈妈：隐藏记忆节点') + '</li></ul>', target);
-    return true;
-  }
-  if (/状态|status/.test(t)) {
-    appendHtml('system', `<div class="lt-msg-title">当前状态</div><div>${esc(state.clock)}｜AP ${state.ap_remaining}｜第 ${state.loop} 轮｜${state.mode === 'dialogue' ? '对话：' + npcName(state.active_npc) : '探索'}</div><div class="lt-subtitle">当前目标</div><div>${esc(state._goal || '证明第七节车厢存在异常，并说服赵乘警检查地板。')}</div>`, target);
-    return true;
-  }
-  if (/下一轮|next/.test(t)) {
-    if (lastFailure) nextLoop(); else appendMsg('system', '只有失败结算后才能进入下一轮。', target);
-    return true;
-  }
-  if (/重置|reset/.test(t)) { resetGame(); return true; }
-  if (/失败|fail|ng/.test(t)) { failLoop(); return true; }
-  appendHtml('system', '<div class="lt-msg-title">指令帮助</div><div>' + (APP_STRINGS.commandHelp || '可用指令：查看线索、查看人物、查看状态、结束对话、进入下一轮、重置本轮。') + '</div>', target);
-  return true;
 }
 
 function showClues(target) {
@@ -232,6 +305,68 @@ function showClues(target) {
     ? state.known_clues.map(id => '<li><strong>' + esc((npcCache?.clue_titles || {})[id] || id) + '</strong></li>').join('')
     : '<li>' + (APP_STRINGS.noClueText || '暂无线索') + '</li>';
   appendHtml('system', '<div class="lt-msg-title">已获得线索</div><ul>' + clues + '</ul>', target);
+}
+
+function showCharacters(target) {
+  const summaries = APP_STRINGS.npcSummaries || {};
+  appendHtml('system', '<div class="lt-msg-title">人物</div><ul><li>' + (summaries.xiaoning || '小宁：线索来源') + '</li><li>' + (summaries.zhao || '赵乘警：证据门槛') + '</li><li>' + (summaries.shen || '沈墨寒：灰大衣男人') + '</li><li>' + (summaries.mother || '小宁妈妈：隐藏记忆节点') + '</li></ul>', target);
+}
+
+function showStatus(target) {
+  appendHtml('system', '<div class="lt-msg-title">当前状态</div><div>' + esc(state.clock) + '｜AP ' + state.ap_remaining + '｜第 ' + state.loop + ' 轮｜' + (state.mode === 'dialogue' ? '对话：' + npcName(state.active_npc) : '探索') + '</div><div class="lt-subtitle">当前目标</div><div>' + esc(state._goal || '证明第七节车厢存在异常，并说服赵乘警检查地板。') + '</div>', target);
+}
+
+function showGoal(target) {
+  appendHtml('system', '<div class="lt-msg-title">当前任务</div><div>' + esc(state._goal || '证明第七节车厢存在异常，并说服赵乘警检查地板。') + '</div>', target);
+}
+
+function showMemory(target) {
+  if (state.carried_memory && state.carried_memory.length) {
+    const items = state.carried_memory.map(function(id) { return '<li>' + esc(clueName(id)) + '</li>'; }).join('');
+    appendHtml('system', '<div class="lt-msg-title">跨循环记忆</div><ul>' + items + '</ul>', target);
+  } else {
+    appendMsg('system', APP_STRINGS.noClueText || '暂无跨循环记忆。', target);
+  }
+}
+
+function showTimeline(target) {
+  appendMsg('system', '时间线功能将在后续版本开放。当前为第 ' + state.loop + ' 轮。', target);
+}
+
+function showBeliefs(target) {
+  appendMsg('system', '推测功能将在后续版本开放。', target);
+}
+
+function showXuPanel(target) {
+  var helpText = '';
+  if (XU_DIALOGUES && XU_DIALOGUES.templates) {
+    var helpTpl = XU_DIALOGUES.templates.find(function(t) { return t.intent === 'command_help'; });
+    if (helpTpl) helpText = helpTpl.text;
+  }
+  if (!helpText) {
+    helpText = '你可以随时使用下面的指令。\n\n📋 信息查询：查看线索、查看人物、查看状态、查看任务\n🧠 记忆系统：查看记忆、查看时间线、查看推测\n⚡ 行动指令：结束对话、进入下一轮、重置本轮、重置游戏';
+  }
+  appendHtml('system', '<div class="lt-msg-title">调查助手：许知微</div><div>' + esc(helpText) + '</div>', target);
+}
+
+async function resetLoop() {
+  const res = await api('/session/init', { state: clone(START_STATE) });
+  if (res?.state) {
+    res.state.flags.intro_seen = true;
+    res.state._goal = res.goal || '';
+    res.state._suggestions = res.suggestions || [];
+    state = res.state;
+    logEl.innerHTML = '';
+    dialogueLog.innerHTML = '';
+    ngLayer.classList.remove('lt-show');
+    portraitLayer.classList.remove('lt-show');
+    dialoguePanel.classList.remove('lt-show');
+    latestMsg.classList.remove('lt-show');
+    inputEl.value = '';
+    autoSizeInput();
+    appendMsg('system', '本轮已重置。', logEl);
+    render();
+  }
 }
 
 // ── Game actions ──
@@ -246,7 +381,7 @@ async function submitInput() {
 
   AudioManager.play('message_sent');
 
-  if (isCommand(text)) { handleCommand(text); return; }
+  if (matchLocalCommand(text)) { handleCommand(text); return; }
 
   if (inDialogue) {
     if (/结束|离开|不聊了/.test(text)) { endDialogue(); return; }
@@ -320,7 +455,17 @@ function handleResponse(res, inDialogue) {
     prevAudioState = clone(state);
   }
   if (res.suggestions !== undefined) state._suggestions = res.suggestions;
-  if (res.goal !== undefined) state._goal = res.goal;
+  if (res.goal !== undefined) {
+    const prevTitle = state._goalData && state._goalData.goals && state._goalData.goals.length
+      ? state._goalData.goals[0].title : '';
+    state._goalData = res.goal;
+    state._goal = res.goal;
+    const newTitle = state._goalData && state._goalData.goals && state._goalData.goals.length
+      ? state._goalData.goals[0].title : '';
+    if (prevTitle && newTitle && prevTitle !== newTitle) {
+      showGoalFeedback(prevTitle, newTitle, '🧠 该信息已加入下一轮记忆');
+    }
+  }
   if (res.messages) {
     const target = inDialogue || state.mode === 'dialogue' ? dialogueLog : logEl;
     for (const m of res.messages) {
@@ -429,6 +574,7 @@ function loadState() {
   try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) state = JSON.parse(raw); } catch (_) {}
   if (!state) { state = clone(START_STATE); return; }
   if (state.mode === 'dialogue') { state.mode = 'explore'; state.active_npc = null; }
+  if (!state._goalData && state._goal) state._goalData = state._goal;
 }
 
 // ── Audio event mapping ──
@@ -483,15 +629,19 @@ async function bootContent() {
     if (sessionRes?.state) {
       START_STATE = clone(sessionRes.state);
       START_STATE._goal = sessionRes.goal || '';
+      START_STATE._goalData = sessionRes.goal || '';
       START_STATE._suggestions = sessionRes.suggestions || [];
     }
     // Load content strings
-    const [introRes, stringsRes, configRes] = await Promise.all([
-      api('/intro'), api('/app-strings'), api('/config'),
+    const [introRes, stringsRes, configRes, commandsRes] = await Promise.all([
+      api('/intro'), api('/app-strings'), api('/config'), api('/commands'),
     ]);
     if (introRes) renderIntro(introRes);
     if (stringsRes) APP_STRINGS = stringsRes;
     if (configRes?.llm_enabled) llmEnabled = true;
+    if (commandsRes?.commands) COMMANDS = commandsRes.commands;
+    // Xu Zhiwei dialogue (non-blocking)
+    api('/xu-dialogue').then(function(d) { if (d) XU_DIALOGUES = d; }).catch(function() {});
   } catch (_) {}
 }
 
@@ -530,6 +680,20 @@ async function init() {
     if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submitInput(); }
   });
   inputEl.addEventListener('input', autoSizeInput);
+
+  // Command bar buttons (v0.7)
+  if (commandBarEl) {
+    commandBarEl.addEventListener('click', function (ev) {
+      const btn = ev.target.closest('.lt-cmd-btn');
+      if (!btn) return;
+      const cmdId = btn.dataset.cmd;
+      const cmdMap = { view_clues: '查看线索', view_characters: '查看人物', view_memory: '查看记忆', ask_xu: '帮助' };
+      const triggerText = cmdMap[cmdId] || cmdId;
+      inputEl.value = triggerText;
+      autoSizeInput();
+      submitInput();
+    });
+  }
 
   // Mode tabs (2-tab: 对话 / 行动)
   modeTabs.addEventListener('click', async (ev) => {

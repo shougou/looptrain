@@ -258,8 +258,27 @@ function _dlgText(key, condition) {
 
 // ── Game logic functions ──
 
-function currentGoal(s) {
-  s = normalize(s);
+function resetLoop(state) {
+  var s = normalize(state);
+  return Object.assign(clone(START_STATE), {
+    loop: s.loop + 1,
+    known_clues: s.known_clues,
+    carried_memory: s.carried_memory,
+    npc_states: clone(s.npc_states),
+    flags: { intro_seen: true },
+    clock: START_STATE.clock,
+    ap_remaining: START_STATE.ap_remaining,
+    location: START_STATE.location,
+  });
+}
+
+function currentGoal(state) {
+  return {
+    goals: [{ title: currentGoalText(state) }]
+  };
+}
+function currentGoalText(state) {
+  var s = normalize(state);
   var evidence = countValidEvidence(s);
   if (s.flags.trial_success) return '试玩版已完成：你证明了第七节车厢存在异常。';
   if (evidence >= 2) return '证据已足够。现在可以尝试说服赵乘警检查地板。';
@@ -584,6 +603,16 @@ function getNpcInfo() {
   return result;
 }
 
+// ── Command dispatcher ──
+function executeCommand(commandId, state) {
+  switch (commandId) {
+    case 'reset_loop': return { state: resetLoop(state), message: '本轮已重置' };
+    case 'reset_game': return { state: normalize(START_STATE), message: '游戏已重置' };
+    case 'end_dialogue': return endDialogue(state);
+    default: return null;
+  }
+}
+
 // ── Initialize content ──
 loadContent();
 
@@ -606,7 +635,8 @@ module.exports = {
   normalize: normalize, parseAction: parseAction, commitAction: commitAction, startDialogue: startDialogue,
   dialogueMessage: dialogueMessage, endDialogue: endDialogue, failLoop: failLoop, nextLoop: nextLoop,
   suggestions: suggestions, dialogueSuggestions: dialogueSuggestions,
-  countValidEvidence: countValidEvidence, currentGoal: currentGoal,
+  countValidEvidence: countValidEvidence, currentGoal: currentGoal, currentGoalText: currentGoalText,
+  resetLoop: resetLoop, executeCommand: executeCommand,
   clueDetail: clueDetail, cleanLlmReply: cleanLlmReply,
   getNpcs: getNpcs, getClueTitles: getClueTitles, getClueDetails: getClueDetails,
   getScenes: getScenes, getNpcInfo: getNpcInfo, sceneName: sceneName,

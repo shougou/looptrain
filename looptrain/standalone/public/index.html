@@ -22,6 +22,28 @@
           <button class="lt-audio-mute" id="btn-audio-mute" aria-label="关闭声音" title="声音开关">🔊</button>
         </div>
 
+        <!-- Goal bar -->
+        <div class="lt-goal-bar">
+          <span class="lt-goal-bar-text">📋 当前目标</span>
+          <span class="lt-goal-bar-loop"></span>
+        </div>
+
+        <!-- Command bar -->
+        <div class="lt-command-bar">
+          <button class="lt-cmd-btn" data-cmd="view_clues">🔍线索</button>
+          <button class="lt-cmd-btn" data-cmd="view_characters">👤人物</button>
+          <button class="lt-cmd-btn" data-cmd="view_memory">🧠记忆</button>
+          <button class="lt-cmd-btn" data-cmd="ask_xu">❓帮助</button>
+        </div>
+
+        <!-- Goal completion feedback -->
+        <div class="lt-goal-feedback" style="display:none;">
+          <div class="lt-fb-title"></div>
+          <div class="lt-fb-desc"></div>
+          <div class="lt-fb-memory"></div>
+          <div class="lt-fb-next"></div>
+        </div>
+
         <!-- Main content: scene-driven -->
         <div class="lt-content">
           <!-- Scene card -->
