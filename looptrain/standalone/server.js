@@ -107,7 +107,7 @@ app.get('/api/commands', (_req, res) => {
 
 app.get('/api/xu-dialogue', (_req, res) => {
   try {
-    const file = path.join(__dirname, '..', '..', 'looptrain', 'materials', 'runtime', 'dialogues', 'xu-zhiwei-dialogue.json');
+    const file = path.join(__dirname, '..', 'looptrain', 'materials', 'runtime', 'dialogues', 'xu-zhiwei-dialogue.json');
     res.json(JSON.parse(fs.readFileSync(file, 'utf-8')));
   } catch (_) { res.json({ templates: [] }); }
 });
