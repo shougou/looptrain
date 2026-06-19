@@ -161,22 +161,20 @@ function loadContent() {
       }
     } catch (_) {}
 
-    // Load Scenes from runtime scene-labels.json
+    // Load Scenes from runtime/scenes/
     try {
-      var sceneLabels = readJsonSafe(path.join(runtimeBase, 'scene-data', 'scene-labels.json'));
-      if (sceneLabels) {
-        var loadedScenes = {};
-        var keys = Object.keys(sceneLabels);
-        for (var k = 0; k < keys.length; k++) {
-          var key = keys[k];
-          if (key === 'default') continue;
-          var val = sceneLabels[key];
-          loadedScenes[key] = {
-            name: val.label,
-            text: val.full_description,
-            npcs: key === 'carriage_2' ? ['xiaoning', 'zhao_police'] : (key === 'connector_2_3' ? ['shen_mohan'] : []),
-          };
-        }
+      var sceneDir = path.join(runtimeBase, 'scenes');
+      var sceneFiles = fs.readdirSync(sceneDir).filter(function(f) { return f.endsWith('.json'); });
+      var loadedScenes = {};
+      for (var si = 0; si < sceneFiles.length; si++) {
+        var sFile = sceneFiles[si];
+        var sData = readJsonSafe(path.join(sceneDir, sFile));
+        if (!sData || !sData.name) continue;
+        var sId = sFile.replace('.json', '');
+        loadedScenes[sId] = sData;
+        if (!loadedScenes[sId].npcs) loadedScenes[sId].npcs = [];
+      }
+      if (Object.keys(loadedScenes).length > 0) { SCENES = loadedScenes; }
         if (Object.keys(loadedScenes).length > 0) { SCENES = loadedScenes; }
       }
     } catch (_) {}
