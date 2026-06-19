@@ -1,6 +1,7 @@
 "use strict";
 /**
  * AssistantController - orchestrates the full assistant pipeline.
+ * UI labels loaded from materials/runtime/assistant/ui-labels.json.
  * Flow: CompanionViewBuilder → IntentClassifier → PolicyEngine →
  *        ActionPlanner → FallbackTemplate → Validator → Renderer
  * Spec reference: Section 11.2
@@ -16,6 +17,27 @@ const ActionPlanner_1 = require("./ActionPlanner");
 const FallbackTemplateEngine_1 = require("./FallbackTemplateEngine");
 const OutputValidator_1 = require("./OutputValidator");
 const ResponseRenderer_1 = require("./ResponseRenderer");
+const RuntimeContentLoader_1 = require("../content/RuntimeContentLoader");
+let _uiLabels = null;
+function getUiLabels() {
+    if (_uiLabels)
+        return _uiLabels;
+    try {
+        const loader = new RuntimeContentLoader_1.RuntimeContentLoader();
+        _uiLabels = loader.loadRuntimeJSON('assistant/ui-labels.json');
+    }
+    catch (_) {
+        _uiLabels = {
+            assistantName: '许知微',
+            assistantId: 'xu_zhiwei',
+            buttonLabel: '询问助手',
+            errorMessage: '抱歉，处理请求时出现了问题。请稍后再试。',
+            assistantDisplayName: '许知微',
+            settlementSummary: '结算结果',
+        };
+    }
+    return _uiLabels;
+}
 class AssistantController {
     constructor(memoryRuntime) {
         this.actionRegistry = new ActionRegistry_1.ActionRegistryLoader();
@@ -67,20 +89,22 @@ class AssistantController {
             hasFirstContact = loopCount > 0;
         }
         const isPreContact = !hasFirstContact && loopCount === 0;
+        const labels = getUiLabels();
         return {
             buttonVisible: true,
-            buttonLabel: '询问助手',
+            buttonLabel: labels.buttonLabel,
             buttonEmphasis: isPreContact ? 'high' : 'normal',
             assistantKnownToPlayer: hasFirstContact,
             firstContactAvailable: isPreContact,
         };
     }
     buildErrorResult(_loopCount) {
+        const labels = getUiLabels();
         return {
             responseId: `resp_err_${Date.now()}`,
             mode: 'fallback_silent',
-            assistant: { id: 'xu_zhiwei', displayName: '许知微' },
-            visibleText: '抱歉，处理请求时出现了问题。请稍后再试。',
+            assistant: { id: labels.assistantId, displayName: labels.assistantDisplayName },
+            visibleText: labels.errorMessage,
             recommendedActions: [],
             clueReferences: [],
             beliefReferences: [],

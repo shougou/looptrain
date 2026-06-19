@@ -1,16 +1,19 @@
 'use strict';
 
-/* LoopTrain Standalone v0.5.1 UX Refresh — app.js
+/* LoopTrain Standalone v0.6.0 Content Extraction — app.js
+ * Content loaded from /api/intro and /api/app-strings.
  * Scene-driven layout. Pure vanilla JS. No SillyTavern.
  */
 
 const API_BASE = '/api';
 const ASSET_BASE = '/assets/';
 
-// ── Content loaded from engine API ──
+// ── Content loaded dynamically ──
 let START_STATE = null;
 let SCENES = {};
 let NPC_INFO = {};
+let APP_STRINGS = {};
+let INTRO_DATA = null;
 
 // ── State ──
 let state = null;
@@ -62,6 +65,8 @@ async function api(route, body) {
   }
 }
 
+function s(key) { return (APP_STRINGS && APP_STRINGS[key]) || key; }
+
 // ── Render ──
 function render() {
   const s = state;
@@ -112,15 +117,13 @@ function render() {
     btn.textContent = '📋 对话记录';
     btn.addEventListener('click', function () {
       logDrawer.classList.add('lt-show');
-      // Auto-scroll to bottom when opening log drawer
       requestAnimationFrame(() => {
         const log = document.querySelector('.lt-log-drawer .lt-log');
         if (log) {
-          // Show hint if no messages yet
           if (!log.children.length) {
             const hint = document.createElement('div');
             hint.className = 'lt-msg lt-msg-system';
-            hint.textContent = '当前没有对话记录';
+            hint.textContent = APP_STRINGS.noDialogueRecord || '当前没有对话记录';
             log.appendChild(hint);
           }
           log.scrollTop = log.scrollHeight;
@@ -174,7 +177,6 @@ function renderPortrait() {
 function updateLatestMsg() {
   const playerMsgs = document.querySelectorAll('.lt-dialogue-log .lt-msg-player, .lt-dialogue-log .lt-msg-npc');
   const isDialogue = state.mode === 'dialogue';
-  // Hide latest preview in dialogue mode because dialogue panel already shows the conversation
   if (playerMsgs.length && !isDialogue) {
     const last = playerMsgs[playerMsgs.length - 1];
     latestMsg.innerHTML = last.outerHTML;
@@ -207,7 +209,8 @@ function handleCommand(text) {
   }
   if (/线索|clue/.test(t)) { showClues(target); return true; }
   if (/人物|npc|角色/.test(t)) {
-    appendHtml('system', '<div class="lt-msg-title">人物</div><ul><li>小宁：线索来源，害怕但敏感。</li><li>赵乘警：证据门槛，需要至少两条有效证据。</li><li>沈墨寒：灰大衣男人，制造压力与误导。</li><li>小宁妈妈：隐藏记忆节点，不推进主线。</li></ul>', target);
+    const summaries = APP_STRINGS.npcSummaries || {};
+    appendHtml('system', '<div class="lt-msg-title">人物</div><ul><li>' + (summaries.xiaoning || '小宁：线索来源') + '</li><li>' + (summaries.zhao || '赵乘警：证据门槛') + '</li><li>' + (summaries.shen || '沈墨寒：灰大衣男人') + '</li><li>' + (summaries.mother || '小宁妈妈：隐藏记忆节点') + '</li></ul>', target);
     return true;
   }
   if (/状态|status/.test(t)) {
@@ -220,14 +223,14 @@ function handleCommand(text) {
   }
   if (/重置|reset/.test(t)) { resetGame(); return true; }
   if (/失败|fail|ng/.test(t)) { failLoop(); return true; }
-  appendHtml('system', '<div class="lt-msg-title">指令帮助</div><div>可用指令：查看线索、查看人物、查看状态、结束对话、进入下一轮、重置本轮。</div>', target);
+  appendHtml('system', '<div class="lt-msg-title">指令帮助</div><div>' + (APP_STRINGS.commandHelp || '可用指令：查看线索、查看人物、查看状态、结束对话、进入下一轮、重置本轮。') + '</div>', target);
   return true;
 }
 
 function showClues(target) {
   const clues = state.known_clues.length
     ? state.known_clues.map(id => '<li><strong>' + esc((npcCache?.clue_titles || {})[id] || id) + '</strong></li>').join('')
-    : '<li>暂无线索</li>';
+    : '<li>' + (APP_STRINGS.noClueText || '暂无线索') + '</li>';
   appendHtml('system', '<div class="lt-msg-title">已获得线索</div><ul>' + clues + '</ul>', target);
 }
 
@@ -277,7 +280,7 @@ async function nextLoop() {
   if (res?.state) state = res.state;
   appendMsg('system', res?.opening || '你回到了 08:45。', logEl);
   dialogueLog.innerHTML = '';
-  toast('进入下一轮');
+  toast(APP_STRINGS.nextLoopToast || '进入下一轮');
   render();
 }
 
@@ -295,7 +298,7 @@ async function resetGame() {
   document.activeElement?.blur();
   inputEl.value = '';
   autoSizeInput();
-  appendMsg('system', '已重置试玩版。开场背景将重新显示。', logEl);
+  appendMsg('system', APP_STRINGS.resetToast || '已重置试玩版。开场背景将重新显示。', logEl);
   render();
 }
 
@@ -327,7 +330,7 @@ function handleResponse(res, inDialogue) {
   }
   if (res.dialogue_outcome) renderDialogueOutcome(res.dialogue_outcome);
   if (res.loop_failure_outcome) renderFailureOutcome(res.loop_failure_outcome);
-  if (res.trial_success) toast('试玩版成功');
+  if (res.trial_success) toast(APP_STRINGS.trialSuccessToast || '试玩版成功');
   if (res.memory_node) {
     appendMsg('system', '💭 触发隐藏记忆：' + (res.memory_node.title || ''), dialogueLog);
     showMemoryPortrait(res.memory_node);
@@ -360,8 +363,8 @@ function renderDialogueOutcome(out) {
   const clues = (out.clues_gained || []).map(x => {
     const c = x.source ? x : {};
     return '<li><strong>' + esc(c.title || clueName(x.id)) + '</strong><br><span class="lt-muted">来源：' + esc(c.source || '未知') + '｜可信度：' + esc(c.confidence || 'unknown') + '</span></li>';
-  }).join('') || '<li>没有获得新线索</li>';
-  const events = (out.world_events || []).map(x => '<li>' + esc(x) + '</li>').join('') || '<li>世界仍在继续推进</li>';
+  }).join('') || '<li>' + (APP_STRINGS.noNewClues || '没有获得新线索') + '</li>';
+  const events = (out.world_events || []).map(x => '<li>' + esc(x) + '</li>').join('') || '<li>' + (APP_STRINGS.noWorldEvents || '世界仍在继续推进') + '</li>';
   const actions = (out.unlocked_actions || []).slice(0, 3).map(x => '<li>' + esc(x.label || '') + '</li>').join('') || '<li>继续观察车厢</li>';
   const turnLine = out.turn_limit ? '｜对话 ' + (out.turns_used || 0) + '/' + out.turn_limit + ' 轮' : '';
   appendHtml('outcome', '<div class="lt-msg-title">对话结算：' + esc(out.npc_name || npcName(out.npc_id)) + '</div><div>AP -' + (out.ap_cost || 0) + '｜' + esc(out.time_advance?.from || '') + ' → ' + esc(out.time_advance?.to || '') + turnLine + '</div><div class="lt-subtitle">获得线索</div><ul>' + clues + '</ul><div class="lt-subtitle">世界推进</div><ul>' + events + '</ul><div class="lt-subtitle">下一步可行动</div><ul>' + actions + '</ul>', logEl);
@@ -445,9 +448,33 @@ function deriveAudioEvents(prevState, nextState, res) {
   return events;
 }
 
+// ── Intro rendering ──
+function renderIntro(data) {
+  if (!data) return;
+  INTRO_DATA = data;
+  const kickerEl = document.querySelector('.lt-intro-kicker');
+  const titleEl = document.querySelector('.lt-intro-title');
+  const stepsEl = document.querySelector('.lt-intro-steps');
+  const memoryEl = document.querySelector('.lt-intro-memory');
+  const btnEl = document.getElementById('intro-start-btn');
+  const skipEl = document.querySelector('.lt-intro-skip');
+
+  if (kickerEl) kickerEl.textContent = data.kicker || '';
+  if (titleEl) titleEl.textContent = data.title || '';
+  if (stepsEl && Array.isArray(data.steps)) {
+    stepsEl.innerHTML = data.steps.map(function(s) {
+      return '<div><strong>' + esc(s.role) + '</strong><span>' + esc(s.text) + '</span></div>';
+    }).join('');
+  }
+  if (memoryEl) memoryEl.textContent = data.memory || '';
+  if (btnEl) btnEl.textContent = data.buttonLabel || '进入第七节车厢';
+  if (skipEl) skipEl.textContent = data.skipLabel || '点击任意位置跳过';
+}
+
 // ── Content boot ──
 async function bootContent() {
   try {
+    // Load game data
     const [scenesRes, npcsRes, sessionRes] = await Promise.all([
       api('/scenes'), api('/npcs'), api('/session/init', {}),
     ]);
@@ -458,7 +485,12 @@ async function bootContent() {
       START_STATE._goal = sessionRes.goal || '';
       START_STATE._suggestions = sessionRes.suggestions || [];
     }
-    const configRes = await api('/config');
+    // Load content strings
+    const [introRes, stringsRes, configRes] = await Promise.all([
+      api('/intro'), api('/app-strings'), api('/config'),
+    ]);
+    if (introRes) renderIntro(introRes);
+    if (stringsRes) APP_STRINGS = stringsRes;
     if (configRes?.llm_enabled) llmEnabled = true;
   } catch (_) {}
 }
@@ -546,8 +578,9 @@ async function init() {
       setTimeout(function () { AudioManager.play('rail_loop_low'); }, 200);
       contentEl.style.display = '';
       bottomEl.style.display = '';
-      appendMsg('system', '1939 年冬，重庆。日机连日轰炸，渝江线 307 次夜行列车成了离开这座燃烧之城的最后窗口。你在第七节车厢醒来，表面是普通乘客，真实身份是打入敌人内部的地下工作者。口袋里有半张车票、一张写着"不要相信灰大衣"的纸条，以及一枚银色扣子。09:00 前，列车会在北江铁桥前爆炸。', logEl);
-      toast('第 1 轮开始');
+      const startMsg = (INTRO_DATA && INTRO_DATA.gameStartMessage) || '1939 年冬，重庆。日机连日轰炸，渝江线 307 次夜行列车成了离开这座燃烧之城的最后窗口。你在第七节车厢醒来，表面是普通乘客，真实身份是打入敌人内部的地下工作者。口袋里有半张车票、一张写着"不要相信灰大衣"的纸条，以及一枚银色扣子。09:00 前，列车会在北江铁桥前爆炸。';
+      appendMsg('system', startMsg, logEl);
+      toast(APP_STRINGS.gameStartToast || '第 1 轮开始');
       render();
       return;
     }

@@ -1,0 +1,19 @@
+{
+  "commandHelp": "可用指令：查看线索、查看人物、查看状态、结束对话、进入下一轮、重置本轮。",
+  "statusFormat": "{clock}｜AP {ap}｜第 {loop} 轮｜{mode}",
+  "npcSummaries": {
+    "xiaoning": "小宁：线索来源，害怕但敏感。",
+    "zhao": "赵乘警：证据门槛，需要至少两条有效证据。",
+    "shen": "沈墨寒：灰大衣男人，制造压力与误导。",
+    "mother": "小宁妈妈：隐藏记忆节点，不推进主线。"
+  },
+  "gameStartToast": "第 1 轮开始",
+  "nextLoopToast": "进入下一轮",
+  "resetToast": "已重置试玩版。开场背景将重新显示。",
+  "trialSuccessToast": "试玩版成功",
+  "noClueText": "暂无线索",
+  "noDialogueRecord": "当前没有对话记录",
+  "noNewClues": "没有获得新线索",
+  "noWorldEvents": "世界仍在继续推进",
+  "emptyGoals": "证明第七节车厢存在异常，并说服赵乘警检查地板。"
+}

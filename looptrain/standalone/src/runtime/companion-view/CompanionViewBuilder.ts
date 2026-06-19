@@ -1,5 +1,6 @@
 /**
  * CompanionViewBuilder - builds a CompanionView from RuntimeClientState.
+ * Content loaded from materials/runtime/scene-data/scene-labels.json.
  * Slice 0: deterministic skeleton. Slice 2: MemoryRuntime integration.
  * Spec reference: Section 10.2
  */
@@ -13,6 +14,41 @@ import type { MemoryEvent } from '../memory/MemoryEvent';
 import type { Knowledge } from '../knowledge/Knowledge';
 import type { Belief } from '../belief/Belief';
 import type { Timeline } from '../timeline/Timeline';
+import { RuntimeContentLoader } from '../content/RuntimeContentLoader';
+
+interface SceneLabelEntry {
+  label: string;
+  description: string;
+  full_description?: string;
+}
+
+interface SceneLabels {
+  [sceneId: string]: SceneLabelEntry;
+}
+
+let _sceneLabels: SceneLabels | null = null;
+
+function getSceneLabels(): SceneLabels {
+  if (_sceneLabels) return _sceneLabels;
+  try {
+    const loader = new RuntimeContentLoader();
+    _sceneLabels = loader.loadRuntimeJSON<SceneLabels>('scene-data/scene-labels.json');
+  } catch (_) {
+    _sceneLabels = {
+      carriage_7: {
+        label: '第七节车厢',
+        description: '你正站在第七节车厢中。车厢内灯光昏暗，气氛紧张。',
+        full_description: '列车第七节车厢灯光昏黄。窗外，重庆方向的火光已经渐远。乘客们神色紧张，各自拥着行李。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。地板下方似乎藏着很轻的滴答声。',
+      },
+      default: {
+        label: '第七节车厢',
+        description: '你正站在第七节车厢中。车厢内灯光昏暗，气氛紧张。',
+        full_description: '1939 年冬，渝江线 307 次夜行列车从重庆驶向江城。窗外远方的火光渐远，车厢里灯光昏黄。',
+      },
+    };
+  }
+  return _sceneLabels;
+}
 
 function extractLoopNo(loopId: string): number {
   const match = loopId.match(/^loop_(\d+)/);
@@ -137,6 +173,10 @@ export function buildCompanionView(
     }
   }
 
+  // Load scene data from JSON
+  const sceneLabels = getSceneLabels();
+  const sceneEntry = sceneLabels[sceneId] || sceneLabels['default'] || { label: '第七节车厢', description: '你正站在第七节车厢中。' };
+
   return {
     viewId,
     schemaVersion: 1,
@@ -154,11 +194,11 @@ export function buildCompanionView(
     },
     scene: {
       sceneId,
-      sceneLabel: '第七节车厢',
+      sceneLabel: sceneEntry.label,
       visibleNpcIds,
       reachableLocationIds: [],
       availableActionIds: [],
-      sceneDescription: '你正站在第七节车厢中。车厢内灯光昏暗，气氛紧张。',
+      sceneDescription: sceneEntry.description,
     },
     knowledge: { confirmedClueIds, confirmedFacts, unlockedLocationIds: [] },
     belief: { activeBeliefs },

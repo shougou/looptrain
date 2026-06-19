@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const engine = require('./engine');
 const prompt = require('./llm/prompt');
@@ -33,7 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ── API routes (no /api/plugins — standalone) ──
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, engine: 'looptrain', version: '0.5-standalone-mvp', mode: 'standalone' });
+  res.json({ ok: true, engine: 'looptrain', version: '0.6-standalone-mvp', mode: 'standalone' });
 });
 
 app.post('/api/session/init', (req, res) => {
@@ -95,6 +96,53 @@ app.get('/api/config', (_req, res) => {
     llm_provider: config.LLM_PROVIDER || 'deepseek',
     lt_llm_provider: LT_LLM_PROVIDER,
   });
+});
+
+// ── Content API endpoints ──
+
+app.get('/api/intro', (_req, res) => {
+  try {
+    const introPath = path.join(__dirname, '..', 'looptrain', 'materials', 'runtime', 'intro', 'intro-text.json');
+    const data = JSON.parse(fs.readFileSync(introPath, 'utf-8'));
+    res.json(data);
+  } catch (_) {
+    res.json({
+      kicker: '渝江线 307 次｜1939 年冬',
+      title: '第七节车厢',
+      steps: [
+        { role: '重庆', text: '日机轰炸不断。渝江线 307 次夜行列车，是离开这座燃烧之城最后的窗口。' },
+        { role: '身份', text: '普通乘客只是伪装，你携带绝密情报前往江城。' },
+        { role: '接头', text: '代号"扣子"的同志会在列车上出现。' },
+        { role: '危机', text: '09:00 前，列车将在北江铁桥前爆炸。' },
+      ],
+      memory: '你只记得爆炸前最后听见的声音——第七节车厢地板下方，传来一阵极轻的滴答声。',
+      buttonLabel: '进入第七节车厢',
+      skipLabel: '点击任意位置跳过',
+    });
+  }
+});
+
+app.get('/api/app-strings', (_req, res) => {
+  try {
+    const stringsPath = path.join(__dirname, '..', 'looptrain', 'materials', 'runtime', 'intro', 'app-strings.json');
+    const data = JSON.parse(fs.readFileSync(stringsPath, 'utf-8'));
+    res.json(data);
+  } catch (_) {
+    res.json({
+      commandHelp: '可用指令：查看线索、查看人物、查看状态、结束对话、进入下一轮、重置本轮。',
+      statusFormat: '{clock}｜AP {ap}｜第 {loop} 轮｜{mode}',
+      npcSummaries: {},
+      gameStartToast: '第 1 轮开始',
+      nextLoopToast: '进入下一轮',
+      resetToast: '已重置试玩版。开场背景将重新显示。',
+      trialSuccessToast: '试玩版成功',
+      noClueText: '暂无线索',
+      noDialogueRecord: '当前没有对话记录',
+      noNewClues: '没有获得新线索',
+      noWorldEvents: '世界仍在继续推进',
+      emptyGoals: '证明第七节车厢存在异常，并说服赵乘警检查地板。',
+    });
+  }
 });
 
 // ── Runtime v0.6 API routes (spec Section 6) ──
@@ -201,7 +249,7 @@ app.listen(PORT, () => {
   console.log(`  Local:  http://localhost:${PORT}`);
   console.log(`  LLM:    ${LLM_ENABLED && DEEPSEEK_API_KEY ? 'enabled (deepseek)' : 'mock only'}`);
   console.log(`  Memory: ${memoryRuntime ? 'enabled' : 'disabled'}`);
-  console.log(`  Engine: v0.5.0 (upgrading)\n`);
+  console.log(`  Engine: v0.6.0\n`);
 });
 
 module.exports = app;

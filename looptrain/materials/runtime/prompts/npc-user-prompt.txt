@@ -1,0 +1,5 @@
+场景：${scene.text}
+
+玩家对你说：${playerText}
+
+请以${npc.name}的口吻回复玩家。

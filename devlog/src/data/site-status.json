@@ -1,6 +1,6 @@
 {
   "play": {
-    "currentVersion": "v0.6.1-runtime",
+    "currentVersion": "v0.6.2-content",
     "playUrl": "/play/game",
     "playLabel": "进入游戏",
     "recommendedDevice": "手机竖屏",

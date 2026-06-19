@@ -13,6 +13,22 @@ summary: "基于 Git 提交记录整理的 LoopTrain 完整版本历史，从 v0
 
 ---
 
+## v0.6.2-content — 游戏内容外置化
+
+**日期**：2026-06-19
+**提交**：紧随 v0.6.1
+
+### 内容外置化
+- 17 个 JSON/TXT 内容文件创建于 `materials/runtime/`：NPC定义(4)、对话(4)、助手模板(4)、场景数据(1)、开场文本(2)、LLM提示词(2)
+- engine.js 改为从 JSON 加载 NPC/线索/场景/对话数据，保留完整回退
+- 11 个源码文件修改：TypeScript 文件使用 RuntimeContentLoader，服务端新增 /api/intro 和 /api/app-strings 端点
+- 前端 index.html 和 app.js 改为从 API 动态加载开场文本和UI字符串
+
+### 验证
+- `npm run test:standalone` 6/6 pass · `npm run test:runtime` 2/2 pass · tsc 0 errors
+
+---
+
 ## v0.6.1-runtime — TypeScript Runtime 架构
 
 **日期**：2026-06-19
