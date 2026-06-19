@@ -1,9 +1,23 @@
 {
   "id": "xu_zhiwei",
   "name": "许知微",
+  "cost": 0,
+  "turn_limit": 99,
+  "near_limit_hint_at": 99,
+  "turn_limit_policy": "soft_close",
+  "portrait": "xu_zhiwei_portrait.png",
   "role": "companion",
   "type": "assistant_npc",
-  "portrait": "xu_zhiwei_portrait.png",
+  "location": "carriage_2",
+  "opening": "许知微合上笔记本，抬眼看你。\"有什么想问的吗？还是想先观察一下周围？\"",
+  "near_limit_hint": "",
+  "limit_message": "",
+  "suggestions": [
+    { "label": "查看线索", "template": "查看线索" },
+    { "label": "查看人物", "template": "查看人物" },
+    { "label": "查看指令", "template": "帮助" },
+    { "label": "结束对话", "template": "__END_DIALOGUE__" }
+  ],
   "identity": {
     "age": 23,
     "occupation": "《渝江日报》见习记者",
