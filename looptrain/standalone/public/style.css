@@ -146,6 +146,13 @@ body.dialogue-active .lt-scene-card {
   display: inline-flex; align-items: center;
 }
 .lt-npc-chip:active { background: rgba(214,168,90,.3); }
+.lt-companion-chip {
+  background: rgba(111,169,130,.1); color: var(--lt-success);
+  border: 1px solid rgba(111,169,130,.3);
+  min-height: 44px;
+  display: inline-flex; align-items: center;
+}
+.lt-companion-chip:active { background: rgba(111,169,130,.3); }
 .lt-hidden-npc-chip {
   background: rgba(180,130,210,.1); color: #c0a0d8;
   border: 1px solid rgba(180,130,210,.25);
