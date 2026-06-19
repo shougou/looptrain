@@ -35,14 +35,14 @@ function getSceneLabels(): SceneLabels {
     _sceneLabels = loader.loadRuntimeJSON<SceneLabels>('scene-data/scene-labels.json');
   } catch (_) {
     _sceneLabels = {
-      carriage_7: {
-        label: '第七节车厢',
-        description: '你正站在第七节车厢中。车厢内灯光昏暗，气氛紧张。',
-        full_description: '列车第七节车厢灯光昏黄。窗外，重庆方向的火光已经渐远。乘客们神色紧张，各自拥着行李。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。地板下方似乎藏着很轻的滴答声。',
+      carriage_2: {
+        label: '二号车厢',
+        description: '你正站在二号车厢中。车厢内灯光昏暗，气氛紧张。',
+        full_description: '列车二号车厢灯光昏黄。窗外，重庆方向的火光已经渐远。乘客们神色紧张，各自拥着行李。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。地板下方似乎藏着很轻的滴答声。',
       },
       default: {
-        label: '第七节车厢',
-        description: '你正站在第七节车厢中。车厢内灯光昏暗，气氛紧张。',
+        label: '二号车厢',
+        description: '你正站在二号车厢中。车厢内灯光昏暗，气氛紧张。',
         full_description: '1939 年冬，渝江线 307 次夜行列车从重庆驶向江城。窗外远方的火光渐远，车厢里灯光昏黄。',
       },
     };
@@ -175,7 +175,7 @@ export function buildCompanionView(
 
   // Load scene data from JSON
   const sceneLabels = getSceneLabels();
-  const sceneEntry = sceneLabels[sceneId] || sceneLabels['default'] || { label: '第七节车厢', description: '你正站在第七节车厢中。' };
+  const sceneEntry = sceneLabels[sceneId] || sceneLabels['default'] || { label: '二号车厢', description: '你正站在二号车厢中。' };
 
   return {
     viewId,

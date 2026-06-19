@@ -17,7 +17,7 @@ const legacy = {
     carried_memory: ['clue_sound_under_seat'],
     npc_states: { xiaoning: { trust: 2 }, zhao: { tension: 1 } },
     flags: { intro_seen: true },
-    dialogue_session: null, location: 'carriage_7',
+    dialogue_session: null, location: 'carriage_2',
 };
 const drafts = migrator.migrate(legacy, 'run_test');
 assert.ok(drafts.length >= 3);

@@ -100,15 +100,19 @@ app.get('/api/config', (_req, res) => {
 
 app.get('/api/commands', (_req, res) => {
   try {
-    const file = path.join(__dirname, '..', 'materials', 'runtime', 'commands', 'command-registry.json');
-    res.json(JSON.parse(fs.readFileSync(file, 'utf-8')));
+    var base = path.join(__dirname, '..', 'looptrain', 'materials', 'runtime');
+    if (!require('fs').existsSync(base)) base = path.join(__dirname, '..', '..', 'looptrain', 'materials', 'runtime');
+    const file = path.join(base, 'commands', 'command-registry.json');
+    res.json(JSON.parse(require('fs').readFileSync(file, 'utf-8')));
   } catch (_) { res.json({ commands: [] }); }
 });
 
 app.get('/api/xu-dialogue', (_req, res) => {
   try {
-    const file = path.join(__dirname, '..', 'materials', 'runtime', 'dialogues', 'xu-zhiwei-dialogue.json');
-    res.json(JSON.parse(fs.readFileSync(file, 'utf-8')));
+    var base = path.join(__dirname, '..', 'looptrain', 'materials', 'runtime');
+    if (!require('fs').existsSync(base)) base = path.join(__dirname, '..', '..', 'looptrain', 'materials', 'runtime');
+    const file = path.join(base, 'dialogues', 'xu-zhiwei-dialogue.json');
+    res.json(JSON.parse(require('fs').readFileSync(file, 'utf-8')));
   } catch (_) { res.json({ templates: [] }); }
 });
 
@@ -116,8 +120,10 @@ app.get('/api/xu-dialogue', (_req, res) => {
 
 app.get('/api/intro', (_req, res) => {
   try {
-    const introPath = path.join(__dirname, '..', 'materials', 'runtime', 'intro', 'intro-text.json');
-    const data = JSON.parse(fs.readFileSync(introPath, 'utf-8'));
+    var base = path.join(__dirname, '..', 'looptrain', 'materials', 'runtime');
+    if (!require('fs').existsSync(base)) base = path.join(__dirname, '..', '..', 'looptrain', 'materials', 'runtime');
+    const introPath = path.join(base, 'intro', 'intro-text.json');
+    const data = JSON.parse(require('fs').readFileSync(introPath, 'utf-8'));
     res.json(data);
   } catch (_) {
     res.json({
@@ -138,7 +144,9 @@ app.get('/api/intro', (_req, res) => {
 
 app.get('/api/app-strings', (_req, res) => {
   try {
-    const stringsPath = path.join(__dirname, '..', 'materials', 'runtime', 'intro', 'app-strings.json');
+    var base = path.join(__dirname, '..', 'looptrain', 'materials', 'runtime');
+    if (!require('fs').existsSync(base)) base = path.join(__dirname, '..', '..', 'looptrain', 'materials', 'runtime');
+    const stringsPath = path.join(base, 'intro', 'app-strings.json');
     const data = JSON.parse(fs.readFileSync(stringsPath, 'utf-8'));
     res.json(data);
   } catch (_) {

@@ -24,7 +24,7 @@ function getHardcodedActions() {
     return [
         {
             actionId: 'observe_carriage', type: 'observe',
-            label: '观察车厢', inputTemplate: '我仔细观察了第七节车厢',
+            label: '观察车厢', inputTemplate: '我仔细观察了二号车厢',
             requiredSceneIds: ['scene-carriage-03'],
             phaseAllowed: ['pre_contact', 'onboarding', 'guided', 'normal', 'minimal'],
             spoilerLevel: 0, riskLevel: 'low', priorityBase: 50,

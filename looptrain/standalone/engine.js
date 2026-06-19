@@ -120,8 +120,12 @@ function readJsonSafe(filePath) {
 
 function loadContent() {
   var repoRoot = path.resolve(__dirname, '..');
-  var runtimeBase = path.join(repoRoot, 'materials', 'runtime');
-  var legacyBase = path.join(repoRoot, 'materials', 'looptrain');
+  var runtimeBase = path.join(repoRoot, 'looptrain', 'materials', 'runtime');
+  if (!fs.existsSync(runtimeBase)) {
+    repoRoot = path.resolve(__dirname, '..', '..');
+    runtimeBase = path.join(repoRoot, 'looptrain', 'materials', 'runtime');
+  }
+  var legacyBase = path.join(repoRoot, 'looptrain', 'materials', 'looptrain');
 
   try {
     // Load NPCs from runtime/characters/

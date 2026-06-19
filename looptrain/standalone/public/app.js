@@ -101,10 +101,10 @@ function render() {
                       id === 'shen_mohan' ? '试探沈墨寒' : n.name;
     return `<button class="lt-npc-chip${cls}" data-npc-id="${id}" data-type="person">${verbLabel}</button>`;
   }).join('');
-  if (s.location === 'carriage_7') {
-    npcsHtml += '<button class="lt-scene-chip" data-template="我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。" data-type="move">前往连接处</button>';
-  } else if (s.location === 'connector_7_8') {
-    npcsHtml += '<button class="lt-scene-chip" data-template="我从连接处回到第七节车厢。" data-type="move">返回第七节车厢</button>';
+  if (s.location === 'carriage_2') {
+    npcsHtml += '<button class="lt-scene-chip" data-template="我起身穿过过道，走向二号车厢和三号车厢之间的连接处。" data-type="move">前往连接处</button>';
+  } else if (s.location === 'connector_2_3') {
+    npcsHtml += '<button class="lt-scene-chip" data-template="我从连接处回到二号车厢。" data-type="move">返回二号车厢</button>';
   }
   npcWrap.innerHTML = npcsHtml;
 
@@ -208,7 +208,7 @@ function inputPlaceholder() {
 
 // ── Goal display helpers (v0.7) ──
 function goalDisplayText() {
-  if (!state._goalData) return state._goal || '证明第七节车厢存在异常，并说服赵乘警检查地板。';
+  if (!state._goalData) return state._goal || '证明二号车厢存在异常，并说服赵乘警检查地板。';
   const g = state._goalData;
   if (typeof g === 'string') return g;
   if (g.goals && g.goals.length) return g.goals[0].title || '';
@@ -337,11 +337,11 @@ function showCharacters(target) {
 }
 
 function showStatus(target) {
-  appendHtml('system', '<div class="lt-msg-title">当前状态</div><div>' + esc(state.clock) + '｜AP ' + state.ap_remaining + '｜第 ' + state.loop + ' 轮｜' + (state.mode === 'dialogue' ? '对话：' + npcName(state.active_npc) : '探索') + '</div><div class="lt-subtitle">当前目标</div><div>' + esc(state._goal || '证明第七节车厢存在异常，并说服赵乘警检查地板。') + '</div>', target);
+  appendHtml('system', '<div class="lt-msg-title">当前状态</div><div>' + esc(state.clock) + '｜AP ' + state.ap_remaining + '｜第 ' + state.loop + ' 轮｜' + (state.mode === 'dialogue' ? '对话：' + npcName(state.active_npc) : '探索') + '</div><div class="lt-subtitle">当前目标</div><div>' + esc(state._goal || '证明二号车厢存在异常，并说服赵乘警检查地板。') + '</div>', target);
 }
 
 function showGoal(target) {
-  appendHtml('system', '<div class="lt-msg-title">当前任务</div><div>' + esc(state._goal || '证明第七节车厢存在异常，并说服赵乘警检查地板。') + '</div>', target);
+  appendHtml('system', '<div class="lt-msg-title">当前任务</div><div>' + esc(state._goal || '证明二号车厢存在异常，并说服赵乘警检查地板。') + '</div>', target);
 }
 
 function showMemory(target) {
@@ -664,7 +664,7 @@ function renderIntro(data) {
     }).join('');
   }
   if (memoryEl) memoryEl.textContent = data.memory || '';
-  if (btnEl) btnEl.textContent = data.buttonLabel || '进入第七节车厢';
+  if (btnEl) btnEl.textContent = data.buttonLabel || '进入二号车厢';
   if (skipEl) skipEl.textContent = data.skipLabel || '点击任意位置跳过';
 }
 
@@ -815,7 +815,7 @@ async function init() {
       setTimeout(function () { AudioManager.play('rail_loop_low'); }, 200);
       contentEl.style.display = '';
       bottomEl.style.display = '';
-      const startMsg = (INTRO_DATA && INTRO_DATA.gameStartMessage) || '1939 年冬，重庆。日机连日轰炸，渝江线 307 次夜行列车成了离开这座燃烧之城的最后窗口。你在第七节车厢醒来，表面是普通乘客，真实身份是打入敌人内部的地下工作者。口袋里有半张车票、一张写着"不要相信灰大衣"的纸条，以及一枚银色扣子。09:00 前，列车会在北江铁桥前爆炸。';
+      const startMsg = (INTRO_DATA && INTRO_DATA.gameStartMessage) || '1939 年冬，重庆。日机连日轰炸，渝江线 307 次夜行列车成了离开这座燃烧之城的最后窗口。你在二号车厢醒来，表面是普通乘客，真实身份是打入敌人内部的地下工作者。口袋里有半张车票、一张写着"不要相信灰大衣"的纸条，以及一枚银色扣子。09:00 前，列车会在北江铁桥前爆炸。';
       appendMsg('system', startMsg, logEl);
       toast(APP_STRINGS.gameStartToast || '第 1 轮开始');
       render();

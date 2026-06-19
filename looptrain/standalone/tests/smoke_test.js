@@ -16,7 +16,7 @@ console.log('1. Engine: normalize & commitAction...');
 let s = engine.normalize(engine.START_STATE);
 assert.strictEqual(s.episode_id, 'trial_001');
 assert.strictEqual(s.ap_remaining, 10);
-assert.strictEqual(s.location, 'carriage_7');
+assert.strictEqual(s.location, 'carriage_2');
 assert.ok(s.known_clues.includes('gray_coat_note_pressure'));
 console.log('   OK normalize');
 
@@ -65,9 +65,9 @@ console.log('   OK fail + next loop memory carry');
 // ── Dialogue turn limit ──
 console.log('\n3. Engine: dialogue turn limit...');
 s = engine.normalize(engine.START_STATE);
-r = engine.commitAction('我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。', s);
+r = engine.commitAction('我起身穿过过道，走向二号车厢和三号车厢之间的连接处。', s);
 s = r.state;
-assert.strictEqual(s.location, 'connector_7_8');
+assert.strictEqual(s.location, 'connector_2_3');
 r = engine.commitAction('我走向沈墨寒，试探他。', s);
 s = r.state;
 assert.strictEqual(s.dialogue_session.turn_limit, 8);

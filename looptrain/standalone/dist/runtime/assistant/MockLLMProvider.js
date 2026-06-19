@@ -25,7 +25,7 @@ function getHardcodedResponses() {
     return {
         awakening_first_contact: '我是许知微，你的调查助手。我会尽力协助你。',
         assistant_advice: '我建议你先仔细观察周围的环境。',
-        scene_explain: '这里是第七节车厢，目前有几位乘客在场。',
+        scene_explain: '这里是二号车厢，目前有几位乘客在场。',
         clue_summary: '根据目前掌握的线索，我们可以确认一些事实。',
         dialogue_settlement: '对话已结束，我们可以回顾一下获取的信息。',
         loop_settlement: '本轮已经结束。回顾一下，我们有一些收获。',
