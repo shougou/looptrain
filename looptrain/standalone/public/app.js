@@ -703,7 +703,7 @@ function esc(s) {
   return div.innerHTML;
 }
 
-function showXuWelcome(loop) {
+async function showXuWelcome(loop) {
   var text = '';
   if (XU_DIALOGUES && XU_DIALOGUES.templates) {
     var tpl;
@@ -713,6 +713,19 @@ function showXuWelcome(loop) {
     if (tpl) text = tpl.text;
   }
   if (!text) text = '我是许知微。有什么需要帮助的吗？';
+
+  // Play portrait intro animation before showing text
+  var dock = document.querySelector('.lt-portrait-dock');
+  if (dock) dock.style.display = 'block';
+  await PortraitIntro.play({
+    src: ASSET_BASE + 'xuzhiwei_portrait.png',
+    alt: '许知微',
+    holdMs: 400,
+    durationMs: 700,
+  });
+  if (dock) dock.style.display = '';
+  PortraitIntro.markPlayed('xu_zhiwei', state.loop || 1);
+
   appendHtml('system', '<div class="lt-msg-title">许知微</div><div>' + esc(text) + '</div>', contentEl);
   scrollBottom(contentEl);
 }
