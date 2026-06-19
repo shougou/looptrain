@@ -102,12 +102,8 @@ function render() {
     const n = NPC_INFO[id];
     if (!n) return '';
     const cls = n.hidden ? ' lt-hidden-npc-chip' : (id === 'xu_zhiwei' ? ' lt-companion-chip' : '');
-    const verbLabel = id === 'xiaoning' ? '询问小宁' :
-                      id === 'zhao_police' ? '说服赵乘警' :
-                      id === 'shen_mohan' ? '试探沈墨寒' :
-                    id === 'xu_zhiwei' ? '询问许知微' :
-                    id === 'zhao_chengjing' ? '说服赵乘警' : n.name;
-    return `<button class="lt-npc-chip${cls}" data-npc-id="${id}" data-type="person">💬 ${verbLabel}</button>`;
+    const verbLabel = n.name;
+    return `<button class="lt-npc-chip${cls}" data-npc-id="${id}" data-type="person">${verbLabel}</button>`;
   }).join('');
   if (s.location === 'carriage_2') {
     npcsHtml += '<button class="lt-scene-chip" data-template="我起身穿过过道，走向二号车厢和三号车厢之间的连接处。" data-type="move">前往连接处</button>';
