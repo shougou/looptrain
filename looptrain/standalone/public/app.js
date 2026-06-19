@@ -374,6 +374,7 @@ function showXuPanel(target) {
 }
 
 async function resetLoop() {
+  PortraitIntro.reset();
   const res = await api('/session/init', { state: clone(START_STATE) });
   if (res?.state) {
     res.state.flags.intro_seen = true;
@@ -444,6 +445,7 @@ async function nextLoop() {
 }
 
 async function resetGame() {
+  PortraitIntro.reset();
   lastFailure = null;
   state = clone(START_STATE);
   state.flags.intro_seen = false;
@@ -462,6 +464,17 @@ async function resetGame() {
 }
 
 async function startDialogue(npcId) {
+  const loop = state.loop || 1;
+  const npc = NPC_INFO[npcId];
+  if (npc) {
+    var portraitSrc = ASSET_BASE + (npc.portrait || 'xiaoning_portrait.png');
+    if (PortraitIntro.shouldPlay(npcId, loop)) {
+      await PortraitIntro.play({ src: portraitSrc, alt: npc.name || npcId });
+      PortraitIntro.markPlayed(npcId, loop);
+    } else {
+      PortraitIntro.setImage({ src: portraitSrc, alt: npc.name || npcId });
+    }
+  }
   const res = await api('/dialogue/start', { state, npc_id: npcId });
   handleResponse(res, true);
 }
@@ -514,21 +527,21 @@ function handleResponse(res, inDialogue) {
 
 function showMemoryPortrait(node) {
   if (!node.portrait) return;
-  const prev = portraitImg.src;
-  portraitImg.src = ASSET_BASE + node.portrait;
-  portraitImg.style.filter = 'sepia(.3) saturate(.8) brightness(1.15)';
-  portraitImg.style.opacity = '0';
-  requestAnimationFrame(() => {
-    portraitImg.style.transition = 'opacity .5s ease';
-    portraitImg.style.opacity = '1';
+  PortraitIntro.setImage({ src: ASSET_BASE + node.portrait, alt: node.name || '' });
+  var dockImg = document.querySelector('.lt-portrait-dock img');
+  if (!dockImg) return;
+  dockImg.style.filter = 'sepia(.3) saturate(.8) brightness(1.15)';
+  dockImg.style.opacity = '0';
+  requestAnimationFrame(function () {
+    dockImg.style.transition = 'opacity .5s ease';
+    dockImg.style.opacity = '1';
   });
-  setTimeout(() => {
-    portraitImg.style.opacity = '0';
-    setTimeout(() => {
-      portraitImg.src = prev;
-      portraitImg.style.filter = '';
-      portraitImg.style.transition = '';
-      portraitImg.style.opacity = '';
+  setTimeout(function () {
+    dockImg.style.opacity = '0';
+    setTimeout(function () {
+      dockImg.style.filter = '';
+      dockImg.style.transition = '';
+      dockImg.style.opacity = '';
     }, 500);
   }, 2000);
 }
