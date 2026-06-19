@@ -1,37 +1,18 @@
 ---
-characterId: "shen-mohan"
-displayName: "沈墨寒"
-publicRole: "列车乘客，可交互 NPC"
-availability: "public"
-playtestStatus: "partial"
-portraitAsset: "/images/characters/shen-mohan.png"
-cardSourceStatus: "待确认"
-tags:
-  - 公开角色
-  - NPC
-  - 乘客
-spoilerLevel: "none"
-summary: "沈墨寒是 LoopTrain 试玩版中的 NPC 之一，列车乘客。当前试玩版中对话链路部分实现。"
-publicNotes: "角色立绘和素材授权状态待确认。对话链路仍在开发中。"
-relatedDevlog:
-  - "current-issues"
-assetLicenseStatus: "待确认"
+name: "灰衣乘客"
+role: "可疑人物"
+playtestStatus: "in-playtest"
+description: "一个穿灰大衣的乘客，行踪可疑。他不主动说话，但似乎在观察列车上的每个人。"
+artSource: "AI 生成"
+authorization: "self-generated"
+tags: [乘客, 可疑]
 ---
 
 ## 角色简介
+灰衣乘客在二号和三号车厢之间徘徊。从不主动开口，但也在观察你。
 
-沈墨寒是 LoopTrain 中玩家可以在列车上遇到的乘客角色。当前试玩版中，他的对话链路仅部分实现，完整交互仍在开发中。
-
-## 当前状态
-
-- **试玩版状态**：部分实现，基础交互可用，完整对话链路待完成。
-- **立绘状态**：立绘资源状态待确认。
-- **对话链路**：部分可用，仍在开发中。
+## 当前试玩版中的表现
+出现在连接处。玩家可试探关于三号车厢和帆布包的信息。回答从不完整。
 
 ## 素材说明
-
-沈墨寒的角色设定由 AI 辅助生成，素材授权状态为"待确认"。
-
-## 相关开发日志
-
-- [当前试玩版的问题整理](/devlog/current-issues)
+AI 生成占位素材，待后续替换。
