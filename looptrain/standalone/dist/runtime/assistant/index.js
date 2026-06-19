@@ -17,8 +17,9 @@ const FallbackTemplateEngine_1 = require("./FallbackTemplateEngine");
 const OutputValidator_1 = require("./OutputValidator");
 const ResponseRenderer_1 = require("./ResponseRenderer");
 class AssistantController {
-    constructor() {
+    constructor(memoryRuntime) {
         this.actionRegistry = new ActionRegistry_1.ActionRegistryLoader();
+        this.memoryRuntime = memoryRuntime;
     }
     async initialize() {
         await this.actionRegistry.load();
@@ -28,7 +29,7 @@ class AssistantController {
         try {
             const { clientState, trigger, playerText } = request;
             // 1. Build CompanionView
-            const rawView = (0, CompanionViewBuilder_1.buildCompanionView)(clientState);
+            const rawView = (0, CompanionViewBuilder_1.buildCompanionView)(clientState, this.memoryRuntime);
             // 2. Apply visibility filter
             const view = (0, CompanionVisibilityFilter_1.applyVisibilityFilter)(rawView, rawView.policy);
             // 3. Classify intent
@@ -54,8 +55,17 @@ class AssistantController {
         }
     }
     getInitialState(clientState) {
-        const hasFirstContact = false;
-        const loopCount = 0;
+        let hasFirstContact = false;
+        let loopCount = 0;
+        if (this.memoryRuntime) {
+            const uniqueLoopIds = new Set();
+            for (const ev of this.memoryRuntime.storage.events) {
+                if (ev.loopId)
+                    uniqueLoopIds.add(ev.loopId);
+            }
+            loopCount = uniqueLoopIds.size || 0;
+            hasFirstContact = loopCount > 0;
+        }
         const isPreContact = !hasFirstContact && loopCount === 0;
         return {
             buttonVisible: true,

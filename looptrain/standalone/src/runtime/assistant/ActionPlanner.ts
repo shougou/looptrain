@@ -45,7 +45,7 @@ function isEligible(
 
 function calcScore(
   action: ActionDefinition,
-  _view: CompanionView,
+  view: CompanionView,
   intent: AssistantIntent
 ): number {
   let score = action.priorityBase;
@@ -53,5 +53,14 @@ function calcScore(
   if (intent === 'ASK_NEXT_ACTION' && action.type === 'dialogue') score += 20;
   if (intent === 'ASK_CLUE_SUMMARY' && action.type === 'observe') score += 20;
   if (action.riskLevel === 'high') score -= 20;
+
+  if (action.requiredClueIds?.length && action.requiredClueIds.every((cid) => view.knowledge.confirmedClueIds.includes(cid))) {
+    score += 20;
+  }
+
+  if (action.type === 'dialogue' && view.scene.visibleNpcIds.length > 0) {
+    score += 15;
+  }
+
   return score;
 }

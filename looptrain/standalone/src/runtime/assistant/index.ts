@@ -16,12 +16,15 @@ import { planActions } from './ActionPlanner';
 import { getFallbackTemplate } from './FallbackTemplateEngine';
 import { validateAll } from './OutputValidator';
 import { renderResponse } from './ResponseRenderer';
+import type { MemoryRuntime } from '../MemoryRuntime';
 
 export class AssistantController {
   private actionRegistry: ActionRegistryLoader;
+  private memoryRuntime?: MemoryRuntime;
 
-  constructor() {
+  constructor(memoryRuntime?: MemoryRuntime) {
     this.actionRegistry = new ActionRegistryLoader();
+    this.memoryRuntime = memoryRuntime;
   }
 
   async initialize(): Promise<void> {
@@ -35,7 +38,7 @@ export class AssistantController {
       const { clientState, trigger, playerText } = request;
 
       // 1. Build CompanionView
-      const rawView = buildCompanionView(clientState);
+      const rawView = buildCompanionView(clientState, this.memoryRuntime);
 
       // 2. Apply visibility filter
       const view = applyVisibilityFilter(rawView, rawView.policy);
@@ -70,9 +73,19 @@ export class AssistantController {
     }
   }
 
-  getInitialState(clientState: RuntimeClientState): AssistantInitialStateResult {
-    const hasFirstContact = false;
-    const loopCount = 0;
+  getInitialState(clientState?: RuntimeClientState): AssistantInitialStateResult {
+    let hasFirstContact = false;
+    let loopCount = 0;
+
+    if (this.memoryRuntime) {
+      const uniqueLoopIds = new Set<string>();
+      for (const ev of this.memoryRuntime.storage.events) {
+        if (ev.loopId) uniqueLoopIds.add(ev.loopId);
+      }
+      loopCount = uniqueLoopIds.size || 0;
+      hasFirstContact = loopCount > 0;
+    }
+
     const isPreContact = !hasFirstContact && loopCount === 0;
 
     return {

@@ -7,6 +7,10 @@ const prompt = require('./llm/prompt');
 const llm = require('./llm/providers');
 const runtime = require('./dist/runtime');
 
+const memoryRuntime = process.env.LT_USE_MEMORY_RUNTIME === 'true'
+  ? new runtime.MemoryRuntime(new runtime.InMemoryMemoryStorage())
+  : undefined;
+
 let config = {};
 try { config = require('dotenv').config({ path: path.join(__dirname, '.env') }).parsed || {}; } catch (_) {}
 
@@ -95,7 +99,7 @@ app.get('/api/config', (_req, res) => {
 
 // ── Runtime v0.6 API routes (spec Section 6) ──
 
-const assistantController = new runtime.AssistantController();
+const assistantController = new runtime.AssistantController(memoryRuntime);
 
 app.post('/api/assistant/ask', async (req, res) => {
   const { clientState, trigger, playerText, debug } = req.body || {};
@@ -115,6 +119,18 @@ app.post('/api/assistant/ask', async (req, res) => {
   }
 
   try {
+    if (memoryRuntime) {
+      try {
+        const migrator = new runtime.LegacyStandaloneStateMigrator();
+        const drafts = migrator.migrate(clientState, clientState.runId || 'run_default');
+        if (drafts && drafts.length > 0) {
+          memoryRuntime.appendEvents(drafts);
+        }
+      } catch (_migErr) {
+        // Non-legacy clientState — skip migration silently
+      }
+    }
+
     const result = await assistantController.ask({
       clientState,
       trigger: trigger || 'ASK_ASSISTANT_BUTTON',
@@ -134,13 +150,12 @@ app.post('/api/assistant/ask', async (req, res) => {
 });
 
 app.get('/api/assistant/state', (_req, res) => {
-  res.json({
-    buttonVisible: true,
-    buttonLabel: '询问助手',
-    buttonEmphasis: 'high',
-    assistantKnownToPlayer: false,
-    firstContactAvailable: true,
-  });
+  const clientState = {
+    playerId: 'player_default', runId: 'run_default', chapterId: 'chapter-01',
+    episodeId: 'trial-001', loopId: 'loop_0000_default', sceneId: 'scene-carriage-03',
+    snapshotId: null, lastEventId: null, eventSeq: 0, eventsSinceSnapshot: [],
+  };
+  res.json(assistantController.getInitialState(clientState));
 });
 
 // ── Legacy LLM bridge ──
@@ -181,11 +196,12 @@ app.get('/', (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n  LoopTrain Standalone MVP`);
-  console.log(`  ─────────────────────`);
+  console.log(`\n  LoopTrain Standalone v0.6.0`);
+  console.log(`  ────────────────────────`);
   console.log(`  Local:  http://localhost:${PORT}`);
   console.log(`  LLM:    ${LLM_ENABLED && DEEPSEEK_API_KEY ? 'enabled (deepseek)' : 'mock only'}`);
-  console.log(`  Engine: v0.5.0\n`);
+  console.log(`  Memory: ${memoryRuntime ? 'enabled' : 'disabled'}`);
+  console.log(`  Engine: v0.5.0 (upgrading)\n`);
 });
 
 module.exports = app;

@@ -35,7 +35,7 @@ function isEligible(action, view, policy) {
         return false;
     return true;
 }
-function calcScore(action, _view, intent) {
+function calcScore(action, view, intent) {
     let score = action.priorityBase;
     if (intent === 'ASK_NEXT_ACTION' && action.tags?.includes('tutorial'))
         score += 25;
@@ -45,5 +45,11 @@ function calcScore(action, _view, intent) {
         score += 20;
     if (action.riskLevel === 'high')
         score -= 20;
+    if (action.requiredClueIds?.length && action.requiredClueIds.every((cid) => view.knowledge.confirmedClueIds.includes(cid))) {
+        score += 20;
+    }
+    if (action.type === 'dialogue' && view.scene.visibleNpcIds.length > 0) {
+        score += 15;
+    }
     return score;
 }
