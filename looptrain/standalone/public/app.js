@@ -723,14 +723,19 @@ async function showXuWelcome(loop) {
 
   // Play portrait intro animation before showing text
   var dock = document.querySelector('.lt-portrait-dock');
-  if (dock) dock.style.display = 'block';
-  await PortraitIntro.play({
-    src: ASSET_BASE + 'xuzhiwei_portrait.png',
-    alt: '许知微',
-    holdMs: 400,
-    durationMs: 700,
-  });
-  if (dock) dock.style.display = '';
+  try {
+    if (dock) dock.style.display = 'block';
+    await PortraitIntro.play({
+      src: ASSET_BASE + 'xuzhiwei_portrait.png',
+      alt: '许知微',
+      holdMs: 400,
+      durationMs: 700,
+    });
+  } catch (_) {} finally {
+    if (dock) dock.style.display = '';
+    var layers = document.querySelectorAll('.portrait-intro-layer');
+    for (var i = 0; i < layers.length; i++) layers[i].remove();
+  }
 
   appendHtml('system', '<div class="lt-msg-title">许知微</div><div>' + esc(text) + '</div>', contentEl);
   scrollBottom(contentEl);
