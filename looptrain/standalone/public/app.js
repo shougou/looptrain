@@ -80,6 +80,12 @@ function render() {
 
   document.body.classList.toggle('dialogue-active', isDialogue);
 
+  // Clean up portrait dock when not in dialogue
+  if (!isDialogue) {
+    var dock = document.querySelector('.lt-portrait-dock');
+    if (dock) dock.style.display = '';
+  }
+
   // Topbar: time / loop / location
   topLeft.innerHTML = `第 ${s.loop} 轮 · ${esc(s.clock)}`;
   topRight.innerHTML = `${sceneName(s.location)} · AP ${s.ap_remaining}`;
@@ -724,7 +730,6 @@ async function showXuWelcome(loop) {
     durationMs: 700,
   });
   if (dock) dock.style.display = '';
-  PortraitIntro.markPlayed('xu_zhiwei', state.loop || 1);
 
   appendHtml('system', '<div class="lt-msg-title">许知微</div><div>' + esc(text) + '</div>', contentEl);
   scrollBottom(contentEl);
