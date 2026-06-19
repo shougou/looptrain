@@ -1,24 +1,23 @@
 {
   "play": {
-    "currentVersion": "v0.6.2-content",
+    "currentVersion": "v0.8-testplay",
     "playUrl": "/play/game",
     "playLabel": "进入游戏",
     "recommendedDevice": "手机竖屏",
-    "stageStatus": "独立运行时",
-    "stageDescription": "LoopTrain 已从 SillyTavern 剥离为独立运行时。v0.6 建立了分层 TypeScript Runtime 架构（MemoryRuntime + Deterministic Assistant），实现事件溯源记忆系统和安全 LLM 接入基础。",
+    "stageStatus": "独立运行时 · 试玩版",
+    "stageDescription": "LoopTrain 已从 SillyTavern 剥离为独立运行时。v0.7 建立了目标引擎、12 条指令系统和许知微助手；v0.8 完成《寒灯初醒》全部试玩内容（5 角色、3 场景、8 线索、8 目标、3 轮结算）。",
     "knownIssues": [
+      "当前对话引擎为 Mock 模式，NPC 对话文本为预设模板，尚未接入真实 LLM。",
       "用户状态尚未持久化，刷新页面后无法恢复进度。",
-      "NPC 对话链路仍不完整，部分角色缺少足够交互内容。",
-      "角色素材风格尚未统一，沈墨寒立绘存在加载稳定性问题。",
-      "移动端首屏 UI 仍需真机验证。",
-      "内容尚未完全外置化，素材管理仍需规范。"
+      "角色素材风格尚未统一，部分立绘为占位素材。",
+      "未建立 Playwright 回归测试，修改后需手动验证完整玩家路径。"
     ],
     "feedbackNote": "试玩反馈可以直接联系开发者。"
   },
   "site": {
     "lastUpdated": "2026-06-19",
-    "currentPhase": "独立运行时稳定",
-    "nextFocus": "Runtime 集成测试、Browser 持久化、内容外置",
+    "currentPhase": "试玩版内容完成",
+    "nextFocus": "LLM Bridge 真实接入、Playwright 回归测试、线上部署评估",
     "tagline": "一个互动叙事游戏。也是一个 AI 协同开发实验室。",
     "description": "通过开发这个游戏，探索 AI 与人类如何共同完成复杂软件——状态管理、Prompt 设计、Agent 协作、Runtime 架构、AI Coding 工作流。"
   }

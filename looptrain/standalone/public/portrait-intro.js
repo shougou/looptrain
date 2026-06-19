@@ -101,33 +101,38 @@ const PortraitIntro = (function () {
     img.style.width = width + 'px';
     img.style.height = height + 'px';
 
-    // Fade in layer
-    await layer.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out', fill: 'forwards' }).finished;
+    try {
+      // Fade in layer
+      await layer.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out', fill: 'forwards' }).finished;
 
-    // Hold
-    await new Promise(function (r) { setTimeout(r, holdMs); });
+      // Hold
+      await new Promise(function (r) { setTimeout(r, holdMs); });
 
-    // Shrink to dock
-    var dockRect = dock.getBoundingClientRect();
-    var dx = dockRect.left - left;
-    var dy = dockRect.top - top;
-    var scaleX = dockRect.width / width;
-    var scaleY = dockRect.height / height;
-    var scale = Math.min(scaleX, scaleY);
+      // Shrink to dock
+      var dockRect = dock.getBoundingClientRect();
+      var dx = dockRect.left - left;
+      var dy = dockRect.top - top;
+      var scaleX = dockRect.width / width;
+      var scaleY = dockRect.height / height;
+      var scale = Math.min(scaleX, scaleY);
 
-    var anim = img.animate(
-      [{ transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
-       { transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')', opacity: 1 }],
-      { duration: durationMs, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
-    );
-    var fade = layer.animate(
-      [{ background: 'rgba(0,0,0,0.55)' }, { background: 'rgba(0,0,0,0)' }],
-      { duration: durationMs, easing: 'ease-out', fill: 'forwards' }
-    );
+      var anim = img.animate(
+        [{ transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+         { transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')', opacity: 1 }],
+        { duration: durationMs, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
+      );
+      var fade = layer.animate(
+        [{ background: 'rgba(0,0,0,0.55)' }, { background: 'rgba(0,0,0,0)' }],
+        { duration: durationMs, easing: 'ease-out', fill: 'forwards' }
+      );
 
-    await Promise.all([anim.finished, fade.finished]);
-    dockImg.style.opacity = '1';
-    layer.remove();
+      await Promise.all([anim.finished, fade.finished]);
+      dockImg.style.opacity = '1';
+    } finally {
+      // Guarantee cleanup: remove fullscreen overlay and fullscreen portrait img
+      if (layer.parentNode) layer.remove();
+      if (img.parentNode) img.remove();
+    }
   }
 
   function setImage(options) {

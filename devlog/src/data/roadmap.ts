@@ -3,69 +3,68 @@ import type { RoadmapPhase } from '../types/index';
 const roadmap: RoadmapPhase[] = [
   {
     id: 'current',
-    label: '当前阶段：独立运行时稳定',
+    label: '当前阶段：试玩版内容完成',
     description:
-      '纯 LT Standalone Runtime 已上线，建立状态持久化、补全 NPC 链路、接入音效系统。',
+      'v0.7 建立了目标引擎、指令系统和许知微助手；v0.8 完成《寒灯初醒》全部试玩内容。下一步接入真实 LLM。',
     tasks: [
       {
         task: '剥离 ST，建立 Standalone MVP',
         status: '已完成',
-        description: '已建立 standalone runtime，复用 engine.js。线上 /play/game 已切换到纯 LT Standalone，不再显示 SillyTavern 界面。',
+        description: '已建立 standalone runtime，复用 engine.js。线上 /play/game 已切换到纯 LT Standalone。',
         priority: 'high',
       },
       {
-        task: '移除 SillyTavern 原始界面暴露',
+        task: '建立 TypeScript Runtime 架构',
         status: '已完成',
-        description: '/play/game 进入纯 LT Standalone，公开入口不再呈现任何 ST UI。',
+        description: 'v0.6 建立分层 Runtime 架构（MemoryRuntime + Deterministic Assistant），61 文件 20 模块。',
         priority: 'high',
       },
       {
-        task: 'LLM Bridge 接入',
+        task: 'Goal Engine + 指令系统 + 许知微',
         status: '已完成',
-        description:
-          'DeepSeek + Mock 双模式，API Key 仅在后端环境变量中。',
-        priority: 'high',
-      },
-      {
-        task: '完善 LT Runtime 状态保持',
-        status: '进行中',
-        description:
-          '刷新页面后恢复当前轮次、场景、线索、NPC 状态和对话摘要。',
+        description: 'v0.7 建立 GoalEngine DSL 判定器、12 条指令 CommandRegistry、许知微主动引导和三轮渐进学习 UI。',
         priority: 'high',
       },
       {
         task: '内容外置化',
-        status: '进行中',
-        description:
-          '将剧情内容、NPC 配置、场景描述从代码中分离为独立数据文件。',
+        status: '已完成',
+        description: 'v0.8 完成所有游戏内容外置为 JSON 文件：5 角色、3 场景、8 线索、8 目标、3 轮结算、开场/结尾。',
+        priority: 'high',
+      },
+      {
+        task: '《寒灯初醒》试玩内容上线',
+        status: '已完成',
+        description: '新故事：14:00→14:15 时间线，陆成/灰衣乘客新角色，8 线索 8 目标，电影式开场，试玩版结局。',
         priority: 'high',
       },
       {
         task: '接入音效系统',
         status: '已完成',
-        description:
-          '已完成音效系统设计，已接入场景环境音、按钮音效、消息发送音效等素材。',
+        description: '场景环境音、按钮音效、消息发送音效、时间压力提示、失败冲击音效和循环转场音效。',
         priority: 'medium',
       },
       {
-        task: '建立 TypeScript Runtime 架构',
+        task: 'UX/UI 场景驱动布局',
         status: '已完成',
-        description:
-          'v0.6 建立分层 Runtime 架构（MemoryRuntime + Deterministic Assistant），61 文件 20 模块，实现事件溯源记忆系统和安全 LLM 接入基础。',
+        description: 'v0.7.1 场景驱动布局、NPC 立绘入场动画、对话面板扩展、3 轮渐进学习 UI。',
         priority: 'high',
       },
       {
-        task: '修复角色立绘资源',
-        status: '进行中',
-        description:
-          '立绘路径已迁移到 /assets/，沈墨寒立绘仍存在加载稳定性问题，需压缩优化。',
+        task: 'LLM Bridge 真实接入',
+        status: '未开始',
+        description: '当前 Mock 模式对话可玩但文本单一；接入 DeepSeek 实现 NPC 动态对话。',
         priority: 'high',
       },
       {
-        task: '完成 3 个 NPC + 1 个隐藏 NPC 试玩链路',
-        status: '进行中',
-        description:
-          '小宁、赵乘警、沈墨寒三个 NPC 的对话和行动链路补全中。',
+        task: '建立 Playwright 回归测试',
+        status: '未开始',
+        description: '覆盖开场→对话→结算→失败→下一轮的完整玩家路径。',
+        priority: 'high',
+      },
+      {
+        task: '状态持久化',
+        status: '未开始',
+        description: '刷新页面后恢复当前轮次、场景、线索、NPC 状态和对话摘要。',
         priority: 'high',
       },
     ],

@@ -277,6 +277,10 @@ body.dialogue-active .lt-scene-card {
   padding: 8px 14px 0;
 }
 .lt-dialogue-panel.lt-show { display: flex; }
+body.dialogue-active .lt-dialogue-panel.lt-show {
+  max-height: none;
+  top: 190px;
+}
 .lt-dialogue-header {
   display: flex; justify-content: space-between; align-items: center;
   padding-bottom: 6px;

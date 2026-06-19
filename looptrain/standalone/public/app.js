@@ -475,7 +475,12 @@ async function startDialogue(npcId) {
   if (npc) {
     var portraitSrc = ASSET_BASE + (npc.portrait || 'xiaoning_portrait.png');
     if (PortraitIntro.shouldPlay(npcId, loop)) {
-      await PortraitIntro.play({ src: portraitSrc, alt: npc.name || npcId });
+      try {
+        await PortraitIntro.play({ src: portraitSrc, alt: npc.name || npcId });
+      } catch (_) {
+        // Clean up orphaned portrait overlay if animation failed
+        document.querySelectorAll('div[style*="z-index:9999"]').forEach(function(el) { el.remove(); });
+      }
       PortraitIntro.markPlayed(npcId, loop);
     } else {
       PortraitIntro.setImage({ src: portraitSrc, alt: npc.name || npcId });
@@ -709,6 +714,9 @@ function esc(s) {
 }
 
 async function showXuWelcome(loop) {
+  // Guard: do not interrupt an active dialogue with another NPC
+  if (state.mode === 'dialogue') return;
+
   var text = '';
   if (XU_DIALOGUES && XU_DIALOGUES.templates) {
     var tpl;
@@ -719,20 +727,24 @@ async function showXuWelcome(loop) {
   }
   if (!text) text = '我是许知微。有什么需要帮助的吗？';
 
-  // Play portrait intro animation before showing text
-  var dock = document.querySelector('.lt-portrait-dock');
-  try {
-    if (dock) dock.style.display = 'block';
-    await PortraitIntro.play({
-      src: ASSET_BASE + 'xuzhiwei_portrait.png',
-      alt: '许知微',
-      holdMs: 400,
-      durationMs: 700,
-    });
-  } catch (_) {} finally {
-    if (dock) dock.style.display = '';
-    var layers = document.querySelectorAll('.portrait-intro-layer');
-    for (var i = 0; i < layers.length; i++) layers[i].remove();
+  // Play portrait intro animation (once per loop, matching startDialogue pattern)
+  var xuKey = 'xu_zhiwei';
+  if (PortraitIntro.shouldPlay(xuKey, loop)) {
+    var dock = document.querySelector('.lt-portrait-dock');
+    try {
+      if (dock) dock.style.display = 'block';
+      await PortraitIntro.play({
+        src: ASSET_BASE + 'xuzhiwei_portrait.png',
+        alt: '许知微',
+        holdMs: 400,
+        durationMs: 700,
+      });
+      PortraitIntro.markPlayed(xuKey, loop);
+    } catch (_) {} finally {
+      if (dock) dock.style.display = '';
+      var layers = document.querySelectorAll('div[style*="z-index:9999"]');
+      for (var i = 0; i < layers.length; i++) layers[i].remove();
+    }
   }
 
   appendHtml('system', '<div class="lt-msg-title">许知微</div><div>' + esc(text) + '</div>', contentEl);
