@@ -442,6 +442,7 @@ async function nextLoop() {
   dialogueLog.innerHTML = '';
   toast(APP_STRINGS.nextLoopToast || '进入下一轮');
   render();
+  setTimeout(function () { showXuWelcome(state.loop); }, 1000);
 }
 
 async function resetGame() {
@@ -702,12 +703,34 @@ function esc(s) {
   return div.innerHTML;
 }
 
+function showXuWelcome(loop) {
+  var text = '';
+  if (XU_DIALOGUES && XU_DIALOGUES.templates) {
+    var tpl;
+    if (loop === 1) tpl = XU_DIALOGUES.templates.find(function(t) { return t.intent === 'welcome_first'; });
+    else if (loop === 2) tpl = XU_DIALOGUES.templates.find(function(t) { return t.intent === 'welcome_loop2'; });
+    else tpl = XU_DIALOGUES.templates.find(function(t) { return t.intent === 'welcome_loop3'; });
+    if (tpl) text = tpl.text;
+  }
+  if (!text) text = '我是许知微。有什么需要帮助的吗？';
+  appendHtml('system', '<div class="lt-msg-title">许知微</div><div>' + esc(text) + '</div>', contentEl);
+  scrollBottom(contentEl);
+}
+
 // ── Event bindings ──
 async function init() {
   await bootContent();
   await AudioManager.init();
   loadState();
   render();
+
+  // Xu Zhiwei proactive welcome (first entry)
+  if (!state.flags.intro_seen && !state.flags.xu_welcome_shown) {
+    state.flags.xu_welcome_shown = true;
+    setTimeout(function () {
+      showXuWelcome(state.loop);
+    }, 1500);
+  }
 
   // Mute toggle
   const muteBtn = document.getElementById('btn-audio-mute');
