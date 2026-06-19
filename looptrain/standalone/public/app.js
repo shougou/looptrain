@@ -185,6 +185,7 @@ function getSceneNpcs() {
 }
 
 function renderPortrait() {
+  if (!portraitImg) return;
   if (state.mode === 'dialogue' && state.active_npc) {
     const npc = NPC_INFO[state.active_npc];
     const src = ASSET_BASE + (npc?.portrait || 'xiaoning_portrait.png');
