@@ -54,7 +54,7 @@ console.log('   OK convince zhao -> trial success');
 console.log('\n2. Engine: failLoop & nextLoop...');
 s = engine.normalize(engine.START_STATE);
 s.known_clues.push('xiaoning_heard_ticking', 'zhao_requires_evidence');
-s.clock = '09:00';
+s.clock = '14:15';
 r = engine.failLoop(s, 'time_out_explosion');
 assert.ok(r.loop_failure_outcome.confirmed_facts.some(x => x.id === 'xiaoning_heard_ticking'));
 r = engine.nextLoop(r);
@@ -68,30 +68,22 @@ s = engine.normalize(engine.START_STATE);
 r = engine.commitAction('我起身穿过过道，走向二号车厢和三号车厢之间的连接处。', s);
 s = r.state;
 assert.strictEqual(s.location, 'connector_2_3');
-r = engine.commitAction('我走向沈墨寒，试探他。', s);
+r = engine.commitAction('我走向那个灰衣乘客，试探他。', s);
 s = r.state;
 assert.strictEqual(s.dialogue_session.turn_limit, 8);
 for (let i = 0; i < 8; i++) {
-  r = engine.dialogueMessage('shen_mohan', '你刚才去了连接处吗？08:48 前后你在什么地方？', s);
+  r = engine.dialogueMessage('gray_passenger', '你刚才去了三号车厢吗？14:05 前后你在什么地方？', s);
   s = r.state;
 }
 assert.strictEqual(s.mode, 'explore');
-assert.ok(s.npc_states.shen_mohan.suspicion >= 50);
-console.log('   OK shen mohan turn limit + risk escalation');
+assert.ok(s.npc_states.gray_passenger.suspicion >= 50);
+console.log('   OK gray passenger turn limit + risk escalation');
 
-// ── Hidden node ──
-console.log('\n4. Engine: hidden node (xiaoning mother)...');
+// ── Hidden node (removed in v0.8) ──
+console.log('\n4. Engine: hidden node removed...');
 s = engine.normalize(engine.START_STATE);
-let blocked = engine.startDialogue(s, 'xiaoning_mother_hidden');
-assert.ok(blocked.messages[0].text.includes('记忆'), 'hidden mother not directly available');
-r = engine.startDialogue(s, 'xiaoning');
-s = r.state;
-r = engine.dialogueMessage('xiaoning', '别怕，我会保护你。这个布娃娃是谁给你的？你妈妈是不是让它陪着你？', s);
-s = r.state;
-assert.ok(s.dialogue_session.pending_clues.includes('mother_doll_memory'));
-assert.ok(s.flags.visible_hidden_npcs.includes('xiaoning_mother_hidden'));
-assert.strictEqual(s.flags.xiaoning_mother_memory_triggered, true);
-console.log('   OK hidden node trigger');
+assert.ok(!s.flags.visible_hidden_npcs || s.flags.visible_hidden_npcs.length === 0);
+console.log('   OK hidden NPCs cleanly removed');
 
 // ── Suggestions ──
 console.log('\n5. Engine: suggestions...');
@@ -107,8 +99,7 @@ console.log('\n6. Engine: npcs & clue details...');
 const npcs = engine.getNpcs();
 assert.ok(npcs.xiaoning);
 assert.ok(npcs.zhao_police);
-assert.ok(npcs.shen_mohan);
-assert.ok(npcs.xiaoning_mother_hidden);
+assert.ok(npcs.gray_passenger);
 const clues = engine.getClueDetails();
 assert.ok(clues.gray_coat_note_pressure);
 assert.ok(clues.ticking_under_floor);

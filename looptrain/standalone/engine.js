@@ -12,7 +12,7 @@ var START_STATE = {
   mode: 'explore',
   input_channel: 'roleplay',
   loop: 1,
-  clock: '08:45',
+  clock: '14:00',
   ap_remaining: 10,
   location: 'carriage_2',
   active_npc: null,
@@ -24,13 +24,12 @@ var START_STATE = {
   npc_states: {
     xiaoning: { trust: 20, fear: 45, suspicion: 0 },
     zhao_police: { trust: 0, suspicion: 15, requires_evidence: true },
-    shen_mohan: { trust: -10, suspicion: 35, composure: 80 },
-    xiaoning_mother_hidden: { trust: 0, fear: 0, visibility: 'hidden' },
+    gray_passenger: { trust: -10, suspicion: 35, composure: 80 },
   },
   flags: {
     intro_seen: false, roleplay_hint_seen: false, command_hint_seen: false,
     zhao_checked_floor: false, trial_success: false,
-    xiaoning_mother_memory_triggered: false, shen_connector_hint_seen: false,
+    xiaoning_mother_memory_triggered: false, gray_connector_hint_seen: false,
     visible_hidden_npcs: [],
   },
 };
@@ -70,43 +69,35 @@ var FALLBACK_NPCS = {
       { label: '结束对话', template: '__END_DIALOGUE__' },
     ],
   },
-  shen_mohan: {
-    name: '沈墨寒', cost: 3, turn_limit: 8, near_limit_hint_at: 6, turn_limit_policy: 'risk_escalation',
-    portrait: 'shen_mohan_portrait.png', role: 'misdirection_pressure', location: 'connector_2_3',
-    opening: '沈墨寒把视线从窗外移到你身上，像是早就等着你开口："你终于注意到我了。"',
-    near_limit_hint: '沈墨寒的眼神冷了下来。你意识到，他不是在回答你，而是在反过来确认你的身份。',
-    limit_message: '沈墨寒微微侧过身，声音很低："你问得太多了。"',
+  gray_passenger: {
+    name: '灰衣乘客', cost: 3, turn_limit: 8, near_limit_hint_at: 6, turn_limit_policy: 'risk_escalation',
+    portrait: 'gray_passenger_portrait.png', role: 'misdirection_pressure', location: 'connector_2_3',
+    opening: '灰衣乘客把视线从窗外移到你身上。他没有说话，只是看着你，像是在判断你记得多少。',
+    near_limit_hint: '灰衣乘客的眼神沉了下来。你意识到，他似乎也在试探你。',
+    limit_message: '灰衣乘客微微侧过身，声音很低："你问得太多了。"',
     suggestions: [
-      { label: '反问试探', template: '我看着沈墨寒的眼睛，反问他：你刚才为什么一直盯着二号车厢的连接处？' },
-      { label: '提到灰大衣纸条', template: '我没有拿出纸条，只试探地说：有人提醒我，不要相信灰大衣。' },
-      { label: '提到口琴声', template: '我故意说：餐车那段口琴声，你也听见了吧？' },
+      { label: '反问试探', template: '我看着灰衣乘客的眼睛，反问他：你刚才为什么一直盯着三号车厢的连接处？' },
+      { label: '提到纸条', template: '我没有拿出纸条，只试探地说：有人提醒我，不要相信灰大衣。' },
+      { label: '提到三号车厢', template: '我故意说：三号车厢的行李架，你是不是也去看过？' },
       { label: '结束对话', template: '__END_DIALOGUE__' },
     ],
-  },
-  xiaoning_mother_hidden: {
-    name: '小宁妈妈', cost: 0, turn_limit: 2, near_limit_hint_at: 1, turn_limit_policy: 'memory_once',
-    portrait: 'xiaoning_mother_portrait.png', role: 'hidden_memory', hidden: true, location: 'carriage_2',
-    opening: '你听见小宁怀里的布娃娃里，像有一个温柔的声音隔着旧布料传来："别吓着她。"',
-    near_limit_hint: '那个温柔的声音渐渐变轻，像一段快要散去的记忆。',
-    limit_message: '布娃娃安静下来，车厢里的铁轨声重新盖过一切。',
-    suggestions: [{ label: '结束对话', template: '__END_DIALOGUE__' }],
   },
 };
 
 var FALLBACK_CLUE_DETAILS = {
-  gray_coat_note_pressure: { id: 'gray_coat_note_pressure', title: '不要相信灰大衣', source: '开场纸条', confidence: 'medium', usable_with: ['shen_mohan', 'self_reasoning'], carry_to_next_loop: true },
+  gray_coat_note_pressure: { id: 'gray_coat_note_pressure', title: '不要相信灰大衣', source: '开场纸条', confidence: 'medium', usable_with: ['gray_passenger', 'self_reasoning'], carry_to_next_loop: true },
   xiaoning_heard_ticking: { id: 'xiaoning_heard_ticking', title: '小宁也听见过声音', source: '小宁对话', confidence: 'high', usable_with: ['zhao_police', 'xiaoning'], carry_to_next_loop: true },
-  ticking_under_floor: { id: 'ticking_under_floor', title: '地板下方的滴答声', source: '小宁对话', confidence: 'high', usable_with: ['zhao_police', 'shen_mohan', 'connector'], carry_to_next_loop: true },
+  ticking_under_floor: { id: 'ticking_under_floor', title: '地板下方的滴答声', source: '小宁对话', confidence: 'high', usable_with: ['zhao_police', 'gray_passenger', 'connector'], carry_to_next_loop: true },
   sound_not_from_seat: { id: 'sound_not_from_seat', title: '声音不来自座位下方', source: '玩家检查', confidence: 'high', usable_with: ['zhao_police'], carry_to_next_loop: true },
-  suspicious_connector_movement: { id: 'suspicious_connector_movement', title: '连接处有人停留过', source: '沈墨寒对话', confidence: 'medium', usable_with: ['zhao_police', 'shen_mohan'], carry_to_next_loop: true },
+  suspicious_connector_movement: { id: 'suspicious_connector_movement', title: '连接处有人停留过', source: '灰衣乘客对话', confidence: 'medium', usable_with: ['zhao_police', 'gray_passenger'], carry_to_next_loop: true },
   mother_doll_memory: { id: 'mother_doll_memory', title: '小宁妈妈与布娃娃', source: '隐藏记忆节点', confidence: 'high', usable_with: ['xiaoning'], carry_to_next_loop: true },
-  harmonica_from_dining_car: { id: 'harmonica_from_dining_car', title: '餐车方向的口琴声', source: '世界事件', confidence: 'low', usable_with: ['shen_mohan', 'self_reasoning'], carry_to_next_loop: true },
+  harmonica_from_dining_car: { id: 'harmonica_from_dining_car', title: '餐车方向的口琴声', source: '世界事件', confidence: 'low', usable_with: ['gray_passenger', 'self_reasoning'], carry_to_next_loop: true },
   zhao_requires_evidence: { id: 'zhao_requires_evidence', title: '赵乘警需要证据才会行动', source: '赵乘警反馈', confidence: 'high', usable_with: ['zhao_police', 'self_planning'], carry_to_next_loop: true },
 };
 
 var FALLBACK_SCENES = {
-  carriage_2: { name: '二号车厢', npcs: ['xiaoning', 'zhao_police'], text: '列车二号车厢灯光昏黄。窗外，重庆方向的火光已经渐远。乘客们神色紧张，各自拥着行李。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。地板下方似乎藏着很轻的滴答声。' },
-  connector_2_3: { name: '连接处', npcs: ['shen_mohan'], text: '二号车厢与三号车厢之间的连接处。冷风从缝隙中灌入，列车晃动时铁板发出沉闷的声响。灰大衣的沈墨寒站在这里，像是在等人，又像是在观察着什么。远处偶尔还能听见防空警报的余音。' },
+  carriage_2: { name: '二号车厢', npcs: ['xiaoning', 'zhao_police'], text: '列车二号车厢灯光昏黄。窗外，远处的城市灯火渐远。乘客们神色紧张，各自拥着行李。小宁抱着旧布娃娃坐在靠窗位置，赵乘警正在过道里查票。再过不到十五分钟，一切都会改变。' },
+  connector_2_3: { name: '连接处', npcs: ['gray_passenger'], text: '二号车厢与三号车厢之间的连接处。冷风从缝隙中灌入，列车晃动时铁板发出沉闷的声响。灰衣乘客站在这里，像是在等人，又像是在观察着什么。' },
 };
 
 // ── Content Loading ──
@@ -210,7 +201,7 @@ function normalize(state) {
   s.npc_states = Object.assign(clone(START_STATE.npc_states), state && state.npc_states ? state.npc_states : {});
   s.flags = Object.assign(clone(START_STATE.flags), state && state.flags ? state.flags : {});
   s.flags.visible_hidden_npcs = unique(s.flags.visible_hidden_npcs);
-  if (s.flags.xiaoning_mother_memory_triggered) unlockHiddenNpc(s, 'xiaoning_mother_hidden');
+  if (s.flags.xiaoning_mother_memory_triggered) { /* hidden NPC removed in v0.8 */ }
   s.known_clues = unique(s.known_clues);
   s.carried_memory = unique(s.carried_memory);
   s.unlocked_actions = s.unlocked_actions || [];
@@ -222,7 +213,7 @@ function normalize(state) {
 function addClue(s, id) { if (id && !s.known_clues.includes(id)) s.known_clues.push(id); }
 
 function advanceClock(s, minutes) {
-  var parts = String(s.clock || '08:45').split(':');
+  var parts = String(s.clock || '14:00').split(':');
   var h = Number(parts[0]); var m = Number(parts[1]);
   var total = h * 60 + m + minutes;
   s.clock = String(Math.floor(total / 60)).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0');
@@ -293,7 +284,7 @@ function parseAction(text) {
   if (/前往连接处|去连接处|到连接处|走向.*连接处/.test(t)) return { intent: 'move_to_connector', confidence: 0.88 };
   if (/赵|乘警|警察/.test(t) && /检查|证据|地板|说服|异常|请他|报告/.test(t)) return { intent: 'convince_zhao', target_npc: 'zhao_police', confidence: 0.9 };
   if (/赵|乘警|警察/.test(t)) return { intent: 'start_dialogue', target_npc: 'zhao_police', confidence: 0.82 };
-  if (/沈|灰大衣|墨寒/.test(t)) return { intent: 'start_dialogue', target_npc: 'shen_mohan', confidence: 0.84 };
+  if (/沈|灰衣|灰大衣/.test(t)) return { intent: 'start_dialogue', target_npc: 'gray_passenger', confidence: 0.84 };
   if (/小宁|女孩|布娃娃/.test(t) && /对话|说话|问|靠近|蹲|安抚|确认/.test(t)) return { intent: 'start_dialogue', target_npc: 'xiaoning', confidence: 0.95 };
   if (/座位|下面|地板|声音|滴答|观察|检查|系鞋带/.test(t)) return { intent: 'observe_under_seat', confidence: 0.86 };
   if (/失败|爆炸|下一轮|重开/.test(t)) return { intent: 'force_fail', confidence: 0.8 };
@@ -314,7 +305,7 @@ function suggestions(s) {
     );
   }
   if (loc === 'connector_2_3') {
-    out.push({ label: '试探沈墨寒', template: '我走向沈墨寒，试探他是否知道连接处发生过什么。' });
+    out.push({ label: '试探灰衣乘客', template: '我走向那个穿灰大衣的人，试探他是否知道连接处发生过什么。' });
   }
   if (loc === 'carriage_2') {
     out.push({ label: '前往连接处', template: '我起身穿过过道，走向二号车厢和三号车厢之间的连接处。' });
@@ -331,12 +322,12 @@ function dialogueSuggestions(s) {
 }
 
 function maybeFail(s) {
-  if (s.ap_remaining <= 0 || String(s.clock) >= '09:00') return failLoop(s, 'time_out_explosion');
+  if (s.ap_remaining <= 0 || String(s.clock) >= '14:15') return failLoop(s, 'time_out_explosion');
   return null;
 }
 
 function successHtml() {
-  return '<div class="lt-msg-title">试玩版结束</div>\n<div>赵乘警用警棍敲了敲地板。咚。声音是空的。</div>\n<div>他的脸色终于变了："你到底是谁？"</div>\n<div>你还没回答，餐车方向传来一小段口琴声。</div>\n<div class="lt-subtitle">你证明了</div>\n<ul>\n<li>二号车厢存在异常。</li>\n<li>小宁听见的声音是真的。</li>\n<li>赵乘警开始相信你。</li>\n<li>地板下方确实有夹层。</li>\n</ul>\n<div class="lt-subtitle">但你还不知道</div>\n<ul>\n<li>炸弹在哪里。</li>\n<li>谁是真正敌人。</li>\n<li>口琴声来自谁。</li>\n<li>灰大衣男人到底站在哪一边。</li>\n</ul>\n<div class="lt-subtitle">正式版目标</div>\n<div>活下去，找到炸弹，猜出敌人，留下扣子。</div>';
+  return '<div class="lt-msg-title">试玩版结束</div>\n<div>赵乘警用警棍敲了敲地板。咚。声音是空的。</div>\n<div>他的脸色终于变了："你到底是谁？"</div>\n<div>三号车厢方向，一切安静得异常。</div>\n<div class="lt-subtitle">你证明了</div>\n<ul>\n<li>三号车厢确实存在异常。</li>\n<li>小宁听见的声音是真的。</li>\n<li>赵乘警开始相信你。</li>\n<li>证据链已经完整。</li>\n</ul>\n<div class="lt-subtitle">但你还不知道</div>\n<ul>\n<li>那个灰衣乘客到底是谁。</li>\n<li>谁制造了这场事故。</li>\n<li>循环为什么持续发生。</li>\n</ul>\n<div class="lt-subtitle">正式版目标</div>\n<div>找出真相，打破循环，留下属于你的答案。</div>';
 }
 
 function startDialogue(state, npcId) {
@@ -369,7 +360,7 @@ function commitAction(text, state) {
   if (action.intent === 'move_to_connector') {
     s.ap_remaining -= 1; advanceClock(s, 1); s.location = 'connector_2_3';
     var failure1 = maybeFail(s); if (failure1) return failure1;
-    return { state: s, messages: [{ type: 'system', text: '你起身穿过过道，走到二号车厢和三号车厢之间的连接处。列车晃动让铁板发出沉闷的声响。灰大衣的沈墨寒站在这里。' }], suggestions: suggestions(s), goal: currentGoal(s) };
+    return { state: s, messages: [{ type: 'system', text: '你起身穿过过道，走到二号车厢和三号车厢之间的连接处。列车晃动让铁板发出沉闷的声响。灰衣乘客站在这里，目光沉静。' }], suggestions: suggestions(s), goal: currentGoal(s) };
   }
   if (action.intent === 'move_to_carriage_2') {
     s.ap_remaining -= 1; advanceClock(s, 1); s.location = 'carriage_2';
@@ -462,9 +453,7 @@ function dialogueMessage(npcId, playerText, state, options) {
     if (motherTopic && emotionalKey && s.npc_states.xiaoning.trust >= 36 && s.npc_states.xiaoning.fear <= 55) {
       session.pending_clues = unique([].concat(session.pending_clues || [], ['mother_doll_memory']));
       s.flags.xiaoning_mother_memory_triggered = true;
-      unlockHiddenNpc(s, 'xiaoning_mother_hidden');
       reply = _dlgText('xiaoning-dialogue', 'mother_high_trust') || '小宁低头看着怀里的布娃娃，声音轻得像怕惊醒什么："妈妈说，坐火车的时候，不要和陌生人讲话……可是你不像坏人。"';
-      response.memory_node = { id: 'xiaoning_mother_memory', npc_id: 'xiaoning_mother_hidden', portrait: (NPCS.xiaoning_mother_hidden && NPCS.xiaoning_mother_hidden.portrait) || 'xiaoning_mother_portrait.png', title: '隐藏记忆：小宁妈妈' };
     } else if (/滴答|声音|下面|地板|听见/.test(t) || gentle) {
       session.pending_clues = unique([].concat(session.pending_clues || [], ['ticking_under_floor', 'xiaoning_heard_ticking']));
       reply = _dlgText('xiaoning-dialogue', 'ticking_topic') || '小宁抬头看了你一眼，又很快低下头。她用鞋尖轻轻碰了碰地板："不是座位下面……是下面在响。"';
@@ -479,21 +468,17 @@ function dialogueMessage(npcId, playerText, state, options) {
       addClue(s, 'zhao_requires_evidence');
       reply = _dlgText('zhao-dialogue', 'default') || '赵乘警没有立刻行动："你需要给我能查证的东西。谁听见了？你看见了什么？"';
     }
-  } else if (npcId === 'shen_mohan') {
-    if (/连接处|08:48|餐车|口琴|离开|去了哪里/.test(t)) {
+  } else if (npcId === 'gray_passenger') {
+    if (/连接处|14:0[0-9]|三号车厢|行李架|离开|去了哪里/.test(t)) {
       session.pending_clues = unique([].concat(session.pending_clues || [], ['suspicious_connector_movement', 'harmonica_from_dining_car']));
-      s.flags.shen_connector_hint_seen = true;
-      reply = _dlgText('shen-mohan-dialogue', 'connector_harmonica') || '沈墨寒的手指在打火机上停了一瞬："你关心的是我，还是连接处？"他没有否认自己离开过座位。';
+      s.flags.gray_connector_hint_seen = true;
+      reply = _dlgText('shen-mohan-dialogue', 'connector_harmonica') || '灰衣乘客没有立刻回答。他似乎在权衡什么："你关心的是我，还是三号车厢？"他没有否认自己离开过座位。';
     } else if (/灰大衣|纸条|相信|不相信/.test(t)) {
-      s.npc_states.shen_mohan.suspicion += 8;
-      reply = _dlgText('shen-mohan-dialogue', 'gray_coat_mentioned') || '沈墨寒低头看了一眼自己的袖口，笑意很淡："提醒你的人，也许更不值得相信。"';
+      s.npc_states.gray_passenger.suspicion += 8;
+      reply = _dlgText('shen-mohan-dialogue', 'gray_coat_mentioned') || '灰衣乘客低头看了一眼自己的袖口，笑意很淡："提醒你的人，也许更不值得相信。"';
     } else {
-      reply = _dlgText('shen-mohan-dialogue', 'default') || '沈墨寒看着你，像是在衡量你究竟记得多少："你问得太急了。"';
+      reply = _dlgText('shen-mohan-dialogue', 'default') || '灰衣乘客看着你，像是在衡量你究竟记得多少："你问得太急了。"';
     }
-  } else if (npcId === 'xiaoning_mother_hidden') {
-    reply = /小宁|孩子|她/.test(t)
-      ? (_dlgText('xiaoning-mother-dialogue', 'mentions_xiaoning') || '那个温柔的声音像从旧布料深处传来："她一直很怕声音。你若真想帮她，就别急着逼她说出全部。"')
-      : (_dlgText('xiaoning-mother-dialogue', 'default') || '布娃娃轻轻晃了一下。那个声音低低地说："有些话，她不是不记得，只是不敢记得。"');
   }
 
   var llmReply = cleanLlmReply(options.llm_reply || options.llmReply || '');
@@ -520,8 +505,8 @@ function endDialogue(state) {
   s.ap_remaining -= cost;
   advanceClock(s, cost);
   var world_events = [];
-  if (npcId === 'xiaoning') world_events.push('沈墨寒已经离开二号车厢。', '餐车方向传来一小段口琴声。');
-  if (npcId === 'shen_mohan') world_events.push('沈墨寒重新看向窗外，不再主动开口。');
+  if (npcId === 'xiaoning') world_events.push('灰衣乘客已经离开二号车厢。');
+  if (npcId === 'gray_passenger') world_events.push('灰衣乘客重新看向窗外，不再主动开口。');
   if ((session.pending_events || []).includes('zhao_ready_to_check_floor')) {
     s.flags.zhao_checked_floor = true;
     if (countValidEvidence(s) >= 2) s.flags.trial_success = true;
@@ -572,7 +557,7 @@ function nextLoop(previous) {
   s.flags.intro_seen = true;
   s.carried_memory = carry;
   s.known_clues = unique(['gray_coat_note_pressure'].concat(carry));
-  var opening = '你猛地睁开眼。\n\n二号车厢，08:45。';
+  var opening = '你猛地睁开眼。\n\n二号车厢，14:00。';
   if (carry.length) {
     opening += '\n\n你记得上一轮留下的信息：' + carry.map(clueName).join('、') + '。';
     if (carry.includes('xiaoning_heard_ticking') || carry.includes('ticking_under_floor')) {

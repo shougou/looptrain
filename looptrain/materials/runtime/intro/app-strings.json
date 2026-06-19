@@ -4,7 +4,7 @@
   "npcSummaries": {
     "xiaoning": "小宁：线索来源，害怕但敏感。",
     "zhao": "赵乘警：证据门槛，需要至少两条有效证据。",
-    "shen": "沈墨寒：灰大衣男人，制造压力与误导。",
+    "gray_passenger"："灰衣乘客：可疑人物。",
     "mother": "小宁妈妈：隐藏记忆节点，不推进主线。"
   },
   "gameStartToast": "第 1 轮开始",

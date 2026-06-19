@@ -50,7 +50,7 @@ function buildNpcPrompt(npcId, playerText, state) {
     systemPrompt = [
       '你是 LoopTrain 互动叙事游戏中的 NPC：' + npc.name + '。',
       '当前场景：' + ((scene && scene.name) || state.location) + '。',
-      '当前时间：' + state.clock + '，列车将在 09:00 前爆炸。',
+      '当前时间：' + state.clock + '，列车将在 14:15 前爆炸。',
       '玩家剩余行动点：' + state.ap_remaining + '。',
       '你的角色定位：' + (npc.role || '对话角色') + '。',
       '',

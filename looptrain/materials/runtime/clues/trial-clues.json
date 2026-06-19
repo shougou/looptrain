@@ -1,12 +1,12 @@
 {
   "clues": [
-    { "id": "clue.explosion_time_1415", "title": "爆炸固定发生在14:15", "source": "自我认知", "confidence": "high", "usable_with": ["zhao-chengjing"], "carry_to_next_loop": true, "description": "你确认了爆炸的准确时间点" },
+    { "id": "clue.explosion_time_1415", "title": "爆炸固定发生在14:15", "source": "自我认知", "confidence": "high", "usable_with": ["zhao_police"], "carry_to_next_loop": true, "description": "你确认了爆炸的准确时间点" },
     { "id": "clue.xiaoning_nervous", "title": "小宁从三号车厢回来后紧张", "source": "观察小宁", "confidence": "medium", "usable_with": ["xiaoning"], "carry_to_next_loop": true, "description": "观察小宁后，你注意到她不时看向三号车厢方向" },
-    { "id": "clue.xiaoning_heard_metal_sound", "title": "小宁听到异常声音", "source": "小宁对话", "confidence": "high", "usable_with": ["zhao-chengjing"], "carry_to_next_loop": true, "description": "小宁压低声音告诉你：刚才经过三号车厢时，她听到里面传来奇怪的碰撞声" },
-    { "id": "clue.gray_passenger_entered_carriage_3", "title": "灰衣乘客进入三号车厢", "source": "观察/询问", "confidence": "high", "usable_with": ["zhao-chengjing"], "carry_to_next_loop": true, "description": "你确认了那个穿灰大衣的人在爆炸前进入过三号车厢" },
-    { "id": "clue.canvas_bag_on_luggage_rack", "title": "行李架上有旧帆布包", "source": "检查行李架", "confidence": "high", "usable_with": ["zhao-chengjing", "gray-passenger"], "carry_to_next_loop": true, "description": "三号车厢行李架上有一个不属于乘客的旧帆布包" },
-    { "id": "clue.gray_passenger_returned_without_bag", "title": "灰衣人空手返回", "source": "跟踪/观察", "confidence": "high", "usable_with": ["zhao-chengjing"], "carry_to_next_loop": true, "description": "灰衣乘客从三号车厢回来后，手里没有包" },
-    { "id": "clue.conductor_can_clear_carriage", "title": "赵乘警有权清空车厢", "source": "询问赵乘警", "confidence": "high", "usable_with": ["zhao-chengjing"], "carry_to_next_loop": true, "description": "赵乘警证实他有权限疏散乘客" },
-    { "id": "clue.enough_evidence_for_conductor", "title": "线索足以说服赵乘警", "source": "派生线索", "confidence": "high", "usable_with": ["zhao-chengjing"], "carry_to_next_loop": true, "description": "你已经掌握了足够证据说服赵乘警采取行动" }
+    { "id": "clue.xiaoning_heard_metal_sound", "title": "小宁听到异常声音", "source": "小宁对话", "confidence": "high", "usable_with": ["zhao_police"], "carry_to_next_loop": true, "description": "小宁压低声音告诉你：刚才经过三号车厢时，她听到里面传来奇怪的碰撞声" },
+    { "id": "clue.gray_passenger_entered_carriage_3", "title": "灰衣乘客进入三号车厢", "source": "观察/询问", "confidence": "high", "usable_with": ["zhao_police"], "carry_to_next_loop": true, "description": "你确认了那个穿灰大衣的人在爆炸前进入过三号车厢" },
+    { "id": "clue.canvas_bag_on_luggage_rack", "title": "行李架上有旧帆布包", "source": "检查行李架", "confidence": "high", "usable_with": ["zhao_police", "gray_passenger"], "carry_to_next_loop": true, "description": "三号车厢行李架上有一个不属于乘客的旧帆布包" },
+    { "id": "clue.gray_passenger_returned_without_bag", "title": "灰衣人空手返回", "source": "跟踪/观察", "confidence": "high", "usable_with": ["zhao_police"], "carry_to_next_loop": true, "description": "灰衣乘客从三号车厢回来后，手里没有包" },
+    { "id": "clue.conductor_can_clear_carriage", "title": "赵乘警有权清空车厢", "source": "询问赵乘警", "confidence": "high", "usable_with": ["zhao_police"], "carry_to_next_loop": true, "description": "赵乘警证实他有权限疏散乘客" },
+    { "id": "clue.enough_evidence_for_conductor", "title": "线索足以说服赵乘警", "source": "派生线索", "confidence": "high", "usable_with": ["zhao_police"], "carry_to_next_loop": true, "description": "你已经掌握了足够证据说服赵乘警采取行动" }
   ]
 }

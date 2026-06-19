@@ -338,7 +338,7 @@ function showClues(target) {
 
 function showCharacters(target) {
   const summaries = APP_STRINGS.npcSummaries || {};
-  appendHtml('system', '<div class="lt-msg-title">人物</div><ul><li>' + (summaries.xiaoning || '小宁：线索来源') + '</li><li>' + (summaries.zhao || '赵乘警：证据门槛') + '</li><li>' + (summaries.shen || '沈墨寒：灰大衣男人') + '</li><li>' + (summaries.mother || '小宁妈妈：隐藏记忆节点') + '</li></ul>', target);
+  appendHtml('system', '<div class="lt-msg-title">人物</div><ul><li>' + (summaries.xiaoning || '小宁：线索来源') + '</li><li>' + (summaries.zhao || '赵乘警：证据门槛') + '</li><li>' + (summaries.gray || '灰衣乘客：可疑人物') + '</li></ul>', target);
 }
 
 function showStatus(target) {
@@ -443,7 +443,7 @@ async function nextLoop() {
   ngLayer.classList.remove('lt-show');
   lastFailure = null;
   if (res?.state) state = res.state;
-  appendMsg('system', res?.opening || '你回到了 08:45。', logEl);
+  appendMsg('system', res?.opening || '你回到了 14:00。', logEl);
   dialogueLog.innerHTML = '';
   toast(APP_STRINGS.nextLoopToast || '进入下一轮');
   render();
@@ -844,7 +844,7 @@ async function init() {
       contentEl.style.display = '';
       bottomEl.style.display = '';
       setTimeout(function () { showXuWelcome(state.loop); }, 2000);
-      const startMsg = (INTRO_DATA && INTRO_DATA.gameStartMessage) || '1939 年冬，重庆。日机连日轰炸，渝江线 307 次夜行列车成了离开这座燃烧之城的最后窗口。你在二号车厢醒来，表面是普通乘客，真实身份是打入敌人内部的地下工作者。口袋里有半张车票、一张写着"不要相信灰大衣"的纸条，以及一枚银色扣子。09:00 前，列车会在北江铁桥前爆炸。';
+      const startMsg = (INTRO_DATA && INTRO_DATA.gameStartMessage) || '1939 年冬，江城号列车。窗外夜色流动，车厢灯光昏黄。你醒来，不记得自己是谁——但你知道：14:15，这列火车会爆炸。许知微合上笔记本抬起头："你又醒了。"';
       appendMsg('system', startMsg, logEl);
       toast(APP_STRINGS.gameStartToast || '第 1 轮开始');
       render();
