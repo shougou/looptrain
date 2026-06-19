@@ -105,7 +105,8 @@ function render() {
     const verbLabel = id === 'xiaoning' ? '询问小宁' :
                       id === 'zhao_police' ? '说服赵乘警' :
                       id === 'shen_mohan' ? '试探沈墨寒' :
-                    id === 'xu_zhiwei' ? '询问许知微' : n.name;
+                    id === 'xu_zhiwei' ? '询问许知微' :
+                    id === 'zhao_chengjing' ? '说服赵乘警' : n.name;
     return `<button class="lt-npc-chip${cls}" data-npc-id="${id}" data-type="person">${verbLabel}</button>`;
   }).join('');
   if (s.location === 'carriage_2') {
