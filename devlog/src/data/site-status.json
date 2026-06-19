@@ -1,14 +1,13 @@
 {
   "play": {
-    "currentVersion": "v0.5.0-standalone",
+    "currentVersion": "v0.6.1-runtime",
     "playUrl": "/play/game",
     "playLabel": "进入游戏",
     "recommendedDevice": "手机竖屏",
     "stageStatus": "独立运行时",
-    "stageDescription": "LoopTrain 已从 SillyTavern 剥离为独立运行时。当前阶段重点为状态持久化、音效系统和 NPC 链路补全。",
+    "stageDescription": "LoopTrain 已从 SillyTavern 剥离为独立运行时。v0.6 建立了分层 TypeScript Runtime 架构（MemoryRuntime + Deterministic Assistant），实现事件溯源记忆系统和安全 LLM 接入基础。",
     "knownIssues": [
-      "音效系统尚未接入真实素材。",
-      "用户状态保持仍为早期方案，刷新页面后无法恢复进度。",
+      "用户状态尚未持久化，刷新页面后无法恢复进度。",
       "NPC 对话链路仍不完整，部分角色缺少足够交互内容。",
       "角色素材风格尚未统一，沈墨寒立绘存在加载稳定性问题。",
       "移动端首屏 UI 仍需真机验证。",
@@ -17,9 +16,9 @@
     "feedbackNote": "试玩反馈可以直接联系开发者。"
   },
   "site": {
-    "lastUpdated": "2026-06-13",
+    "lastUpdated": "2026-06-19",
     "currentPhase": "独立运行时稳定",
-    "nextFocus": "状态保持、音效系统、NPC 链路、内容外置",
+    "nextFocus": "Runtime 集成测试、Browser 持久化、内容外置",
     "tagline": "一个互动叙事游戏。也是一个 AI 协同开发实验室。",
     "description": "通过开发这个游戏，探索 AI 与人类如何共同完成复杂软件——状态管理、Prompt 设计、Agent 协作、Runtime 架构、AI Coding 工作流。"
   }

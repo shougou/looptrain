@@ -42,10 +42,17 @@ const roadmap: RoadmapPhase[] = [
       },
       {
         task: '接入音效系统',
-        status: '进行中',
+        status: '已完成',
         description:
-          '已完成音效系统设计，待接入真实音效素材。',
+          '已完成音效系统设计，已接入场景环境音、按钮音效、消息发送音效等素材。',
         priority: 'medium',
+      },
+      {
+        task: '建立 TypeScript Runtime 架构',
+        status: '已完成',
+        description:
+          'v0.6 建立分层 Runtime 架构（MemoryRuntime + Deterministic Assistant），61 文件 20 模块，实现事件溯源记忆系统和安全 LLM 接入基础。',
+        priority: 'high',
       },
       {
         task: '修复角色立绘资源',

@@ -1,15 +1,38 @@
 ---
 title: "版本历史"
-date: "2026-06-13T23:45:00+08:00"
-version: "v0.5.0-standalone"
+date: "2026-06-19T17:00:00+08:00"
+version: "v0.6.1-runtime"
 status: "done"
 tags:
   - 版本记录
   - 项目历史
-summary: "基于 Git 提交记录整理的 LoopTrain 完整版本历史，从 v0.4.3 ST 试玩版到 v0.5.0-standalone 独立运行时。"
+summary: "基于 Git 提交记录整理的 LoopTrain 完整版本历史，从 v0.4.3 ST 试玩版到 v0.6.1 Runtime 架构。"
 ---
 
-基于 `looptrain_st_source_runtime_v0.4` 仓库的 Git 提交记录整理（共 84 个提交，2026-06-12 至 2026-06-13）。
+基于 `looptrain_st_source_runtime_v0.4` 仓库的 Git 提交记录整理（共 84 个提交，2026-06-12 至 2026-06-13），及后续 v0.6 架构重构。
+
+---
+
+## v0.6.1-runtime — TypeScript Runtime 架构
+
+**日期**：2026-06-19
+**提交**：`112d650` → `f572938`（6 个提交）
+
+### Slice 0：TypeScript 骨架 + Assistant 接口
+- 34 文件跨 9 模块，新增 `POST /api/assistant/ask` + `GET /api/assistant/state`
+- Deterministic Assistant 8 步流水线
+
+### Slice 1：Narrative State Runtime Core
+- 25 新文件：Knowledge/Belief/Relationship/Timeline/Archive stores
+- MemoryRuntime 核心引擎，Legacy 迁移器，跨循环 Reset
+
+### Slice 2：CompanionView + Assistant 对接
+- CompanionViewBuilder 从 MemoryRuntime 读取 live 数据
+- ActionPlanner 基于真实 Knowledge/Belief 评分
+
+### UX 增强 + 安全加固
+- 消息发送音效、4 项高优 UX 优化
+- 5 CRITICAL + 7 HIGH 全部修复（3 轮审查，零回归）
 
 ---
 
@@ -186,13 +209,24 @@ v0.5.0-standalone (当前)
   ├─ 无障碍 / 触控 / 性能优化
   ├─ 版本号全局统一
   └─ Devlog 部署上线
+
+       ↓ UX 优化 + 音效 + v0.6 架构重构
+
+v0.6.1-runtime (当前最新)
+  ├─ 61 TS 文件 / 20 模块 / 3 Slice
+  ├─ MemoryRuntime (Event Log → Knowledge/Belief/Timeline)
+  ├─ Deterministic Assistant 流水线
+  ├─ 3 轮代码审查 (12 issues 全部修复)
+  └─ LOOP_ENGINEERING 开发范式建立
 ```
 
 ## 统计
 
 | 指标 | 数值 |
 |------|------|
-| 总提交数 | 84 |
-| 涉及日期 | 2026-06-12 ~ 2026-06-13 |
-| 版本里程碑 | 3 个（v0.4.3, v0.5-mvp, v0.5.0） |
-| 标签 | 1 个（`pre-lt-standalone-20260613`） |
+| 总提交数 | 91 |
+| 涉及日期 | 2026-06-12 ~ 2026-06-19 |
+| 版本里程碑 | 4 个（v0.4.3, v0.5-mvp, v0.5.0, v0.6.1） |
+| TS 源文件 | 61 files, 20 modules |
+| 编译 | 0 errors (strict mode) |
+| 测试 | 8/8 pass |
