@@ -130,5 +130,19 @@ const PortraitIntro = (function () {
     layer.remove();
   }
 
+  function setImage(options) {
+    var dock = document.querySelector(options.dockSelector || '.lt-portrait-dock');
+    if (!dock) return;
+    var img = dock.querySelector('img');
+    if (!img) { img = document.createElement('img'); dock.appendChild(img); }
+    img.src = options.src || '';
+    img.alt = options.alt || '';
+    img.style.opacity = '1';
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.style.objectPosition = 'top center';
+  }
+
   return { play: play, setImage: setImage, shouldPlay: shouldPlay, markPlayed: markPlayed, reset: reset };
 })();
