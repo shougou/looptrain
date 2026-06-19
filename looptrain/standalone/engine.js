@@ -175,8 +175,6 @@ function loadContent() {
         if (!loadedScenes[sId].npcs) loadedScenes[sId].npcs = [];
       }
       if (Object.keys(loadedScenes).length > 0) { SCENES = loadedScenes; }
-        if (Object.keys(loadedScenes).length > 0) { SCENES = loadedScenes; }
-      }
     } catch (_) {}
 
     // Load Dialogues from runtime/dialogues/

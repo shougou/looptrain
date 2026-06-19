@@ -6,14 +6,14 @@
   "turn_limit_policy": "evidence_gate",
   "portrait": "zhao_police_portrait.png",
   "role": "authority_gatekeeper",
-  "location": "carriage_2",
+  "location": "carriage_7",
   "opening": "赵乘警看向你，手搭在警棍旁边：\"你最好想清楚再说。列车上散布恐慌，是要负责的。\"",
   "near_limit_hint": "赵乘警看了一眼怀表：\"我不能一直听你讲推测。你最好拿出能查证的证据。\"",
   "limit_message": "赵乘警打断你：\"如果没有新的证据，我不能继续陪你浪费时间。\"",
   "suggestions": [
-    { "label": "报告异常", "template": "我压低声音告诉赵乘警：二号车厢有异常声音，我需要你检查地板。" },
+    { "label": "报告异常", "template": "我压低声音告诉赵乘警：第七节车厢有异常声音，我需要你检查地板。" },
     { "label": "展示证据", "template": "我把目前获得的线索逐条告诉赵乘警，请他亲自听一听地板下方的声音。" },
-    { "label": "请求检查地板", "template": "我请求赵乘警不要惊动乘客，只检查二号车厢地板和连接处。" },
+    { "label": "请求检查地板", "template": "我请求赵乘警不要惊动乘客，只检查第七节车厢地板和连接处。" },
     { "label": "结束对话", "template": "__END_DIALOGUE__" }
   ]
 }
