@@ -118,11 +118,11 @@ function render() {
   // Portrait & dialogue panel
   if (isDialogue) {
     renderPortrait();
-    portraitLayer.classList.add('lt-show');
+    if (portraitLayer) portraitLayer.classList.add('lt-show');
     dialoguePanel.classList.add('lt-show');
     dialogueNpc.textContent = npcName(s.active_npc);
   } else {
-    portraitLayer.classList.remove('lt-show');
+    if (portraitLayer) portraitLayer.classList.remove('lt-show');
     dialoguePanel.classList.remove('lt-show');
   }
 
@@ -391,7 +391,7 @@ async function resetLoop() {
     logEl.innerHTML = '';
     dialogueLog.innerHTML = '';
     ngLayer.classList.remove('lt-show');
-    portraitLayer.classList.remove('lt-show');
+    if (portraitLayer) portraitLayer.classList.remove('lt-show');
     dialoguePanel.classList.remove('lt-show');
     latestMsg.classList.remove('lt-show');
     inputEl.value = '';
