@@ -734,7 +734,7 @@ async function showXuWelcome(loop) {
     try {
       if (dock) dock.style.display = 'block';
       await PortraitIntro.play({
-        src: ASSET_BASE + 'xuzhiwei_portrait.png',
+        src: ASSET_BASE + 'xu_zhiwei_portrait.png',
         alt: '许知微',
         holdMs: 400,
         durationMs: 700,
