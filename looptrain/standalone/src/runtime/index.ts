@@ -92,3 +92,55 @@ export type { SpoilerPolicy, SpoilerPolicyRule } from './policy/SpoilerPolicy';
 export { checkSpoilerAccess, filterBySpoilerPolicy } from './policy/SpoilerPolicy';
 export type { ForbiddenRevealPolicy, ForbiddenRevealRule } from './policy/ForbiddenRevealPolicy';
 export { isPermanentlyForbidden, filterForbiddenContent } from './policy/ForbiddenRevealPolicy';
+
+// ── v0.6.0 Narrative State Runtime Core ─────────────────────────
+// Record types
+export type { Knowledge } from './knowledge/Knowledge';
+export type { Belief } from './belief/Belief';
+export type { Relationship } from './relationship/Relationship';
+export type { Timeline } from './timeline/Timeline';
+export type { Archive } from './archive/Archive';
+export type { Profile } from './profile/Profile';
+export type { Snapshot } from './snapshot/Snapshot';
+
+// Stores
+export { KnowledgeStore } from './knowledge/KnowledgeStore';
+export { BeliefStore } from './belief/BeliefStore';
+export { RelationshipStore } from './relationship/RelationshipStore';
+export { TimelineStore } from './timeline/TimelineStore';
+export { ArchiveStore } from './archive/ArchiveStore';
+export { ProfileStore } from './profile/ProfileStore';
+
+// Storage
+export { InMemoryMemoryStorage } from './storage/InMemoryMemoryStorage';
+
+// Memory core
+export { MemoryEventDraftAppender } from './memory/MemoryEventDraftAppender';
+export { MemoryProjector } from './memory/MemoryProjector';
+export type { ProjectedLayers } from './memory/MemoryProjector';
+
+// Runtime
+export { MemoryRuntime } from './MemoryRuntime';
+export type { RuntimeState } from './MemoryRuntime';
+
+// Migration
+export type { LegacyStandaloneState } from './migration/LegacyStandaloneState';
+export { LegacyStandaloneStateMigrator } from './migration/LegacyStandaloneStateMigrator';
+export { validateMigration } from './migration/MigrationValidator';
+export type { MigrationValidationResult } from './migration/MigrationValidator';
+
+// Reset
+export type { ResetPolicy } from './reset/ResetPolicy';
+export { getResetPolicy } from './reset/ResetPolicy';
+export type { ResetPlan } from './reset/ResetPlanner';
+export { planReset } from './reset/ResetPlanner';
+export { applyReset } from './reset/ResetApplier';
+
+// Prompt context
+export type {
+  PromptMemoryContext,
+  PromptKnowledgeItem,
+  PromptTimelineItem,
+  PromptBeliefItem,
+} from './prompt/PromptMemoryContext';
+export { buildPromptContext } from './prompt/PromptMemoryContextBuilder';

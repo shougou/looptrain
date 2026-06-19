@@ -1,4 +1,5 @@
 'use strict';
+Object.defineProperty(exports, "__esModule", { value: true });
 const assert = require('assert');
 const runtime = require('..');
 // ── Module Load ────────────────────────────────────────────

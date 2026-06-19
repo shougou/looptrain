@@ -41,6 +41,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RuntimeContentLoader = void 0;
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
+const errors_1 = require("../shared/errors");
+const ContentPathPolicy_1 = require("./ContentPathPolicy");
 class RuntimeContentLoader {
     constructor(runtimeBase, legacyBase) {
         const repoRoot = path.resolve(__dirname, '..', '..', '..', '..', '..');
@@ -48,16 +50,28 @@ class RuntimeContentLoader {
         this.legacyBase = legacyBase || path.join(repoRoot, 'looptrain', 'materials', 'looptrain');
     }
     loadRuntimeJSON(relativePath) {
+        this.enforceContentPolicy(relativePath);
         return this.loadJSON(path.join(this.runtimeBase, relativePath));
     }
     loadLegacyJSON(relativePath) {
+        this.enforceContentPolicy(relativePath);
         return this.loadJSON(path.join(this.legacyBase, relativePath));
     }
     runtimeFileExists(relativePath) {
+        this.enforceContentPolicy(relativePath);
         return fs.existsSync(path.join(this.runtimeBase, relativePath));
     }
     loadRuntimeText(relativePath) {
+        this.enforceContentPolicy(relativePath);
         return fs.readFileSync(path.join(this.runtimeBase, relativePath), 'utf-8');
+    }
+    enforceContentPolicy(relativePath) {
+        if (!(0, ContentPathPolicy_1.validateContentPath)(relativePath, this.runtimeBase)) {
+            throw new errors_1.ValidationError(`Content path rejected: ${relativePath}`);
+        }
+        if (!(0, ContentPathPolicy_1.isAllowedExtension)(relativePath)) {
+            throw new errors_1.ValidationError(`File extension not allowed: ${relativePath}`);
+        }
     }
     loadJSON(fullPath) {
         if (!fs.existsSync(fullPath))

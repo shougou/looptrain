@@ -25,27 +25,33 @@ class AssistantController {
     }
     async ask(request) {
         const startTime = Date.now();
-        const { clientState, trigger, playerText } = request;
-        // 1. Build CompanionView
-        const rawView = (0, CompanionViewBuilder_1.buildCompanionView)(clientState);
-        // 2. Apply visibility filter
-        const view = (0, CompanionVisibilityFilter_1.applyVisibilityFilter)(rawView, rawView.policy);
-        // 3. Classify intent
-        const intent = (0, IntentClassifier_1.classifyIntent)(trigger, playerText);
-        // 4. Get policy
-        const policy = (0, AssistantPolicyEngine_1.getPolicy)(clientState, view.run.loopCount, view.run.hasFirstContact, view.run.failureCount);
-        // 5. Plan actions
-        const actions = (0, ActionPlanner_1.planActions)(view, policy, intent, this.actionRegistry);
-        // 6. Get fallback template
-        const response = (0, FallbackTemplateEngine_1.getFallbackTemplate)(intent, view);
-        // 7. Validate output
-        const validation = (0, OutputValidator_1.validateAll)(response, view);
-        if (!validation.valid) {
-            return this.buildErrorResult(view.run.loopCount);
+        try {
+            const { clientState, trigger, playerText } = request;
+            // 1. Build CompanionView
+            const rawView = (0, CompanionViewBuilder_1.buildCompanionView)(clientState);
+            // 2. Apply visibility filter
+            const view = (0, CompanionVisibilityFilter_1.applyVisibilityFilter)(rawView, rawView.policy);
+            // 3. Classify intent
+            const intent = (0, IntentClassifier_1.classifyIntent)(trigger, playerText);
+            // 4. Get policy
+            const policy = (0, AssistantPolicyEngine_1.getPolicy)(clientState, view.run.loopCount, view.run.hasFirstContact, view.run.failureCount);
+            // 5. Plan actions
+            const actions = (0, ActionPlanner_1.planActions)(view, policy, intent, this.actionRegistry);
+            // 6. Get fallback template
+            const response = (0, FallbackTemplateEngine_1.getFallbackTemplate)(intent, view);
+            // 7. Validate output
+            const validation = (0, OutputValidator_1.validateAll)(response, view);
+            if (!validation.valid) {
+                return this.buildErrorResult(view.run.loopCount);
+            }
+            // 8. Render response
+            const processingTimeMs = Date.now() - startTime;
+            return (0, ResponseRenderer_1.renderResponse)(response, actions, view, processingTimeMs);
         }
-        // 8. Render response
-        const processingTimeMs = Date.now() - startTime;
-        return (0, ResponseRenderer_1.renderResponse)(response, actions, view, processingTimeMs);
+        catch (error) {
+            console.error('AssistantController.ask failed:', error);
+            return this.buildErrorResult(0);
+        }
     }
     getInitialState(clientState) {
         const hasFirstContact = false;

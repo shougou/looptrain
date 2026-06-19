@@ -22,6 +22,13 @@ exports.applyVisibilityFilter = applyVisibilityFilter;
  * Full filter logic will be implemented alongside the content policy system
  * in later slices.
  */
-function applyVisibilityFilter(view, _policy) {
-    return view;
+function applyVisibilityFilter(view, policy) {
+    return {
+        ...view,
+        knowledge: {
+            ...view.knowledge,
+            confirmedClueIds: view.knowledge.confirmedClueIds.filter((_clueId) => policy.maxSpoilerLevel >= 0),
+        },
+        policy,
+    };
 }

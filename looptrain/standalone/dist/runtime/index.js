@@ -5,7 +5,8 @@
  * CommonJS module format. All exports are named (no default exports).
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.filterForbiddenContent = exports.isPermanentlyForbidden = exports.filterBySpoilerPolicy = exports.checkSpoilerAccess = exports.isAllowedExtension = exports.isAllowedContentDir = exports.validateContentPath = exports.RuntimeContentLoader = exports.AssistantController = exports.getFallbackTemplate = exports.renderResponse = exports.validateAll = exports.validateTone = exports.validateClues = exports.validateActions = exports.validateSchema = exports.DisabledLLMProvider = exports.MockLLMProvider = exports.planActions = exports.ActionRegistryLoader = exports.getPolicy = exports.classifyIntent = exports.filterBySpoilerLevel = exports.isSpoilerSafe = exports.applyVisibilityFilter = exports.buildCompanionView = exports.generateViewId = exports.generateSnapshotId = exports.generateEventId = exports.generateLoopId = exports.generateRunId = exports.generatePlayerId = exports.RuntimeId = exports.failure = exports.success = exports.DisabledProviderError = exports.ValidationError = exports.RuntimeError = exports.fromTimestamp = exports.toISOString = exports.nowISO = void 0;
+exports.MemoryProjector = exports.MemoryEventDraftAppender = exports.InMemoryMemoryStorage = exports.ProfileStore = exports.ArchiveStore = exports.TimelineStore = exports.RelationshipStore = exports.BeliefStore = exports.KnowledgeStore = exports.filterForbiddenContent = exports.isPermanentlyForbidden = exports.filterBySpoilerPolicy = exports.checkSpoilerAccess = exports.isAllowedExtension = exports.isAllowedContentDir = exports.validateContentPath = exports.RuntimeContentLoader = exports.AssistantController = exports.getFallbackTemplate = exports.renderResponse = exports.validateAll = exports.validateTone = exports.validateClues = exports.validateActions = exports.validateSchema = exports.DisabledLLMProvider = exports.MockLLMProvider = exports.planActions = exports.ActionRegistryLoader = exports.getPolicy = exports.classifyIntent = exports.filterBySpoilerLevel = exports.isSpoilerSafe = exports.applyVisibilityFilter = exports.buildCompanionView = exports.generateViewId = exports.generateSnapshotId = exports.generateEventId = exports.generateLoopId = exports.generateRunId = exports.generatePlayerId = exports.RuntimeId = exports.failure = exports.success = exports.DisabledProviderError = exports.ValidationError = exports.RuntimeError = exports.fromTimestamp = exports.toISOString = exports.nowISO = void 0;
+exports.buildPromptContext = exports.applyReset = exports.planReset = exports.getResetPolicy = exports.validateMigration = exports.LegacyStandaloneStateMigrator = exports.MemoryRuntime = void 0;
 var time_1 = require("./shared/time");
 Object.defineProperty(exports, "nowISO", { enumerable: true, get: function () { return time_1.nowISO; } });
 Object.defineProperty(exports, "toISOString", { enumerable: true, get: function () { return time_1.toISOString; } });
@@ -71,3 +72,39 @@ Object.defineProperty(exports, "filterBySpoilerPolicy", { enumerable: true, get:
 var ForbiddenRevealPolicy_1 = require("./policy/ForbiddenRevealPolicy");
 Object.defineProperty(exports, "isPermanentlyForbidden", { enumerable: true, get: function () { return ForbiddenRevealPolicy_1.isPermanentlyForbidden; } });
 Object.defineProperty(exports, "filterForbiddenContent", { enumerable: true, get: function () { return ForbiddenRevealPolicy_1.filterForbiddenContent; } });
+// Stores
+var KnowledgeStore_1 = require("./knowledge/KnowledgeStore");
+Object.defineProperty(exports, "KnowledgeStore", { enumerable: true, get: function () { return KnowledgeStore_1.KnowledgeStore; } });
+var BeliefStore_1 = require("./belief/BeliefStore");
+Object.defineProperty(exports, "BeliefStore", { enumerable: true, get: function () { return BeliefStore_1.BeliefStore; } });
+var RelationshipStore_1 = require("./relationship/RelationshipStore");
+Object.defineProperty(exports, "RelationshipStore", { enumerable: true, get: function () { return RelationshipStore_1.RelationshipStore; } });
+var TimelineStore_1 = require("./timeline/TimelineStore");
+Object.defineProperty(exports, "TimelineStore", { enumerable: true, get: function () { return TimelineStore_1.TimelineStore; } });
+var ArchiveStore_1 = require("./archive/ArchiveStore");
+Object.defineProperty(exports, "ArchiveStore", { enumerable: true, get: function () { return ArchiveStore_1.ArchiveStore; } });
+var ProfileStore_1 = require("./profile/ProfileStore");
+Object.defineProperty(exports, "ProfileStore", { enumerable: true, get: function () { return ProfileStore_1.ProfileStore; } });
+// Storage
+var InMemoryMemoryStorage_1 = require("./storage/InMemoryMemoryStorage");
+Object.defineProperty(exports, "InMemoryMemoryStorage", { enumerable: true, get: function () { return InMemoryMemoryStorage_1.InMemoryMemoryStorage; } });
+// Memory core
+var MemoryEventDraftAppender_1 = require("./memory/MemoryEventDraftAppender");
+Object.defineProperty(exports, "MemoryEventDraftAppender", { enumerable: true, get: function () { return MemoryEventDraftAppender_1.MemoryEventDraftAppender; } });
+var MemoryProjector_1 = require("./memory/MemoryProjector");
+Object.defineProperty(exports, "MemoryProjector", { enumerable: true, get: function () { return MemoryProjector_1.MemoryProjector; } });
+// Runtime
+var MemoryRuntime_1 = require("./MemoryRuntime");
+Object.defineProperty(exports, "MemoryRuntime", { enumerable: true, get: function () { return MemoryRuntime_1.MemoryRuntime; } });
+var LegacyStandaloneStateMigrator_1 = require("./migration/LegacyStandaloneStateMigrator");
+Object.defineProperty(exports, "LegacyStandaloneStateMigrator", { enumerable: true, get: function () { return LegacyStandaloneStateMigrator_1.LegacyStandaloneStateMigrator; } });
+var MigrationValidator_1 = require("./migration/MigrationValidator");
+Object.defineProperty(exports, "validateMigration", { enumerable: true, get: function () { return MigrationValidator_1.validateMigration; } });
+var ResetPolicy_1 = require("./reset/ResetPolicy");
+Object.defineProperty(exports, "getResetPolicy", { enumerable: true, get: function () { return ResetPolicy_1.getResetPolicy; } });
+var ResetPlanner_1 = require("./reset/ResetPlanner");
+Object.defineProperty(exports, "planReset", { enumerable: true, get: function () { return ResetPlanner_1.planReset; } });
+var ResetApplier_1 = require("./reset/ResetApplier");
+Object.defineProperty(exports, "applyReset", { enumerable: true, get: function () { return ResetApplier_1.applyReset; } });
+var PromptMemoryContextBuilder_1 = require("./prompt/PromptMemoryContextBuilder");
+Object.defineProperty(exports, "buildPromptContext", { enumerable: true, get: function () { return PromptMemoryContextBuilder_1.buildPromptContext; } });

@@ -1,5 +1,7 @@
 'use strict';
 
+export {};
+
 const assert = require('assert');
 const runtime = require('..');
 
