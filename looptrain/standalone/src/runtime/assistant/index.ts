@@ -30,38 +30,44 @@ export class AssistantController {
 
   async ask(request: AssistantAskRequest): Promise<AssistantAskResult> {
     const startTime = Date.now();
-    const { clientState, trigger, playerText } = request;
 
-    // 1. Build CompanionView
-    const rawView = buildCompanionView(clientState);
+    try {
+      const { clientState, trigger, playerText } = request;
 
-    // 2. Apply visibility filter
-    const view = applyVisibilityFilter(rawView, rawView.policy);
+      // 1. Build CompanionView
+      const rawView = buildCompanionView(clientState);
 
-    // 3. Classify intent
-    const intent = classifyIntent(trigger, playerText);
+      // 2. Apply visibility filter
+      const view = applyVisibilityFilter(rawView, rawView.policy);
 
-    // 4. Get policy
-    const policy = getPolicy(
-      clientState, view.run.loopCount,
-      view.run.hasFirstContact, view.run.failureCount
-    );
+      // 3. Classify intent
+      const intent = classifyIntent(trigger, playerText);
 
-    // 5. Plan actions
-    const actions = planActions(view, policy, intent, this.actionRegistry);
+      // 4. Get policy
+      const policy = getPolicy(
+        clientState, view.run.loopCount,
+        view.run.hasFirstContact, view.run.failureCount
+      );
 
-    // 6. Get fallback template
-    const response = getFallbackTemplate(intent, view);
+      // 5. Plan actions
+      const actions = planActions(view, policy, intent, this.actionRegistry);
 
-    // 7. Validate output
-    const validation = validateAll(response, view);
-    if (!validation.valid) {
-      return this.buildErrorResult(view.run.loopCount);
+      // 6. Get fallback template
+      const response = getFallbackTemplate(intent, view);
+
+      // 7. Validate output
+      const validation = validateAll(response, view);
+      if (!validation.valid) {
+        return this.buildErrorResult(view.run.loopCount);
+      }
+
+      // 8. Render response
+      const processingTimeMs = Date.now() - startTime;
+      return renderResponse(response, actions, view, processingTimeMs);
+    } catch (error) {
+      console.error('AssistantController.ask failed:', error);
+      return this.buildErrorResult(0);
     }
-
-    // 8. Render response
-    const processingTimeMs = Date.now() - startTime;
-    return renderResponse(response, actions, view, processingTimeMs);
   }
 
   getInitialState(clientState: RuntimeClientState): AssistantInitialStateResult {

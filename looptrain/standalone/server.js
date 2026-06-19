@@ -99,30 +99,37 @@ const assistantController = new runtime.AssistantController();
 
 app.post('/api/assistant/ask', async (req, res) => {
   const { clientState, trigger, playerText, debug } = req.body || {};
+
+  if (!clientState || typeof clientState !== 'object' || !clientState.playerId || !clientState.runId) {
+    return res.status(400).json({ error: 'missing_client_state' });
+  }
+
+  if (trigger && typeof trigger === 'string') {
+    const validTriggers = [
+      'ASK_ASSISTANT_BUTTON', 'ASSISTANT_FREE_TEXT', 'PLAYER_STALLED',
+      'NEW_CLUE_ACQUIRED', 'LOOP_STARTED', 'DIALOGUE_SETTLEMENT', 'LOOP_SETTLEMENT',
+    ];
+    if (!validTriggers.includes(trigger)) {
+      return res.status(400).json({ error: 'invalid_trigger' });
+    }
+  }
+
   try {
     const result = await assistantController.ask({
-      clientState: clientState || {
-        playerId: 'player_default',
-        runId: 'run_default',
-        chapterId: 'chapter-01',
-        episodeId: 'trial-001',
-        loopId: 'loop_0001_default',
-        sceneId: 'scene-carriage-03',
-        snapshotId: null,
-        lastEventId: null,
-        eventSeq: 0,
-        eventsSinceSnapshot: [],
-      },
+      clientState,
       trigger: trigger || 'ASK_ASSISTANT_BUTTON',
-      playerText,
+      playerText: typeof playerText === 'string' ? playerText.slice(0, 2048) : undefined,
       locale: 'zh-CN',
       clientNow: new Date().toISOString(),
-      debug,
+      debug: !!debug,
     });
     res.json(result);
   } catch (e) {
     console.error('[LT] /api/assistant/ask error:', e);
-    res.status(500).json({ error: 'assistant_error', message: e.message });
+    res.status(500).json({
+      error: 'assistant_error',
+      message: '助手处理请求时出现问题，请稍后重试。',
+    });
   }
 });
 

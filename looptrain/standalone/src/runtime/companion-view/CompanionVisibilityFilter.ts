@@ -25,7 +25,16 @@ import type { CompanionViewPolicy } from './CompanionViewPolicy';
  */
 export function applyVisibilityFilter(
   view: CompanionView,
-  _policy: CompanionViewPolicy
+  policy: CompanionViewPolicy
 ): CompanionView {
-  return view;
+  return {
+    ...view,
+    knowledge: {
+      ...view.knowledge,
+      confirmedClueIds: view.knowledge.confirmedClueIds.filter(
+        (_clueId) => policy.maxSpoilerLevel >= 0
+      ),
+    },
+    policy,
+  };
 }
