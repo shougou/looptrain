@@ -322,6 +322,7 @@ python3 scripts/check_docs_governance.py
 
 14. **patch 发布仅更新 changelog 条目，不生成 devlog 文章**。
     major / minor 发布在完成收尾后生成 `devlog/src/content/devlog/` 文章。
+    → **例外**：工程规范/治理类 work item 即使为 patch 级别，也必须生成 devlog 文章（因为规范变更影响后续所有开发流程）。
     → 正确判断版本级别是 Agent 的责任；`50-release-note.md` 中必须注明级别。
 
 15. **收尾完成后必须执行线上部署**。
@@ -330,6 +331,13 @@ python3 scripts/check_docs_governance.py
     - LT 游戏部署：rsync 代码 + pm2 restart
     - 部署后验证：`curl https://looptrain.me/api/health`（200 OK）；`curl https://looptrain.me/`（200 OK）
     → 部署脚本和部署文档由开发者维护；Agent 执行部署命令并验证结果。
+
+16. **devlog 总结文章撰写属于收尾工作**。
+    对 major / minor / 工程规范类 work item，收尾阶段必须撰写 devlog 总结文章：
+    - 文章路径：`devlog/src/content/devlog/YYYY-MM-DD-slug.md`
+    - 文章内容：基于 review 和 release note，详细记录工程规范落地与实施过程
+    - 文章完成后等待开发者审核，审核通过后才发布到线上
+    → 文章审核期间不执行 devlog 部署；审核通过后部署属于收尾的最终步骤。
 
 ### 13.2 文档结构
 
