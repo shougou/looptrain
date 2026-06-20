@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.8.1-save-versioning — 2026-06-20
+
+### Added
+- 存档版本检测系统：启动时检测 `lt:save:meta` 与 `looptrain.standalone.v1` 旧数据，自动判定兼容性
+- SaveMeta 结构（6 字段）：`appId`, `saveSchemaVersion`, `runtimeVersion`, `storyVersion`, `createdAt`, `updatedAt`
+- `lt:` key 命名体系：`lt:save:meta`, `lt:save:runtime`, `lt:save:memory`, `lt:save:goals`, `lt:settings`
+- breaking change 强制重置模态框：区分 legacy 数据检测和 incompatible version 两种文案
+- 手动重置三路径：UI「🔄重置」按钮、URL `?reset=1` 参数、开发者 `window.LT_RESET()`
+- 旧数据归档：`looptrain.standalone.v1` → `lt:legacy:<timestamp>` 开发侧保留
+- IndexedDB 旧库清理：异步删除 `LoopTrainDB`, `LoopTrainRuntimeDB`, `LoopTrainMemoryDB`
+- 版本升级分级策略（Patch/Minor/Major）
+
+### Changed
+- 存档从单 key `looptrain.standalone.v1` 迁移到双 key `lt:save:meta` + `lt:save:runtime`
+- `init()` 流程重构为 4 路径分流：新玩家、旧数据归档、版本不兼容、兼容恢复
+- `AudioManager` 静音设置迁移到 `lt:settings`，跨版本保留
+- `resetGame()` 升级为新存档系统
+
+### Fixed
+- 刷新页面丢失进度：localStorage 持久化 + 版本检测确保正确恢复
+- 旧存档污染新版 Runtime：强制 breaking change 检测隔离
+
 ## v0.8-testplay — 2026-06-19
 
 ### Added

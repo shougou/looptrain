@@ -105,6 +105,24 @@ assert.ok(clues.gray_coat_note_pressure);
 assert.ok(clues.ticking_under_floor);
 console.log('   OK npcs & clues');
 
+// ── Save version detection tests ──
+console.log('\n7. Engine: save version detection...');
+// Verify engine START_STATE alignment with save version constants
+assert.strictEqual(typeof engine.START_STATE.loop, 'number');
+assert.strictEqual(engine.START_STATE.loop, 1);
+assert.strictEqual(engine.START_STATE.clock, '14:00');
+assert.ok(engine.START_STATE.known_clues.includes('gray_coat_note_pressure'));
+assert.strictEqual(engine.START_STATE.flags.intro_seen, false);
+// Verify reset_game engine command returns normalized START_STATE (AC-12)
+var resetResult = engine.executeCommand('reset_game', engine.START_STATE);
+assert.strictEqual(resetResult.state.loop, 1);
+assert.strictEqual(resetResult.state.clock, '14:00');
+assert.ok(resetResult.state.known_clues.includes('gray_coat_note_pressure'));
+assert.strictEqual(resetResult.state.flags.intro_seen, false);
+assert.strictEqual(resetResult.state.ap_remaining, 10);
+assert.strictEqual(resetResult.state.location, 'carriage_2');
+console.log('   OK save version constants & engine reset');
+
 console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('  All engine smoke tests pass ✓');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━');

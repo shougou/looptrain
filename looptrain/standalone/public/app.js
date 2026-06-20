@@ -1,9 +1,19 @@
 'use strict';
 
-/* LoopTrain Standalone v0.6.0 Content Extraction — app.js
+/* LoopTrain Standalone v0.8.0 Content Extraction — app.js
  * Content loaded from /api/intro and /api/app-strings.
  * Scene-driven layout. Pure vanilla JS. No SillyTavern.
  */
+
+// ── Save version constants (v0.8 save system) ──
+var LT_SAVE_SCHEMA_VERSION = 1;
+var LT_MIN_COMPATIBLE_SCHEMA_VERSION = 1;
+var LT_RUNTIME_VERSION = '0.8.0';
+var LT_STORY_VERSION = 'demo-0.8-handeng';
+var LT_KEY_PREFIX = 'lt:';
+var LT_SAVE_META_KEY = 'lt:save:meta';
+var LT_SAVE_RUNTIME_KEY = 'lt:save:runtime';
+var LT_SETTINGS_KEY = 'lt:settings';
 
 const API_BASE = '/api';
 const ASSET_BASE = '/assets/';
@@ -453,16 +463,19 @@ async function nextLoop() {
 async function resetGame() {
   PortraitIntro.reset();
   lastFailure = null;
-  state = clone(START_STATE);
+  var legacyKeys = detectLegacyKeys();
+  if (legacyKeys.length) archiveLegacyData(legacyKeys);
+  clearLtKeys();
+  initNewSave();
   state.flags.intro_seen = false;
   logEl.innerHTML = '';
   dialogueLog.innerHTML = '';
   ngLayer.classList.remove('lt-show');
-  portraitLayer.classList.remove('lt-show');
+  if (portraitLayer) portraitLayer.classList.remove('lt-show');
   dialoguePanel.classList.remove('lt-show');
   logDrawer.classList.remove('lt-show');
   latestMsg.classList.remove('lt-show');
-  document.activeElement?.blur();
+  document.activeElement && document.activeElement.blur();
   inputEl.value = '';
   autoSizeInput();
   appendMsg('system', APP_STRINGS.resetToast || '已重置试玩版。开场背景将重新显示。', logEl);
@@ -628,15 +641,182 @@ function clueName(id) { return (npcCache?.clue_titles || {})[id] || id; }
 function npcName(id) { return NPC_INFO[id]?.name || id; }
 function sceneName(id) { return SCENES[id]?.name || id; }
 
-// ── Persistence ──
-const STORAGE_KEY = 'looptrain.standalone.v1';
-function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
+// ── Persistence (v0.8 save system) ──
+function saveState() {
+  try {
+    localStorage.setItem(LT_SAVE_RUNTIME_KEY, JSON.stringify(state));
+  } catch (_) {}
+  saveSaveMeta();
+}
+
+function saveSaveMeta() {
+  try {
+    var now = new Date().toISOString();
+    var existing = loadSaveMeta();
+    var meta = {
+      appId: 'looptrain',
+      saveSchemaVersion: LT_SAVE_SCHEMA_VERSION,
+      runtimeVersion: LT_RUNTIME_VERSION,
+      storyVersion: LT_STORY_VERSION,
+      createdAt: (existing && existing.createdAt) || now,
+      updatedAt: now,
+    };
+    localStorage.setItem(LT_SAVE_META_KEY, JSON.stringify(meta));
+  } catch (_) {}
+}
+
+function loadSaveMeta() {
+  try {
+    var raw = localStorage.getItem(LT_SAVE_META_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) { return null; }
+}
+
 function loadState() {
-  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) state = JSON.parse(raw); } catch (_) {}
+  try {
+    var raw = localStorage.getItem(LT_SAVE_RUNTIME_KEY);
+    if (raw) state = JSON.parse(raw);
+  } catch (_) {}
   if (!state) { state = clone(START_STATE); return; }
   if (state.mode === 'dialogue') { state.mode = 'explore'; state.active_npc = null; }
   if (!state._goalData && state._goal) state._goalData = state._goal;
+  if (!state._goal && state._goalData) state._goal = state._goalData;
 }
+
+// ── Legacy detection & cleanup (v0.8 save system) ──
+function detectLegacyKeys() {
+  var legacy = [];
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var key = localStorage.key(i);
+      if (key === 'looptrain.standalone.v1') {
+        if (!localStorage.getItem(LT_SAVE_META_KEY)) {
+          legacy.push(key);
+        }
+      }
+    }
+  } catch (_) {}
+  return legacy;
+}
+
+function archiveLegacyData(legacyKeys) {
+  var ts = Date.now();
+  legacyKeys.forEach(function (key) {
+    try {
+      var raw = localStorage.getItem(key);
+      if (raw) {
+        localStorage.setItem('lt:legacy:' + ts, raw);
+      }
+      localStorage.removeItem(key);
+    } catch (e) {
+      console.warn('[LT] Failed to archive legacy key:', key, e);
+    }
+  });
+}
+
+function clearLtKeys() {
+  try {
+    var toRemove = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var key = localStorage.key(i);
+      if (key.indexOf(LT_KEY_PREFIX) === 0 &&
+          key.indexOf('lt:legacy:') !== 0 &&
+          key !== LT_SETTINGS_KEY) {
+        toRemove.push(key);
+      }
+    }
+    toRemove.forEach(function (key) { localStorage.removeItem(key); });
+  } catch (_) {}
+}
+
+function clearOldIndexedDBs() {
+  if (!window.indexedDB || !window.indexedDB.deleteDatabase) return;
+  var OLD_DBS = ['LoopTrainDB', 'LoopTrainRuntimeDB', 'LoopTrainMemoryDB'];
+  OLD_DBS.forEach(function (dbName) {
+    try {
+      var req = window.indexedDB.deleteDatabase(dbName);
+      req.onsuccess = function () { console.info('[LT] Deleted old IndexedDB:', dbName); };
+      req.onerror = function () { console.warn('[LT] Failed to delete old IndexedDB:', dbName); };
+      req.onblocked = function () { console.warn('[LT] IndexedDB deletion blocked:', dbName); };
+    } catch (e) {
+      console.warn('[LT] IndexedDB deleteDatabase threw:', dbName, e);
+    }
+  });
+}
+
+function initNewSave() {
+  state = clone(START_STATE);
+  state.flags.intro_seen = false;
+  saveState();
+  prevAudioState = null;
+}
+
+// ── Reset modal ──
+function showResetModal(reason) {
+  var overlay = document.getElementById('lt-reset-modal');
+  if (!overlay) return;
+  var bodyEl = overlay.querySelector('.lt-reset-body');
+  if (bodyEl) {
+    if (reason === 'legacy') {
+      bodyEl.textContent = '《寒灯初醒》试玩是一次全面重构，剧情、人物和游戏系统都已更新。旧存档无法兼容，需要重新开始。\n\n你的旧进度已保留在浏览器中，不会丢失（开发侧留档）。';
+    } else {
+      bodyEl.textContent = '检测到旧版本存档（剧情版本不匹配）。新版试玩已重构，需要重新开始。\n\n你的旧进度已保留在浏览器中，不会丢失。';
+    }
+  }
+  overlay.style.display = 'flex';
+  introLayer.classList.remove('lt-show');
+  contentEl.style.display = 'none';
+  bottomEl.style.display = 'none';
+}
+
+function hideResetModal() {
+  var overlay = document.getElementById('lt-reset-modal');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function migrateAudioSettings() {
+  try {
+    var oldMuted = localStorage.getItem('looptrain.audio.muted');
+    if (oldMuted === 'true' || oldMuted === 'false') {
+      var settings = { muted: oldMuted === 'true' };
+      localStorage.setItem(LT_SETTINGS_KEY, JSON.stringify(settings));
+    }
+  } catch (_) {}
+}
+
+function handleReset() {
+  var legacyKeys = detectLegacyKeys();
+  if (legacyKeys.length) archiveLegacyData(legacyKeys);
+  clearLtKeys();
+  initNewSave();
+  try {
+    var oldMuted = localStorage.getItem('looptrain.audio.muted');
+    if (oldMuted === 'true' || oldMuted === 'false') {
+      AudioManager.setMuted(oldMuted === 'true');
+    }
+  } catch (_) {}
+  hideResetModal();
+  introLayer.classList.add('lt-show');
+  state.flags.intro_seen = false;
+  contentEl.style.display = 'none';
+  bottomEl.style.display = 'none';
+  logEl.innerHTML = '';
+  dialogueLog.innerHTML = '';
+  ngLayer.classList.remove('lt-show');
+  if (portraitLayer) portraitLayer.classList.remove('lt-show');
+  dialoguePanel.classList.remove('lt-show');
+  latestMsg.classList.remove('lt-show');
+  inputEl.value = '';
+  autoSizeInput();
+  render();
+}
+
+window.LT_RESET = function () {
+  var legacyKeys = detectLegacyKeys();
+  if (legacyKeys.length) archiveLegacyData(legacyKeys);
+  clearLtKeys();
+  location.reload();
+};
 
 // ── Audio event mapping ──
 function knownCluesIncreased(prev, next) { return (next.known_clues?.length || 0) > (prev.known_clues?.length || 0); }
@@ -755,8 +935,45 @@ async function showXuWelcome(loop) {
 async function init() {
   await bootContent();
   await AudioManager.init();
-  loadState();
-  render();
+
+  // ── Audio settings migration ──
+  migrateAudioSettings();
+
+  // ── Save bootstrap: version detection ──
+  var urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('reset') === '1') {
+    // AC-5: ?reset=1 → force reset → clean URL
+    handleReset();
+    if (window.history && window.history.replaceState) {
+      var cleanUrl = window.location.pathname;
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  } else {
+    var meta = loadSaveMeta();
+    var legacyKeys = detectLegacyKeys();
+
+    if (legacyKeys.length > 0) {
+      // AC-2: legacy key exists without new meta → show reset modal
+      showResetModal('legacy');
+    } else if (meta) {
+      // AC-3: version incompatibility detection
+      if (meta.storyVersion !== LT_STORY_VERSION ||
+          meta.saveSchemaVersion < LT_MIN_COMPATIBLE_SCHEMA_VERSION) {
+        showResetModal('incompatible');
+      } else {
+        // AC-4: compatible save → normal restore
+        loadState();
+        render();
+      }
+    } else {
+      // AC-1: new player → create fresh save
+      initNewSave();
+      render();
+    }
+  }
+
+  // ── IndexedDB cleanup (async, non-blocking) ──
+  clearOldIndexedDBs();
 
   // Xu Zhiwei proactive welcome triggers when intro is dismissed (see intro-start-btn handler)
 
@@ -773,6 +990,24 @@ async function init() {
       muteBtn.textContent = '🔇';
       muteBtn.setAttribute('aria-label', '开启声音');
     }
+  }
+
+  // Reset modal confirm button (AC-2, AC-3)
+  var resetConfirm = document.getElementById('lt-reset-confirm');
+  if (resetConfirm) {
+    resetConfirm.addEventListener('click', function () {
+      handleReset();
+    });
+  }
+
+  // Manual reset button (AC-6)
+  var manualResetBtn = document.getElementById('btn-manual-reset');
+  if (manualResetBtn) {
+    manualResetBtn.addEventListener('click', function () {
+      if (confirm('确定要重新开始吗？当前进度将清除。')) {
+        handleReset();
+      }
+    });
   }
 
   // Input

@@ -278,15 +278,58 @@ python3 scripts/check_docs_governance.py
 
 6. **review 必须逐条对照 spec 验收标准**。`40-review.md` 的"Spec 对照"表格含 spec 中每一条验收标准的实现结论。
 
-7. **release 后必须运行检查脚本**：
+7. **release 阶段必须运行检查脚本**：
    ```bash
-   bash scripts/check_work_item.sh <LT-ID>   # 退出码 0 = 通过
-   bash scripts/check_project_docs.sh          # 退出码 0 = 通过
+   bash scripts/check_work_item.sh <LT-ID>      # 退出码 0 = 通过（阶段 6）
+   bash scripts/check_project_docs.sh             # 退出码 0 = 通过（阶段 8）
+   bash scripts/check_release_wrapup.sh <LT-ID>   # 退出码 0 = 通过（阶段 8，收尾完整性）
    ```
 
 8. **devlog 只能基于 review 和 release note 生成**。`60-devlog-draft.md` 不包含 review 和 release note 中没有的信息。
 
 9. **work item 完成后从 active/ 移动到 released/**。目录路径变更后更新 Project Status 文档。
+
+10. **收尾阶段必须更新稳态文档（docs/project/）**。
+    每次 release 后必须更新以下 4 个文件：
+    - `PROJECT_STATUS.md` — 更新版本号、状态描述
+    - `CHANGELOG.md` — 追加版本条目（Added / Changed / Fixed）
+    - `ROADMAP.md` — 标记已完成任务、添加新任务（如适用）
+    - `KNOWN_ISSUES.md` — 移除已解决问题、追加新问题
+    → 验证方式：`scripts/check_release_wrapup.sh` 检查文件修改时间晚于 release note
+
+11. **收尾阶段必须同步 devlog 网站数据层**。
+    每次 release 后必须更新：
+    - `devlog/src/data/site-status.json` — 更新 `play.currentVersion`、`play.knownIssues`、`site.lastUpdated`
+    - `devlog/src/data/roadmap.ts` — 任务状态与 ROADMAP.md 保持一致
+    - `devlog/src/content/changelog/` — 追加 changelog 条目（所有发布级别）
+    → 对 major / minor 发布额外生成 devlog 文章到 `devlog/src/content/devlog/`
+
+12. **版本号必须在所有位置一致**。
+    同一版本的版本号必须出现在以下位置且完全一致：
+    - `docs/project/PROJECT_STATUS.md`
+    - `docs/project/CHANGELOG.md` 最新条目
+    - `devlog/src/data/site-status.json` 的 `play.currentVersion`
+    - work item 的 `50-release-note.md`
+    → 验证方式：`scripts/check_release_wrapup.sh` 自动提取并比对
+
+13. **版本号变更级别按改动性质决定**：
+    | 级别 | 示例 | 条件 |
+    |------|------|------|
+    | patch | v0.8.1 | runtime 小改动（bug fix、文案、配置） |
+    | minor | v0.9 | 新功能/内容（新场景、角色、系统模块） |
+    | major | v1.0 | 破坏性变更（世界观重写、架构重做） |
+    → 基础设施类 work item 按 patch 处理
+
+14. **patch 发布仅更新 changelog 条目，不生成 devlog 文章**。
+    major / minor 发布在完成收尾后生成 `devlog/src/content/devlog/` 文章。
+    → 正确判断版本级别是 Agent 的责任；`50-release-note.md` 中必须注明级别。
+
+15. **收尾完成后必须执行线上部署**。
+    归档后按 `DEPLOYMENT.md` 执行部署：
+    - Devlog 部署：`bash scripts/deploy_devlog.sh`
+    - LT 游戏部署：rsync 代码 + pm2 restart
+    - 部署后验证：`curl https://looptrain.me/api/health`（200 OK）；`curl https://looptrain.me/`（200 OK）
+    → 部署脚本和部署文档由开发者维护；Agent 执行部署命令并验证结果。
 
 ### 13.2 文档结构
 

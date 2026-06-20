@@ -35,6 +35,7 @@
           <button class="lt-cmd-btn" data-cmd="view_characters">👤人物</button>
           <button class="lt-cmd-btn" data-cmd="view_memory">🧠记忆</button>
           <button class="lt-cmd-btn" data-cmd="ask_xu">❓帮助</button>
+          <button class="lt-cmd-btn" id="btn-manual-reset" title="重新开始试玩版">🔄重置</button>
         </div>
 
         <!-- Goal completion feedback -->
@@ -84,6 +85,15 @@
         <div class="lt-ng">
           <div class="lt-ng-bg"></div>
           <div class="lt-ng-card"></div>
+        </div>
+
+        <!-- Reset modal (version-incompatible / legacy data detected) -->
+        <div id="lt-reset-modal" class="lt-reset-overlay" style="display:none">
+          <div class="lt-reset-card">
+            <h2 class="lt-reset-title">新版试玩已重构</h2>
+            <p class="lt-reset-body"></p>
+            <button id="lt-reset-confirm" class="lt-reset-btn">重新开始</button>
+          </div>
         </div>
 
         <!-- Intro overlay (populated dynamically from /api/intro) -->

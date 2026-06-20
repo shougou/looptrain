@@ -33,13 +33,24 @@
 Idea → Spec → Plan → Code → Review → Release → Devlog → Archive
 ```
 
-### 强制执行：三层约束
+### 强制执行：四层约束
 
-| 层 | 机制 | 作用 |
-|:--:|------|------|
-| 1 | 目录门禁 | Agent 先读 work item 目录状态再进入下一阶段 |
-| 2 | `scripts/check_work_item.sh` | 预发布自动验证 7 项条件 |
-| 3 | `scripts/check_project_docs.sh` | 发布后稳态文档一致性检查 |
+| 层 | 机制 | 阶段 | 作用 |
+|:--:|------|:--:|------|
+| 1 | 目录门禁 | Idea → Code | Agent 先读 work item 目录状态再进入下一阶段 |
+| 2 | `scripts/check_work_item.sh` | Release | 预发布自动验证 7 项条件 |
+| 3 | `scripts/check_project_docs.sh` | Archive | 稳态文档存在性 + 项目内版本一致性 |
+| 4 | `scripts/check_release_wrapup.sh` | Archive | 收尾完整性：稳态文档更新、devlog 同步、跨层一致性 |
+
+### 收尾阶段（阶段 6-8）
+
+每次 release 后的收尾阶段必须完成：
+- 更新稳态文档（PROJECT_STATUS、CHANGELOG、ROADMAP、KNOWN_ISSUES）
+- 同步 devlog 网站数据层（site-status.json、roadmap.ts）
+- 追加 changelog 条目到 devlog/src/content/changelog/
+- 对 major / minor 发布生成 devlog 文章
+- 确保版本号在所有位置一致
+- 运行所有检查脚本，移动到 released/
 
 ### 每个 Work Item 必须包含
 

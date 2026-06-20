@@ -13,7 +13,7 @@
 - [x] 内容一致性全面审计（时间线、角色、场景、文本）
 - [ ] LLM Bridge 真实接入（DeepSeek）
 - [ ] Playwright 回归测试
-- [ ] 状态持久化（刷新恢复进度）
+- [x] 状态持久化（localStorage 版本化存档 + breaking change 检测，后续需迁移 IndexedDB）
 
 ## 下一阶段：体验增强
 

@@ -6,8 +6,8 @@
  */
 
 const AudioManager = (function () {
-  const STORAGE_KEY = 'looptrain.audio.muted';
-  const MANIFEST_PATH = '/assets/audio/manifest.json';
+  var SETTINGS_KEY = 'lt:settings';
+  var MANIFEST_PATH = '/assets/audio/manifest.json';
   const AUDIO_BASE = '/assets/audio/';
 
   let manifest = null;
@@ -211,11 +211,25 @@ const AudioManager = (function () {
 
   // ── localStorage ──
 
+  function readSettings() {
+    try {
+      var raw = localStorage.getItem(SETTINGS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (_) { return {}; }
+  }
+  function writeSettings(settings) {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (_) {}
+  }
+
   function readMuted() {
-    try { return localStorage.getItem(STORAGE_KEY) === 'true'; } catch (_) { return false; }
+    try { return readSettings().muted === true; } catch (_) { return false; }
   }
   function writeMuted(val) {
-    try { localStorage.setItem(STORAGE_KEY, val ? 'true' : 'false'); } catch (_) {}
+    try {
+      var settings = readSettings();
+      settings.muted = !!val;
+      writeSettings(settings);
+    } catch (_) {}
   }
 
   // ── Exports ──

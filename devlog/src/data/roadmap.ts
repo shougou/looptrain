@@ -63,8 +63,8 @@ const roadmap: RoadmapPhase[] = [
       },
       {
         task: '状态持久化',
-        status: '未开始',
-        description: '刷新页面后恢复当前轮次、场景、线索、NPC 状态和对话摘要。',
+        status: '已完成',
+        description: 'localStorage 版本化双 key 存档（SaveMeta + runtime），启动时自动检测 breaking change 并引导重置。后续需迁移到 IndexedDB。',
         priority: 'high',
       },
     ],
