@@ -7,7 +7,7 @@
     "stageStatus": "独立运行时 · 试玩版",
     "stageDescription": "LoopTrain 已从 SillyTavern 剥离为独立运行时。v0.7 建立了目标引擎、12 条指令系统和许知微助手；v0.8 完成《寒灯初醒》全部试玩内容（5 角色、3 场景、8 线索、8 目标、3 轮结算）；v0.8.1 完成存档版本检测与 breaking change 强制重置系统。",
     "knownIssues": [
-      "当前对话引擎为 Mock 模式，NPC 对话文本为预设模板，尚未接入真实 LLM。",
+      "当前对话引擎已接入 DeepSeek LLM，Mock 模式作为 LLM 调用失败时的自动降级兜底。",
       "游戏支持刷新后恢复进度（localStorage 版），后续需迁移到 IndexedDB 以支持更复杂的状态结构。",
       "角色素材风格尚未统一，部分立绘为占位素材。",
       "未建立 Playwright 回归测试，修改后需手动验证完整玩家路径。"
