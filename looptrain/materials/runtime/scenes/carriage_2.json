@@ -1,5 +1,5 @@
 {
   "name": "二号车厢",
   "text": "列车中段的二号车厢。灯光昏黄，窗外夜色浓重。小宁抱着旧布娃娃坐在靠窗位置，不时看向三号车厢方向。赵乘警正在过道里巡视。许知微坐在你对面的座位上，正往笔记本上写着什么。车厢尽头挂着一面圆钟，指针正指向两点。",
-  "npcs": ["xiaoning", "xu_zhiwei", "zhao_chengjing"]
+  "npcs": ["xiaoning", "xu_zhiwei", "zhao_police"]
 }
