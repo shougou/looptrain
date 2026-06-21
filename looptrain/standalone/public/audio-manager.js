@@ -1,6 +1,6 @@
 'use strict';
 
-/* AudioManager — LoopTrain v0.5.1
+/* AudioManager — LoopTrain v0.8.2-version-source
  * Pure vanilla JS. HTMLAudioElement-based, degrade-safe.
  * No Web Audio API. No game judgment. Audio-only.
  */

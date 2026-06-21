@@ -12,8 +12,6 @@ export const SITE_DESCRIPTION =
 
 export const SITE_OG_IMAGE = '/images/og-default.svg';
 
-export const CURRENT_VERSION = 'v0.8-testplay';
-export const CURRENT_PHASE = '独立运行时稳定';
 export const CURRENT_YEAR = '2026';
 
 /** Navigation items. Order matters. */

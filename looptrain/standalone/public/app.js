@@ -1,6 +1,6 @@
 'use strict';
 
-/* LoopTrain Standalone v0.8.0 Content Extraction — app.js
+/* LoopTrain Standalone v0.8.2-version-source Content Extraction — app.js
  * Content loaded from /api/intro and /api/app-strings.
  * Scene-driven layout. Pure vanilla JS. No SillyTavern.
  */
@@ -8,7 +8,7 @@
 // ── Save version constants (v0.8 save system) ──
 var LT_SAVE_SCHEMA_VERSION = 1;
 var LT_MIN_COMPATIBLE_SCHEMA_VERSION = 1;
-var LT_RUNTIME_VERSION = '0.8.0';
+var LT_RUNTIME_VERSION = 'v0.8.2-version-source';
 var LT_STORY_VERSION = 'demo-0.8-handeng';
 var LT_KEY_PREFIX = 'lt:';
 var LT_SAVE_META_KEY = 'lt:save:meta';

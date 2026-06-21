@@ -78,7 +78,7 @@ SillyTavern（传统线，保留）
 ```text
 浏览器
   └── LT MVP 前端（单页 HTML，/play/game）
-        └── LT MVP Server（Node.js，端口 3001）
+        └── LT MVP Server（Node.js，端口 3030）
               ├── engine.js
               └── Mock 数据
 ```
@@ -236,5 +236,5 @@ node standalone/tests/engine_flow_test.js
 
 # 独立 Server 启动
 node standalone/server/index.js
-# 访问 http://localhost:3001/play/game
+# 访问 http://localhost:3030/play/game
 ```

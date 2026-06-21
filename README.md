@@ -79,8 +79,6 @@ scripts/            # SLT 本地启动/验证脚本
 - 后端 `.env` API Key 管理
 - 生产进程管理
 - 线上 `/play/game` 切换
-- 内容完全外置化
-- 音效系统实现
 
 ---
 
@@ -145,8 +143,6 @@ https://looptrain.me/
 
 ## 推荐下一步
 
-1. 将 `materials/looptrain/**` 迁入 `standalone/content/`。
-2. 消除 `standalone/public/app.js` 中重复的 `START_STATE / SCENES / NPC_INFO`。
-3. 增加 LLM Bridge，但默认保留 Mock 模式。
-4. 增加 Playwright 本地回归测试。
-5. 本地稳定后，再评估线上 `/play/game` 切换。
+1. 增加 LLM Bridge，但默认保留 Mock 模式。
+2. 增加 Playwright 本地回归测试。
+3. 本地稳定后，再评估线上 `/play/game` 切换。

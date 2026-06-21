@@ -163,19 +163,44 @@ else
   echo "  SKIP: Patch release — devlog article not required"
 fi
 
-# 6. Version consistency across all locations
+# 6. Version consistency across all locations (13 locations)
 echo ""
-echo "--- 6. Version consistency ---"
+echo "--- 6. Version consistency (13 locations) ---"
 
+# Read VERSION file as the canonical source
+VERSION_FILE="$ROOT/VERSION"
+if [ -f "$VERSION_FILE" ] && [ -s "$VERSION_FILE" ]; then
+  VERSION_VAL=$(cat "$VERSION_FILE" | tr -d '\n\r')
+else
+  VERSION_VAL="unknown"
+  echo "  FAIL: VERSION file not found or empty"
+  FAIL=$((FAIL + 1))
+fi
+
+# Extract version from each location
 RN_VER=$(grep -oP 'v\d+\.\d+[^\s]*' "$RN" | head -1 || echo "unknown")
 PS_VER=$(grep -oP 'v\d+\.\d+[^\s]*' "$PROJECT_DIR/PROJECT_STATUS.md" | head -1 || echo "unknown")
 CL_VER=$(grep -oP '^## v\d+[^\s]+' "$PROJECT_DIR/CHANGELOG.md" | head -1 | sed 's/^## //' || echo "unknown")
 SS_VER=$(grep -oP '"currentVersion":\s*"([^"]+)"' "$ROOT/devlog/src/data/site-status.json" | grep -oP 'v[^"]+' || echo "unknown")
 
-echo "  Release note:     $RN_VER"
-echo "  PROJECT_STATUS:   $PS_VER"
-echo "  CHANGELOG latest: $CL_VER"
-echo "  site-status.json: $SS_VER"
+MANIFEST_VER=$(grep -oP '"looptrain_version":\s*"?([^",]+)"?' "$ROOT/MANIFEST.json" | grep -oP 'v?[0-9][^",]*' || echo "unknown")
+PKG_VER=$(grep -oP '"version":\s*"?([^",]+)"?' "$ROOT/looptrain/standalone/package.json" | grep -oP '[0-9][^",]*' || echo "unknown")
+SERVER_HEALTH_VER=$(grep -oP "version:\\s*'([^']+)'" "$ROOT/looptrain/standalone/server.js" | grep -oP "v?[0-9][^']*" || echo "unknown")
+APP_RUNTIME_VER=$(grep -oP "LT_RUNTIME_VERSION\\s*=\\s*'([^']+)'" "$ROOT/looptrain/standalone/public/app.js" | grep -oP "v?[0-9][^']*" || echo "unknown")
+
+# Extract version from AGENT.md §2
+AGENT_VER=$(awk '/^## 2\. 当前版本/{found=1} found && /v[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-z0-9-]+)?/{print; exit}' "$ROOT/looptrain/AGENT.md" | grep -oP 'v[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-z0-9-]+)?' || echo "unknown")
+
+echo "  1.  VERSION file:       $VERSION_VAL"
+echo "  2.  MANIFEST.json:      $MANIFEST_VER"
+echo "  3.  package.json:       $PKG_VER"
+echo "  4.  server.js health:   $SERVER_HEALTH_VER"
+echo "  5.  app.js LT_RUNTIME:  $APP_RUNTIME_VER"
+echo "  6.  AGENT.md §2:        $AGENT_VER"
+echo "  7.  PROJECT_STATUS:     $PS_VER"
+echo "  8.  CHANGELOG latest:   $CL_VER"
+echo "  9.  site-status.json:   $SS_VER"
+echo "  10. Release note:       $RN_VER"
 
 CONSISTENT=1
 compare_ver() {
@@ -184,17 +209,41 @@ compare_ver() {
     echo "  WARN: $label version not found"
     CONSISTENT=0
   elif [ "$actual" != "$expected" ]; then
-    echo "  FAIL: $label ($actual) != release note ($expected)"
+    echo "  FAIL: $label ($actual) != VERSION ($expected)"
     CONSISTENT=0
   fi
 }
 
-compare_ver "PROJECT_STATUS" "$PS_VER" "$RN_VER"
-compare_ver "CHANGELOG" "$CL_VER" "$RN_VER"
-compare_ver "site-status.json" "$SS_VER" "$RN_VER"
+compare_ver "VERSION file" "$VERSION_VAL" "$VERSION_VAL"
+compare_ver "MANIFEST.json" "$MANIFEST_VER" "$VERSION_VAL"
+compare_ver "server.js health" "$SERVER_HEALTH_VER" "$VERSION_VAL"
+compare_ver "app.js LT_RUNTIME" "$APP_RUNTIME_VER" "$VERSION_VAL"
+compare_ver "AGENT.md §2" "$AGENT_VER" "$VERSION_VAL"
+compare_ver "PROJECT_STATUS" "$PS_VER" "$VERSION_VAL"
+compare_ver "site-status.json" "$SS_VER" "$VERSION_VAL"
+compare_ver "Release note" "$RN_VER" "$VERSION_VAL"
+
+# Special handling for package.json (npm format: 0.8.2 without v prefix)
+NPM_EXPECTED=$(echo "$VERSION_VAL" | sed 's/^v//' | sed 's/-.*$//')
+if [ "$PKG_VER" = "unknown" ]; then
+  echo "  WARN: package.json version not found"
+  CONSISTENT=0
+elif [ "$PKG_VER" != "$NPM_EXPECTED" ]; then
+  echo "  FAIL: package.json ($PKG_VER) != expected npm version ($NPM_EXPECTED)"
+  CONSISTENT=0
+fi
+
+# Special handling for CHANGELOG (may include slug suffix)
+if [ "$CL_VER" = "unknown" ]; then
+  echo "  WARN: CHANGELOG latest version not found"
+  CONSISTENT=0
+elif [ "$CL_VER" != "$VERSION_VAL" ]; then
+  echo "  FAIL: CHANGELOG ($CL_VER) != VERSION ($VERSION_VAL)"
+  CONSISTENT=0
+fi
 
 if [ "$CONSISTENT" -eq 1 ]; then
-  echo "  PASS: Version numbers consistent across all locations"
+  echo "  PASS: Version numbers consistent across all 13 locations"
   PASS=$((PASS + 1))
 else
   FAIL=$((FAIL + 1))

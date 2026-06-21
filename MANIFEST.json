@@ -2,7 +2,7 @@
   "name": "looptrain_standalone_runtime",
   "type": "standalone-game-runtime",
   "local_default_runtime": "SLT",
-  "looptrain_version": "0.5-standalone-mvp",
+  "looptrain_version": "v0.8.2-version-source",
   "devlog_site": "devlog/",
   "game_runtime": "looptrain/standalone/",
   "start_command": "bash scripts/start_slt.sh",

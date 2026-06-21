@@ -18,7 +18,6 @@
 ├── looptrain/                        # Main game runtime, materials, tests, and internal docs
 ├── devlog/                           # Astro static site for looptrain.me
 ├── docs/                             # Root-level architecture/spec docs
-├── TBD/                              # Draft design notes and planning docs
 ├── .omo/                             # OhMyOpenCode planning/session artifacts
 ├── .gitignore
 └── .git/
@@ -51,6 +50,8 @@ looptrain/standalone/
 ├── .env.example                      # Environment variable template
 ├── .env                              # Local environment file; do not publish secrets
 ├── .gitignore
+├── src/                               # TypeScript Runtime source
+├── tsconfig.runtime.json             # TypeScript config for runtime
 ├── llm/                              # Current LLM bridge code
 ├── public/                           # Vanilla JS browser frontend and assets
 ├── tests/                            # Standalone smoke tests
@@ -126,10 +127,7 @@ looptrain/materials/looptrain/
 
 ```text
 looptrain/docs/
-├── LT_STANDALONE_ARCHITECTURE.md     # Standalone architecture and migration notes
 ├── CONTROL_FLOW.md                   # Success/failure/control flow docs
-├── SPEC.md                           # Game spec / rules / setting
-├── UI_UX_DESIGN.md                   # UI/UX design notes
 └── DEPLOY.md                         # Deployment notes for runtime
 ```
 
@@ -175,38 +173,11 @@ devlog/src/
 
 ```text
 docs/
-├── runtime-architecture-design.md    # Runtime architecture + implementation spec draft
-└── superpowers/                      # Superpowers-generated design/spec artifacts
-```
-
-### `docs/superpowers/`
-
-```text
-docs/superpowers/
-└── specs/
-    └── 2026-06-15-companion-runtime-design.md
-```
-
----
-
-## Draft and planning docs: `TBD/`
-
-```text
-TBD/
-├── 0000-document-governance.md       # Draft governance rules
-├── 0001-document-migration-inventory.md
-├── 01_new_npc.md                     # Draft companion/NPC design source
-├── 02_doc.md                         # Second-pass docs/governance draft
-└── runtime/                          # Runtime-specific draft specs
-```
-
-### `TBD/runtime/`
-
-```text
-TBD/runtime/
-├── 2026-06-15-narrative-state-runtime.md
-├── 2026-06-15-companion-runtime-design.md
-└── lt-assistant-runtime-spec-zh.md
+├── README.md                         # 文档体系总览 + Work Item 流转协议
+├── adr/                              # 架构决策记录
+├── project/                          # 稳态文档（每次 release 更新）
+├── templates/                        # 文档模板
+└── work/                             # Work item（active + released）
 ```
 
 ---
@@ -218,7 +189,12 @@ scripts/
 ├── start_slt.sh                      # Starts local Standalone LoopTrain runtime
 ├── verify_slt.sh                     # Verifies SLT syntax/tests/health endpoints
 ├── deploy_devlog.sh                  # Deploys devlog static site
-└── check_docs_governance.py          # Documentation governance checker
+├── check_cross_consistency.py        # Cross-document consistency checker
+├── check_docs_governance.py          # Documentation governance checker
+├── check_project_docs.sh             # Steady-state doc existence + version consistency
+├── check_release_wrapup.sh           # Release wrapup completeness verification
+├── check_work_item.sh                # Pre-release 7-condition verification
+└── sync_version.sh                   # Version synchronization script
 ```
 
 ---
@@ -235,7 +211,6 @@ scripts/
 | LLM provider boundary | `looptrain/standalone/llm/providers.js` |
 | Standalone smoke test | `looptrain/standalone/tests/smoke_test.js` |
 | Engine test suite | `looptrain/tests/*.js` |
-| Runtime architecture spec | `docs/runtime-architecture-design.md` |
 | Devlog site entry | `devlog/src/pages/` |
 | Devlog content | `devlog/src/content/` |
 

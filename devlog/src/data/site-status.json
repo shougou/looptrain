@@ -1,6 +1,6 @@
 {
   "play": {
-    "currentVersion": "v0.8.1-save-versioning",
+    "currentVersion": "v0.8.2-version-source",
     "playUrl": "/play/game",
     "playLabel": "进入游戏",
     "recommendedDevice": "手机竖屏",

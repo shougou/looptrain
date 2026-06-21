@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.8.2-version-source — 2026-06-21
+
+### Added
+- `VERSION` 文件 — 项目唯一版本源
+- `scripts/sync_version.sh` — 从 VERSION 自动同步到 11 个派生位置
+- `scripts/check_cross_consistency.py` — 5 项跨文档一致性检查
+- AGENT.md 规则 17-20（版本号单一源/收尾检查全覆盖/文档结构同步/changelog 变更验证）
+
+### Changed
+- `scripts/check_release_wrapup.sh` §6 — 版本一致性从 4 个位置扩展到 13 个
+- `looptrain/AGENT.md` §4 — 目录结构更新为当前实际结构
+- 统一 9 个代码文件的版本号为 v0.8.2-version-source
+
+### Fixed
+- MANIFEST.json 版本号 0.5 → v0.8.2（落后 4 个大版本）
+- site.ts 死代码 `CURRENT_VERSION`/`CURRENT_PHASE` 删除
+- devlog 公开展示层 4 处 陆成→赵乘警修正
+- 根 README/looptrain/README 等 7 处文档结构过期修复
+
 ## v0.8.1-save-versioning — 2026-06-20
 
 ### Added

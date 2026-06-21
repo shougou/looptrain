@@ -19,7 +19,7 @@ LoopTrain 当前本地开发主线是 **SLT（Standalone LoopTrain）**。
 当前版本：
 
 ```text
-v0.8-testplay
+v0.8.2-version-source
 ```
 
 当前状态：
@@ -103,6 +103,9 @@ looptrain/
   standalone/
     server.js
     engine.js
+    llm/
+    src/
+    tsconfig.runtime.json
     public/
       index.html
       app.js
@@ -117,10 +120,8 @@ looptrain/
     assets/          # 可复用角色立绘和概念图
 
   docs/
-    LT_STANDALONE_ARCHITECTURE.md
     CONTROL_FLOW.md
-    SPEC.md
-    UI_UX_DESIGN.md
+    DEPLOY.md
 ```
 
 ---
@@ -357,3 +358,37 @@ LT-YYYYMMDD-short-slug
 ```
 
 完整说明见 `docs/README.md`。
+
+### 13.4 版本号单一源 — 规则 17
+
+`VERSION` 文件是项目唯一版本源，所有其他位置必须从此同步。
+
+在收尾阶段 7 必须执行：
+
+```bash
+bash scripts/sync_version.sh
+```
+
+验证方式：`check_release_wrapup.sh` §6 检查全部 13 个版本号位置一致。
+
+### 13.5 收尾检查全覆盖 — 规则 18
+
+`check_release_wrapup.sh` §6 必须验证全部 13 个版本号位置一致。
+
+新增版本号位置时，必须同步更新：
+- `scripts/sync_version.sh`（添加同步规则）
+- `scripts/check_release_wrapup.sh`（添加检查规则）
+
+验证方式：`check_release_wrapup.sh` §6 输出 13 个位置的版本号。
+
+### 13.6 文档结构变更必须同步 PROJECT_STRUCTURE.md — 规则 19
+
+任何目录增删必须同步更新 `PROJECT_STRUCTURE.md`。
+
+验证方式：`scripts/check_cross_consistency.py` 检查 1。
+
+### 13.7 changelog 声称的变更必须可验证落地 — 规则 20
+
+`scripts/check_cross_consistency.py` 解析 changelog 的 Added/Removed 章节，验证代码实际状态。
+
+验证方式：`scripts/check_cross_consistency.py` 检查 4 和 5。

@@ -1,6 +1,6 @@
 'use strict';
 
-/* PortraitIntro — v0.7.1 NPC portrait entrance animation.
+/* PortraitIntro — v0.8.2-version-source NPC portrait entrance animation.
  * Web Animations API + CSS transform. No dependencies.
  * Plays once per NPC per loop.
  */
