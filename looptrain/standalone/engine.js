@@ -472,12 +472,12 @@ function dialogueMessage(npcId, playerText, state, options) {
     if (/连接处|14:0[0-9]|三号车厢|行李架|离开|去了哪里/.test(t)) {
       session.pending_clues = unique([].concat(session.pending_clues || [], ['suspicious_connector_movement', 'harmonica_from_dining_car']));
       s.flags.gray_connector_hint_seen = true;
-      reply = _dlgText('shen-mohan-dialogue', 'connector_harmonica') || '灰衣乘客没有立刻回答。他似乎在权衡什么："你关心的是我，还是三号车厢？"他没有否认自己离开过座位。';
+      reply = _dlgText('grey-passenger-dialogue', 'connector_harmonica') || '灰衣乘客没有立刻回答。他似乎在权衡什么："你关心的是我，还是三号车厢？"他没有否认自己离开过座位。';
     } else if (/灰大衣|纸条|相信|不相信/.test(t)) {
       s.npc_states.gray_passenger.suspicion += 8;
-      reply = _dlgText('shen-mohan-dialogue', 'gray_coat_mentioned') || '灰衣乘客低头看了一眼自己的袖口，笑意很淡："提醒你的人，也许更不值得相信。"';
+      reply = _dlgText('grey-passenger-dialogue', 'gray_coat_mentioned') || '灰衣乘客低头看了一眼自己的袖口，笑意很淡："提醒你的人，也许更不值得相信。"';
     } else {
-      reply = _dlgText('shen-mohan-dialogue', 'default') || '灰衣乘客看着你，像是在衡量你究竟记得多少："你问得太急了。"';
+      reply = _dlgText('grey-passenger-dialogue', 'default') || '灰衣乘客看着你，像是在衡量你究竟记得多少："你问得太急了。"';
     }
   }
 

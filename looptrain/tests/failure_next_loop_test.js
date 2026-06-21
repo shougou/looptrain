@@ -3,7 +3,7 @@ const assert = require('assert');
 const engine = require('../standalone/engine');
 let s = engine.normalize(engine.START_STATE);
 s.known_clues.push('xiaoning_heard_ticking', 'zhao_requires_evidence');
-s.clock = '09:00';
+s.clock = '14:00';
 let r = engine.failLoop(s, 'time_out_explosion');
 assert.ok(r.loop_failure_outcome.confirmed_facts.some(x => x.id === 'xiaoning_heard_ticking'));
 r = engine.nextLoop(r);

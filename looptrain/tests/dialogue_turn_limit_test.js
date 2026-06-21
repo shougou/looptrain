@@ -22,17 +22,17 @@ assert.strictEqual(r.dialogue_outcome.turn_limit, 10);
 assert.strictEqual(r.dialogue_outcome.turns_used, 10);
 
 s = engine.normalize(engine.START_STATE);
-r = engine.commitAction('我起身穿过过道，走向第七节车厢和第八节车厢之间的连接处。', s);
+r = engine.commitAction('我起身穿过过道，走向二号车厢和三号车厢之间的连接处。', s);
 s = r.state;
-assert.strictEqual(s.location, 'connector_7_8');
-r = engine.commitAction('我走向沈墨寒，试探他。', s);
+assert.strictEqual(s.location, 'connector_2_3');
+r = engine.commitAction('我走向灰衣乘客，试探他。', s);
 s = r.state;
 assert.strictEqual(s.dialogue_session.turn_limit, 8);
 for (let i = 0; i < 8; i++) {
-  r = engine.dialogueMessage('shen_mohan', '你刚才去了连接处吗？08:48 前后你在什么地方？', s);
+  r = engine.dialogueMessage('gray_passenger', '你刚才去了连接处吗？14:05 前后你在什么地方？', s);
   s = r.state;
 }
 assert.strictEqual(s.mode, 'explore');
-assert.ok(s.npc_states.shen_mohan.suspicion >= 50);
+assert.ok(s.npc_states.gray_passenger.suspicion >= 50);
 
 console.log('OK dialogue turn limits and auto close');

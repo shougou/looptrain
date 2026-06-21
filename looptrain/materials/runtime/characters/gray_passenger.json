@@ -4,7 +4,7 @@
   "turn_limit": 8,
   "near_limit_hint_at": 4,
   "turn_limit_policy": "risk_escalation",
-  "portrait": "shen_mohan_portrait.png",
+  "portrait": "gray_passenger_portrait.png",
   "role": "suspicious_figure",
   "hidden": false,
   "location": "connector_2_3",
