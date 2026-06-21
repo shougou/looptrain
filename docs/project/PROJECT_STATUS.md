@@ -2,7 +2,7 @@
 
 ## 当前版本
 
-v0.8.2-version-source — 《寒灯初醒》试玩版（版本号单一源 + 检查脚本全覆盖 + 工程规范治理扩展）
+v0.9.0-playwright-e2e — 《寒灯初醒》试玩版（Playwright E2E 回归测试 + 工程规范完整治理）
 
 ## 当前状态
 
@@ -18,10 +18,12 @@ v0.8.2-version-source — 《寒灯初醒》试玩版（版本号单一源 + 检
 - Goal Engine + 指令系统 + 许知微助手已上线
 - 《寒灯初醒》完整试玩内容已上线
 - 暂用 Mock 模式，待接入真实 LLM
+- 测试: Playwright E2E 12 步回归测试（Mock 模式，33.1s）
 - 版本号治理: VERSION 文件作为唯一源，sync_version.sh 自动同步 11 个位置，check_release_wrapup.sh 覆盖 13 个位置验证
 
 ## 最近完成
 
+- v0.9.0 Playwright E2E 12 步回归测试：full-player-journey + save-restore，集成 verify_slt.sh，AGENT.md 规则 21
 - v0.8.2 版本号单一源 + 检查脚本全覆盖 + 23 处不一致修复：VERSION 文件、sync_version.sh、check_cross_consistency.py、AGENT.md 规则 17-20
 - v0.8.1 存档版本检测 + breaking change 强制重置系统：`lt:save:` key 体系、SaveMeta 6 字段、3 重置路径、旧数据归档、IndexedDB 旧库清理
 - v0.7 Goal Engine DSL + 12 指令系统 + 许知微主动引导 + UX/UI 场景驱动

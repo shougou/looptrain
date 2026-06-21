@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.9.0-playwright-e2e — 2026-06-21
+
+### Added
+- Playwright E2E 回归测试套件：`tests/e2e/` 目录
+- `full-player-journey.spec.js` — 12 步完整玩家路径（开场→对话→行动→失败→下一轮→刷新→重置）
+- `save-restore.spec.js` — 存档恢复 + URL 强制重置
+- `playwright.config.js` — 390×844 zh-CN 移动端配置
+- AGENT.md 规则 21 — E2E 测试必须通过，失败不得合并或部署
+
+### Changed
+- `package.json`: +@playwright/test + test:e2e script
+- `scripts/verify_slt.sh`: 新增 Playwright E2E 测试步骤
+- 版本号: v0.9.0-playwright-e2e
+
 ## v0.8.2-version-source — 2026-06-21
 
 ### Added

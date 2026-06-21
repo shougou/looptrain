@@ -12,7 +12,7 @@
 - [x] UX/UI 场景驱动布局 + 立绘入场动画
 - [x] 内容一致性全面审计（时间线、角色、场景、文本）
 - [ ] LLM Bridge 真实接入（DeepSeek）
-- [ ] Playwright 回归测试
+- [x] Playwright 回归测试
 - [x] 状态持久化（localStorage 版本化存档 + breaking change 检测，后续需迁移 IndexedDB）
 
 ## 下一阶段：体验增强
