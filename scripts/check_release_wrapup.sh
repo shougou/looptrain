@@ -249,6 +249,25 @@ else
   FAIL=$((FAIL + 1))
 fi
 
+# 6b. E2E regression test results (Playwright)
+echo ""
+echo "--- 6b. E2E test results ---"
+E2E_RESULT_DIR="$ROOT/looptrain/standalone/test-results"
+E2E_LAST_RUN="$E2E_RESULT_DIR/.last-run.json"
+if [ -f "$E2E_LAST_RUN" ]; then
+  E2E_STATUS=$(python3 -c "import json; d=json.load(open('$E2E_LAST_RUN')); print(d.get('status','unknown'))" 2>/dev/null || echo "unknown")
+  echo "  Last E2E run status: $E2E_STATUS"
+  if [ "$E2E_STATUS" = "passed" ] || [ "$E2E_STATUS" = "failed" ]; then
+    echo "  PASS: E2E tests have been executed"
+    PASS=$((PASS + 1))
+  else
+    echo "  WARN: E2E test results status is '$E2E_STATUS' — may not have run recently"
+  fi
+else
+  echo "  FAIL: No E2E test results found ($E2E_LAST_RUN missing)"
+  FAIL=$((FAIL + 1))
+fi
+
 # 7. Work item location — should be in released/ (not active/)
 echo ""
 echo "--- 7. Archive status ---"
