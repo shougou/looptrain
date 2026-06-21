@@ -19,7 +19,7 @@ LoopTrain 当前本地开发主线是 **SLT（Standalone LoopTrain）**。
 当前版本：
 
 ```text
-v0.8.2-version-source
+v0.9.0-playwright-e2e
 ```
 
 当前状态：
@@ -387,8 +387,16 @@ bash scripts/sync_version.sh
 
 验证方式：`scripts/check_cross_consistency.py` 检查 1。
 
-### 13.7 changelog 声称的变更必须可验证落地 — 规则 20
+### 13.8 E2E 回归测试必须通过 — 规则 21
 
-`scripts/check_cross_consistency.py` 解析 changelog 的 Added/Removed 章节，验证代码实际状态。
+所有修改完成后必须运行 Playwright E2E 测试：
 
-验证方式：`scripts/check_cross_consistency.py` 检查 4 和 5。
+```bash
+cd looptrain/standalone && npx playwright test
+```
+
+失败不得合并或部署。
+
+verify_slt.sh 中已集成 E2E 步骤，收尾阶段 8 必须全部通过。
+
+每个 work item 的 `40-review.md` 必须包含 `npx playwright test` 结果。

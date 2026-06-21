@@ -1,6 +1,6 @@
 {
   "play": {
-    "currentVersion": "v0.8.2-version-source",
+    "currentVersion": "v0.9.0-playwright-e2e",
     "playUrl": "/play/game",
     "playLabel": "进入游戏",
     "recommendedDevice": "手机竖屏",

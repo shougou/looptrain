@@ -1,6 +1,6 @@
 {
   "name": "looptrain-standalone",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "LoopTrain Standalone MVP - Local Node prototype without SillyTavern",
   "main": "server.js",
   "scripts": {
@@ -8,16 +8,18 @@
     "build:runtime": "tsc -p tsconfig.runtime.json",
     "test:runtime": "npm run build:runtime && node --test \"dist/runtime/**/*.test.js\"",
     "test:standalone": "node tests/smoke_test.js",
+    "test:e2e": "npx playwright test --config=playwright.config.js",
     "test": "npm run test:runtime && npm run test:standalone",
     "check": "node --check server.js && node --check engine.js && node --check tests/smoke_test.js"
   },
   "dependencies": {
-    "express": "^4.21.0",
-    "dotenv": "^16.4.0"
+    "dotenv": "^16.4.0",
+    "express": "^4.21.0"
   },
   "devDependencies": {
-    "typescript": "^5.5.0",
-    "@types/node": "^20.14.0"
+    "@playwright/test": "^1.61.0",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
   },
   "license": "UNLICENSED",
   "private": true

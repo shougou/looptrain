@@ -15,6 +15,9 @@ npm test
 echo "[SLT] Materials validation"
 python3 "$ROOT_DIR/looptrain/materials/tools/validate_materials.py"
 
+echo "[SLT] Playwright E2E tests"
+cd "$SLT_DIR" && npx playwright test
+
 echo "[SLT] HTTP checks"
 python3 - <<PY
 import json

@@ -34,7 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ── API routes (no /api/plugins — standalone) ──
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, engine: 'looptrain', version: 'v0.8.2-version-source', mode: 'standalone' });
+  res.json({ ok: true, engine: 'looptrain', version: 'v0.9.0-playwright-e2e', mode: 'standalone' });
 });
 
 app.post('/api/session/init', (req, res) => {
@@ -266,12 +266,12 @@ app.get('/', (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n  LoopTrain Standalone v0.8.2-version-source`);
+  console.log(`\n  LoopTrain Standalone v0.9.0-playwright-e2e`);
   console.log(`  ────────────────────────`);
   console.log(`  Local:  http://localhost:${PORT}`);
   console.log(`  LLM:    ${LLM_ENABLED && DEEPSEEK_API_KEY ? 'enabled (deepseek)' : 'mock only'}`);
   console.log(`  Memory: ${memoryRuntime ? 'enabled' : 'disabled'}`);
-  console.log(`  Engine: v0.8.2-version-source\n`);
+  console.log(`  Engine: v0.9.0-playwright-e2e\n`);
 });
 
 module.exports = app;
