@@ -17,7 +17,7 @@
   "site": {
     "lastUpdated": "2026-06-20",
     "currentPhase": "试玩版内容完成",
-    "nextFocus": "LLM Bridge 真实接入、Playwright 回归测试、IndexedDB 存档迁移",
+    "nextFocus": "Playwright 回归测试、IndexedDB 存档迁移、手机端真机适配",
     "tagline": "一个互动叙事游戏。也是一个 AI 协同开发实验室。",
     "description": "通过开发这个游戏，探索 AI 与人类如何共同完成复杂软件——状态管理、Prompt 设计、Agent 协作、Runtime 架构、AI Coding 工作流。"
   }
