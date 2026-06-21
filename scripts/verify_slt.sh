@@ -12,6 +12,9 @@ echo "[SLT] Syntax and smoke tests"
 npm run check
 npm test
 
+echo "[SLT] Materials validation"
+python3 "$ROOT_DIR/looptrain/materials/tools/validate_materials.py"
+
 echo "[SLT] HTTP checks"
 python3 - <<PY
 import json
