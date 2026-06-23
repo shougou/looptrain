@@ -341,6 +341,7 @@ function makeTimelineEntry(entryData) {
     source_type: entryData.source_type || 'observation',
     source_label: entryData.source_label || '',
     source_id: entryData.source_id || entryData.public_clue_id || entryData.id,
+    description: entryData.description || '',
     speaker: entryData.speaker || null,
     reliability: entryData.reliability || 'high',
     status: entryData.status || 'verified',
@@ -399,6 +400,8 @@ function observeEnvironment(state, params) {
 
   if (s.ap_remaining < 1) return maybeFail(s) || { state: s, observation_result: { discovered: [], nothing_found: true, conflict_detected: false, clock_advanced: s.clock, ap_remaining: s.ap_remaining } };
 
+  var checkClock = s.clock;
+
   s.ap_remaining -= 1;
   if (obsType === 'scene') {
     advanceClock(s, 1);
@@ -407,7 +410,6 @@ function observeEnvironment(state, params) {
   }
 
   var playerLoc = s.location;
-  var clock = s.clock;
   var advanceMin = obsType === 'scene' ? 1 : 2;
   var npcId = params.npc_id || null;
   var locFilter = params.location || null;
@@ -418,15 +420,15 @@ function observeEnvironment(state, params) {
     var match = false;
 
     if (obsType === 'scene') {
-      if (timeInWindow(clock, evt.observable.window) && evt.observable.locations.indexOf(playerLoc) >= 0) {
+      if (timeInWindow(checkClock, evt.observable.window) && evt.observable.locations.indexOf(playerLoc) >= 0) {
         match = true;
       }
     } else if (obsType === 'npc' && npcId) {
-      if (evt.actor === npcId && windowsOverlap(clock, advanceMin, evt.observable.window) && evt.observable.locations.indexOf(playerLoc) >= 0) {
+      if (evt.actor === npcId && windowsOverlap(checkClock, advanceMin, evt.observable.window) && evt.observable.locations.indexOf(playerLoc) >= 0) {
         match = true;
       }
     } else if (obsType === 'location' && locFilter) {
-      if (windowsOverlap(clock, advanceMin, evt.observable.window) && evt.observable.locations.indexOf(locFilter) >= 0) {
+      if (windowsOverlap(checkClock, advanceMin, evt.observable.window) && evt.observable.locations.indexOf(locFilter) >= 0) {
         match = true;
       }
     }
@@ -490,7 +492,7 @@ function observeEnvironment(state, params) {
       discovered: discovered,
       nothing_found: nothingFound && discovered.length === 0,
       conflict_detected: conflictDetected,
-      clock_advanced: clock,
+      clock_advanced: checkClock,
       ap_remaining: s.ap_remaining,
     },
     suggestions: suggestions(s),
