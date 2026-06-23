@@ -522,13 +522,21 @@ async function submitInput() {
   autoSizeInput();
 
   const inDialogue = state.mode === 'dialogue';
-  appendMsg('player', text, inDialogue ? dialogueLog : logEl);
-
-  AudioManager.play('message_sent');
 
   if (matchLocalCommand(text)) { handleCommand(text); return; }
 
-  if (text.indexOf('__OBSERVE_') === 0) { await handleObserveAction(text); return; }
+  if (text.indexOf('__OBSERVE_') === 0) {
+    AudioManager.play('message_sent');
+    var obsLabel = text.indexOf('__OBSERVE_NPC__') === 0 ? '盯住 ' + (text.split(':')[1] || '') :
+      text.indexOf('__OBSERVE_LOCATION__') === 0 ? '守点观察 ' + (text.split(':')[1] || '') :
+      '观察当前场景';
+    appendMsg('player', obsLabel, logEl);
+    await handleObserveAction(text);
+    return;
+  }
+
+  appendMsg('player', text, inDialogue ? dialogueLog : logEl);
+  AudioManager.play('message_sent');
 
   if (inDialogue) {
     if (/结束|离开|不聊了/.test(text)) { endDialogue(); return; }
@@ -555,6 +563,10 @@ async function handleObserveAction(template) {
     params.location = template.split(':')[1] || '';
   }
   var res = await api('/action/observe', { type: params.type, npc_id: params.npc_id, location: params.location, state: state });
+  if (!res) {
+    appendMsg('system', '观察失败，请稍后重试。如果持续失败请刷新页面。', logEl);
+    return;
+  }
   handleObserveResponse(res);
 }
 
