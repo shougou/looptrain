@@ -591,6 +591,7 @@ function handleObserveResponse(res) {
   if (obsResult) {
     if (obsResult.nothing_found) {
       appendMsg('system', '你仔细观察周围，没有发现异常。', logEl);
+      toast('没有发现异常');
     }
     if (obsResult.discovered && obsResult.discovered.length > 0) {
       for (var i = 0; i < obsResult.discovered.length; i++) {
@@ -600,9 +601,14 @@ function handleObserveResponse(res) {
         if (d.entry.description) text += ' — ' + d.entry.description;
         appendHtml('system', '<div class="lt-observation-result">' + esc(text) + '</div>', logEl);
       }
+      var firstTitle = clueName(obsResult.discovered[0].entry.public_clue_id) || clueName(obsResult.discovered[0].entry.source_id) || '';
+      var toastText = firstTitle ? '发现: ' + firstTitle : '注意到了一些细节';
+      if (obsResult.discovered.length > 1) toastText += ' 等' + obsResult.discovered.length + '项';
+      toast(toastText);
     }
     if (obsResult.conflict_detected) {
       appendHtml('system', '<div class="lt-observation-conflict">⚠ 这与你已知的某条线索存在矛盾</div>', logEl);
+      toast('⚠ 发现线索矛盾');
     }
   }
   render();
