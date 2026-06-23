@@ -17,7 +17,7 @@ let s = engine.normalize(engine.START_STATE);
 assert.strictEqual(s.episode_id, 'trial_001');
 assert.strictEqual(s.ap_remaining, 10);
 assert.strictEqual(s.location, 'carriage_2');
-assert.ok(s.known_clues.includes('gray_coat_note_pressure'));
+assert.ok(s.known_clues.includes('clue_gray_note_warning'));
 console.log('   OK normalize');
 
 let r = engine.commitAction('我走到小宁身边，蹲下来和她说话。', s);
@@ -28,38 +28,47 @@ console.log('   OK start dialogue');
 
 r = engine.dialogueMessage('xiaoning', '别怕，我也听见了那个声音。你刚才是不是看见了什么？', s);
 s = r.state;
-assert.ok(s.dialogue_session.pending_clues.includes('ticking_under_floor'));
+assert.ok(s.dialogue_session.pending_clues.includes('clue_ticking_under_floor'));
+assert.ok(s.dialogue_session.pending_clues.includes('claim_xiaoning_heard_ticking'));
 console.log('   OK dialogue message');
 
 r = engine.endDialogue(s);
 s = r.state;
 assert.strictEqual(s.mode, 'explore');
-assert.ok(s.known_clues.includes('ticking_under_floor'));
-assert.ok(s.known_clues.includes('xiaoning_heard_ticking'));
-assert.strictEqual(s.ap_remaining, 7);
+assert.ok(s.known_clues.includes('clue_ticking_under_floor'));
+assert.ok(s.known_clues.includes('claim_xiaoning_heard_ticking'));
+assert.strictEqual(s.ap_remaining, 8);  // NPC cost is now 2
 console.log('   OK end dialogue');
 
 r = engine.commitAction('我假装系鞋带，低头检查座位下方。', s);
 s = r.state;
-assert.ok(s.known_clues.includes('sound_not_from_seat'));
+assert.ok(s.known_clues.includes('clue_sound_not_from_seat'));
+// countValidEvidence is deprecated but still works (redirects to evaluateEvidence)
 assert.ok(engine.countValidEvidence(s) >= 2);
 console.log('   OK observe');
 
+// Convince zhao: first call auto-injects police_context, second call succeeds
 r = engine.commitAction('我找到赵乘警，说明小宁听见过声音，而且我也确认声音不来自座位，请他检查地板。', s);
 s = r.state;
+assert.ok(s.known_clues.includes('claim_zhao_needs_actionable_evidence'));
+assert.strictEqual(s.flags.trial_success, false);
+console.log('   OK first convince zhao (auto-injects police context)');
+
+r = engine.commitAction('我找到赵乘警，说明已获得的证据，请他检查地板。', s);
+s = r.state;
 assert.strictEqual(s.flags.trial_success, true);
-console.log('   OK convince zhao -> trial success');
+console.log('   OK second convince zhao -> trial success');
 
 // ── Failure + next loop ──
 console.log('\n2. Engine: failLoop & nextLoop...');
 s = engine.normalize(engine.START_STATE);
-s.known_clues.push('xiaoning_heard_ticking', 'zhao_requires_evidence');
+s.known_clues.push('claim_xiaoning_heard_ticking', 'claim_zhao_needs_actionable_evidence');
 s.clock = '14:15';
 r = engine.failLoop(s, 'time_out_explosion');
-assert.ok(r.loop_failure_outcome.confirmed_facts.some(x => x.id === 'xiaoning_heard_ticking'));
+assert.ok(r.loop_failure_outcome.confirmed_facts.some(x => x.id === 'claim_xiaoning_heard_ticking'));
 r = engine.nextLoop(r);
 assert.strictEqual(r.state.loop, 2);
-assert.ok(r.state.carried_memory.includes('xiaoning_heard_ticking'));
+assert.ok(r.state.carried_memory.includes('claim_xiaoning_heard_ticking'));
 console.log('   OK fail + next loop memory carry');
 
 // ── Dialogue turn limit ──
@@ -101,8 +110,8 @@ assert.ok(npcs.xiaoning);
 assert.ok(npcs.zhao_police);
 assert.ok(npcs.gray_passenger);
 const clues = engine.getClueDetails();
-assert.ok(clues.gray_coat_note_pressure);
-assert.ok(clues.ticking_under_floor);
+assert.ok(clues.clue_gray_note_warning);
+assert.ok(clues.clue_ticking_under_floor);
 console.log('   OK npcs & clues');
 
 // ── Save version detection tests ──
@@ -111,13 +120,13 @@ console.log('\n7. Engine: save version detection...');
 assert.strictEqual(typeof engine.START_STATE.loop, 'number');
 assert.strictEqual(engine.START_STATE.loop, 1);
 assert.strictEqual(engine.START_STATE.clock, '14:00');
-assert.ok(engine.START_STATE.known_clues.includes('gray_coat_note_pressure'));
+assert.ok(engine.START_STATE.known_clues.includes('clue_gray_note_warning'));
 assert.strictEqual(engine.START_STATE.flags.intro_seen, false);
 // Verify reset_game engine command returns normalized START_STATE (AC-12)
 var resetResult = engine.executeCommand('reset_game', engine.START_STATE);
 assert.strictEqual(resetResult.state.loop, 1);
 assert.strictEqual(resetResult.state.clock, '14:00');
-assert.ok(resetResult.state.known_clues.includes('gray_coat_note_pressure'));
+assert.ok(resetResult.state.known_clues.includes('clue_gray_note_warning'));
 assert.strictEqual(resetResult.state.flags.intro_seen, false);
 assert.strictEqual(resetResult.state.ap_remaining, 10);
 assert.strictEqual(resetResult.state.location, 'carriage_2');

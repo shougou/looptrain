@@ -15,6 +15,18 @@ npm test
 echo "[SLT] Materials validation"
 python3 "$ROOT_DIR/looptrain/materials/tools/validate_materials.py"
 
+echo "[SLT] Start server for E2E + HTTP checks"
+cd "$SLT_DIR" && PORT=$PORT node server.js &
+SLT_PID=$!
+sleep 2
+
+# Verify server is up
+if ! curl -sf "$BASE_URL/api/health" > /dev/null 2>&1; then
+  echo "ERROR: Server failed to start on port $PORT"
+  kill $SLT_PID 2>/dev/null || true
+  exit 1
+fi
+
 echo "[SLT] Playwright E2E tests"
 cd "$SLT_DIR" && npx playwright test
 
@@ -50,3 +62,6 @@ for path, expected in checks:
 PY
 
 echo "[SLT] OK: local standalone runtime verified at ${BASE_URL}"
+
+kill $SLT_PID 2>/dev/null || true
+wait $SLT_PID 2>/dev/null || true

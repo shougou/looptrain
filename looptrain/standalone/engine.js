@@ -16,9 +16,10 @@ var START_STATE = {
   ap_remaining: 10,
   location: 'carriage_2',
   active_npc: null,
-  known_clues: ['gray_coat_note_pressure'],
+  known_clues: ['clue_gray_note_warning'],
   carried_memory: [],
   unlocked_actions: [],
+  player_timeline: { entries: [], inferences: [] },
   dialogue_session: null,
   last_outcome: null,
   npc_states: {
@@ -40,6 +41,7 @@ var SCENES = {};
 var CLUE_DETAILS = {};
 var CLUE_TITLES = {};
 var DIALOGUES = {};
+var TIMELINE_EVENTS = [];
 
 // ── Hardcoded fallbacks (used when JSON files are unavailable) ──
 var FALLBACK_NPCS = {
@@ -85,14 +87,21 @@ var FALLBACK_NPCS = {
 };
 
 var FALLBACK_CLUE_DETAILS = {
-  gray_coat_note_pressure: { id: 'gray_coat_note_pressure', title: '不要相信灰大衣', source: '开场纸条', confidence: 'medium', usable_with: ['gray_passenger', 'self_reasoning'], carry_to_next_loop: true },
-  xiaoning_heard_ticking: { id: 'xiaoning_heard_ticking', title: '小宁也听见过声音', source: '小宁对话', confidence: 'high', usable_with: ['zhao_police', 'xiaoning'], carry_to_next_loop: true },
-  ticking_under_floor: { id: 'ticking_under_floor', title: '地板下方的滴答声', source: '小宁对话', confidence: 'high', usable_with: ['zhao_police', 'gray_passenger', 'connector'], carry_to_next_loop: true },
-  sound_not_from_seat: { id: 'sound_not_from_seat', title: '声音不来自座位下方', source: '玩家检查', confidence: 'high', usable_with: ['zhao_police'], carry_to_next_loop: true },
-  suspicious_connector_movement: { id: 'suspicious_connector_movement', title: '连接处有人停留过', source: '灰衣乘客对话', confidence: 'medium', usable_with: ['zhao_police', 'gray_passenger'], carry_to_next_loop: true },
-  mother_doll_memory: { id: 'mother_doll_memory', title: '小宁妈妈与布娃娃', source: '隐藏记忆节点', confidence: 'high', usable_with: ['xiaoning'], carry_to_next_loop: true },
-  harmonica_from_dining_car: { id: 'harmonica_from_dining_car', title: '餐车方向的口琴声', source: '世界事件', confidence: 'low', usable_with: ['gray_passenger', 'self_reasoning'], carry_to_next_loop: true },
-  zhao_requires_evidence: { id: 'zhao_requires_evidence', title: '赵乘警需要证据才会行动', source: '赵乘警反馈', confidence: 'high', usable_with: ['zhao_police', 'self_planning'], carry_to_next_loop: true },
+  clue_gray_note_warning: { id: 'clue_gray_note_warning', title: '不要相信灰大衣', source: '开场纸条', source_type: 'physical', confidence: 'medium', usable_with: ['gray_passenger', 'self_reasoning'], carry_to_next_loop: true },
+  claim_xiaoning_heard_ticking: { id: 'claim_xiaoning_heard_ticking', title: '小宁也听见过声音', source: '小宁对话', source_type: 'claim', confidence: 'high', usable_with: ['zhao_police', 'xiaoning'], carry_to_next_loop: true, speaker: 'xiaoning' },
+  clue_ticking_under_floor: { id: 'clue_ticking_under_floor', title: '地板下方的滴答声', source: '检查地板', source_type: 'physical', confidence: 'high', usable_with: ['zhao_police', 'gray_passenger'], carry_to_next_loop: true },
+  clue_sound_not_from_seat: { id: 'clue_sound_not_from_seat', title: '声音不来自座位下方', source: '玩家检查', source_type: 'physical', confidence: 'high', usable_with: ['zhao_police'], carry_to_next_loop: true, auto_grant: ['clue_floor_panel_scratch'] },
+  clue_floor_panel_scratch: { id: 'clue_floor_panel_scratch', title: '地板边缘有新划痕', source: '检查连接处地板', source_type: 'physical', confidence: 'high', usable_with: ['zhao_police'], carry_to_next_loop: true },
+  claim_gray_stayed_connector: { id: 'claim_gray_stayed_connector', title: '灰衣声称一直在连接处', source: '灰衣乘客对话', source_type: 'claim', confidence: 'unknown', usable_with: ['gray_passenger'], carry_to_next_loop: true, contradicts: ['obs_gray_passes_1404', 'obs_gray_enters_c3_1406'], speaker: 'gray_passenger' },
+  claim_zhao_needs_actionable_evidence: { id: 'claim_zhao_needs_actionable_evidence', title: '赵乘警需要证据才会行动', source: '赵乘警反馈', source_type: 'claim', confidence: 'high', usable_with: ['zhao_police', 'self_planning'], carry_to_next_loop: true, speaker: 'zhao_police' },
+  obs_gray_passes_1404: { id: 'obs_gray_passes_1404', title: '灰衣经过二号车厢', source: '玩家观察', source_type: 'observation', confidence: 'high', usable_with: ['zhao_police'], carry_to_next_loop: true, contradicts: ['claim_gray_stayed_connector'] },
+  obs_gray_enters_c3_1406: { id: 'obs_gray_enters_c3_1406', title: '灰衣进入三号车厢方向', source: '玩家观察', source_type: 'observation', confidence: 'high', usable_with: ['zhao_police'], carry_to_next_loop: true, contradicts: ['claim_gray_stayed_connector', 'claim_gray_denies_carriage3'] },
+  obs_metal_sound_1408: { id: 'obs_metal_sound_1408', title: '三号车厢方向金属碰撞声', source: '玩家观察', source_type: 'observation', confidence: 'high', usable_with: ['zhao_police'], carry_to_next_loop: true },
+  inf_gray_alibi_contradicted: { id: 'inf_gray_alibi_contradicted', title: '灰衣不在场说法不成立', source: '玩家推理', source_type: 'inference', confidence: 'high', usable_with: ['zhao_police', 'gray_passenger'], carry_to_next_loop: true, derived_from: ['claim_gray_stayed_connector', 'obs_gray_passes_1404'], effect: {unlock_actions: ['action_confront_gray_movement'], contributes_to: 'timeline_conflict'} },
+  inf_gray_denial_false: { id: 'inf_gray_denial_false', title: '灰衣否认三号车厢说法不成立', source: '玩家推理', source_type: 'inference', confidence: 'high', usable_with: ['zhao_police'], carry_to_next_loop: true, derived_from: ['claim_gray_denies_carriage3', 'obs_gray_enters_c3_1406'], effect: {contributes_to: 'timeline_conflict'} },
+  inf_gray_connected_to_c3_anomaly: { id: 'inf_gray_connected_to_c3_anomaly', title: '灰衣与三号车厢异常有关', source: '玩家推理', source_type: 'inference', confidence: 'high', usable_with: ['zhao_police'], carry_to_next_loop: true, derived_from: ['obs_gray_enters_c3_1406', 'obs_metal_sound_1408'] },
+  inf_c3_needs_inspection: { id: 'inf_c3_needs_inspection', title: '三号车厢/连接处需立即检查', source: '玩家推理', source_type: 'inference', confidence: 'high', usable_with: ['zhao_police'], carry_to_next_loop: true, derived_from: ['inf_gray_connected_to_c3_anomaly', 'clue_floor_panel_scratch'], effect: {unlock_actions: ['action_report_c3_inspection', 'action_request_zhao_check_connector'], contributes_to_success: true} },
+  inf_xiaoning_statement_incomplete: { id: 'inf_xiaoning_statement_incomplete', title: '小宁没有说出完整事实', source: '玩家推理', source_type: 'inference', confidence: 'high', usable_with: ['xiaoning'], carry_to_next_loop: true, derived_from: ['claim_xiaoning_stayed_carriage2', 'obs_xiaoning_returns_1402'], effect: {unlock_actions: ['action_ask_xiaoning_about_c3_gently']} },
 };
 
 var FALLBACK_SCENES = {
@@ -107,6 +116,19 @@ function readJsonSafe(filePath) {
     if (!fs.existsSync(filePath)) return null;
     return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
   } catch (_) { return null; }
+}
+
+function loadTimelineEvents() {
+  var repoRoot = path.resolve(__dirname, '..');
+  var timelinePath = path.join(repoRoot, 'looptrain', 'materials', 'runtime', 'timeline', 'trial-timeline.json');
+  if (!fs.existsSync(timelinePath)) {
+    repoRoot = path.resolve(__dirname, '..', '..');
+    timelinePath = path.join(repoRoot, 'looptrain', 'materials', 'runtime', 'timeline', 'trial-timeline.json');
+  }
+  var data = readJsonSafe(timelinePath);
+  if (data && Array.isArray(data.events)) {
+    TIMELINE_EVENTS = data.events;
+  }
 }
 
 function loadContent() {
@@ -134,23 +156,62 @@ function loadContent() {
       if (Object.keys(loadedNpcs).length > 0) { NPCS = loadedNpcs; }
     } catch (_) {}
 
-    // Load Clues from legacy looptrain/clues/
+    // Load Clues from runtime/clues/ (new path), fallback to legacy looptrain/clues/
+    var clueLoaded = false;
     try {
-      var clueFile = path.join(legacyBase, 'clues', 'trial_001_clues.json');
-      var clueData = readJsonSafe(clueFile);
-      if (clueData && Array.isArray(clueData.clues)) {
+      var runtimeClueFile = path.join(runtimeBase, 'clues', 'trial-clues.json');
+      var runtimeClueData = readJsonSafe(runtimeClueFile);
+      if (runtimeClueData && Array.isArray(runtimeClueData.clues)) {
         var details = {};
-        for (var j = 0; j < clueData.clues.length; j++) {
-          var c = clueData.clues[j];
+        for (var j = 0; j < runtimeClueData.clues.length; j++) {
+          var c = runtimeClueData.clues[j];
           details[c.id] = {
-            id: c.id, title: c.title, source: c.source,
+            id: c.id, title: c.title, source: c.source, source_type: c.source_type || 'physical',
             confidence: c.confidence, usable_with: c.usable_with || [],
             carry_to_next_loop: c.carry_to_next_loop !== false,
+            conflicts_with: c.conflicts_with || [],
+            supports: c.supports || [],
+            contradicts: c.contradicts || [],
+            derived_from: c.derived_from || [],
+            effect: c.effect || null,
+            auto_grant: c.auto_grant || [],
+            unlocked_by: c.unlocked_by || null,
+            speaker: c.speaker || null,
+            description: c.description || '',
           };
         }
-        if (Object.keys(details).length > 0) { CLUE_DETAILS = details; }
+        if (Object.keys(details).length > 0) { CLUE_DETAILS = details; clueLoaded = true; }
       }
     } catch (_) {}
+
+    // Legacy fallback — only if runtime load failed
+    if (!clueLoaded) {
+      try {
+        var clueFile = path.join(legacyBase, 'clues', 'trial_001_clues.json');
+        var clueData = readJsonSafe(clueFile);
+        if (clueData && Array.isArray(clueData.clues)) {
+          var ldetails = {};
+          for (var k = 0; k < clueData.clues.length; k++) {
+            var lc = clueData.clues[k];
+            ldetails[lc.id] = {
+              id: lc.id, title: lc.title, source: lc.source, source_type: lc.source_type || 'physical',
+              confidence: lc.confidence, usable_with: lc.usable_with || [],
+              carry_to_next_loop: lc.carry_to_next_loop !== false,
+              conflicts_with: lc.conflicts_with || [],
+              supports: lc.supports || [],
+              contradicts: lc.contradicts || [],
+              derived_from: lc.derived_from || [],
+              effect: lc.effect || null,
+              auto_grant: lc.auto_grant || [],
+              unlocked_by: lc.unlocked_by || null,
+              speaker: lc.speaker || null,
+              description: lc.description || '',
+            };
+          }
+          if (Object.keys(ldetails).length > 0) { CLUE_DETAILS = ldetails; }
+        }
+      } catch (_) {}
+    }
 
     // Load Scenes from runtime/scenes/
     try {
@@ -189,6 +250,9 @@ function loadContent() {
       ct[cdKeys[ci]] = CLUE_DETAILS[cdKeys[ci]].title;
     }
     CLUE_TITLES = ct;
+
+    // Load timeline events
+    loadTimelineEvents();
   } catch (_) {}
 }
 
@@ -207,6 +271,9 @@ function normalize(state) {
   s.unlocked_actions = s.unlocked_actions || [];
   s.input_channel = s.input_channel || 'roleplay';
   s.location = s.location || 'carriage_2';
+  if (!s.player_timeline) s.player_timeline = { entries: [], inferences: [] };
+  if (!Array.isArray(s.player_timeline.entries)) s.player_timeline.entries = [];
+  if (!Array.isArray(s.player_timeline.inferences)) s.player_timeline.inferences = [];
   return s;
 }
 
@@ -219,9 +286,12 @@ function advanceClock(s, minutes) {
   s.clock = String(Math.floor(total / 60)).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0');
 }
 
+// DEPRECATED: countValidEvidence is superseded by canConvinceZhao() and evaluateEvidence().
+// Kept for backward compatibility with existing code paths that still reference it.
 function countValidEvidence(s) {
-  var valid = ['ticking_under_floor', 'xiaoning_heard_ticking', 'sound_not_from_seat', 'suspicious_connector_movement'];
-  return unique(s.known_clues).filter(function(x) { return valid.includes(x); }).length;
+  s = normalize(s);
+  var ev = evaluateEvidence(s);
+  return ev.physical_anomaly + ev.timeline_conflict + ev.suspect_route + ev.actionable_location;
 }
 
 function clueName(id) { return (CLUE_DETAILS[id] && CLUE_DETAILS[id].title) || id; }
@@ -235,6 +305,399 @@ function isHiddenNpcVisible(s, npcId) {
 
 function unlockHiddenNpc(s, npcId) {
   s.flags.visible_hidden_npcs = unique([].concat(s.flags.visible_hidden_npcs || [], [npcId]));
+}
+
+// ── Time helpers ──
+
+function timeToMinutes(t) {
+  var parts = String(t || '00:00').split(':');
+  return Number(parts[0]) * 60 + Number(parts[1]);
+}
+
+function timeInWindow(time, window) {
+  var t = timeToMinutes(time);
+  return t >= timeToMinutes(window[0]) && t < timeToMinutes(window[1]);
+}
+
+function windowsOverlap(clock, advanceMin, window) {
+  var start = timeToMinutes(clock);
+  var end = start + advanceMin;
+  var wStart = timeToMinutes(window[0]);
+  var wEnd = timeToMinutes(window[1]);
+  return start < wEnd && end > wStart;
+}
+
+// ── Timeline entry factory ──
+
+function makeTimelineEntry(entryData) {
+  return {
+    id: entryData.id || ('entry_' + Date.now()),
+    public_clue_id: entryData.public_clue_id || null,
+    actor: entryData.actor || 'scene',
+    time: entryData.time || null,
+    time_range: entryData.time_range || null,
+    location: entryData.location || null,
+    action: entryData.action || null,
+    source_type: entryData.source_type || 'observation',
+    source_label: entryData.source_label || '',
+    source_id: entryData.source_id || entryData.public_clue_id || entryData.id,
+    speaker: entryData.speaker || null,
+    reliability: entryData.reliability || 'high',
+    status: entryData.status || 'verified',
+    loop_observed: entryData.loop_observed || 1,
+    current_loop_verified: entryData.current_loop_verified !== false,
+    visible_to_player: entryData.visible_to_player !== false,
+    carry_to_next_loop: entryData.carry_to_next_loop !== false,
+    counts_as_current_evidence: entryData.counts_as_current_evidence !== false,
+    can_unlock_prepositioning: entryData.can_unlock_prepositioning || false,
+    tags: entryData.tags || [],
+    contradicts: entryData.contradicts || [],
+    supports: entryData.supports || [],
+    derived_from: entryData.derived_from || [],
+    effect: entryData.effect || null,
+  };
+}
+
+// ── Timeline functions ──
+
+function addTimelineEntry(state, entryData) {
+  var s = normalize(state);
+  var entry = makeTimelineEntry(entryData);
+  s.player_timeline.entries.push(entry);
+  if (entry.public_clue_id) addClue(s, entry.public_clue_id);
+  detectConflicts(s);
+  generateInference(s);
+  return entry;
+}
+
+function hasCurrentEntry(state, clueId) {
+  var s = normalize(state);
+  var found = false;
+  var entries = s.player_timeline.entries || [];
+  for (var i = 0; i < entries.length; i++) {
+    if ((entries[i].source_id === clueId || entries[i].public_clue_id === clueId) && entries[i].current_loop_verified) {
+      found = true;
+      break;
+    }
+  }
+  if (!found && s.known_clues.indexOf(clueId) >= 0) found = true;
+  return found;
+}
+
+function hasInference(state, inferenceId) {
+  var s = normalize(state);
+  return (s.player_timeline.inferences || []).indexOf(inferenceId) >= 0;
+}
+
+function observeEnvironment(state, params) {
+  var s = normalize(state);
+  params = params || {};
+  var obsType = params.type || 'scene';
+  var discovered = [];
+  var nothingFound = true;
+  var conflictDetected = false;
+
+  if (s.ap_remaining < 1) return maybeFail(s) || { state: s, observation_result: { discovered: [], nothing_found: true, conflict_detected: false, clock_advanced: s.clock, ap_remaining: s.ap_remaining } };
+
+  s.ap_remaining -= 1;
+  if (obsType === 'scene') {
+    advanceClock(s, 1);
+  } else {
+    advanceClock(s, 2);
+  }
+
+  var playerLoc = s.location;
+  var clock = s.clock;
+  var advanceMin = obsType === 'scene' ? 1 : 2;
+  var npcId = params.npc_id || null;
+  var locFilter = params.location || null;
+
+  for (var i = 0; i < TIMELINE_EVENTS.length; i++) {
+    var evt = TIMELINE_EVENTS[i];
+    if (!evt.observable) continue;
+    var match = false;
+
+    if (obsType === 'scene') {
+      if (timeInWindow(clock, evt.observable.window) && evt.observable.locations.indexOf(playerLoc) >= 0) {
+        match = true;
+      }
+    } else if (obsType === 'npc' && npcId) {
+      if (evt.actor === npcId && windowsOverlap(clock, advanceMin, evt.observable.window) && evt.observable.locations.indexOf(playerLoc) >= 0) {
+        match = true;
+      }
+    } else if (obsType === 'location' && locFilter) {
+      if (windowsOverlap(clock, advanceMin, evt.observable.window) && evt.observable.locations.indexOf(locFilter) >= 0) {
+        match = true;
+      }
+    }
+
+    if (match) {
+      nothingFound = false;
+      var clueDetail = CLUE_DETAILS[evt.public_clue_id] || {};
+      var entryData = {
+        id: 'entry_' + (evt.id || evt.public_clue_id || ('evt_' + i)),
+        public_clue_id: evt.public_clue_id || null,
+        actor: evt.actor || 'scene',
+        time: evt.time || null,
+        location: evt.location || null,
+        action: evt.action || null,
+        source_type: 'observation',
+        source_label: '玩家观察',
+        source_id: evt.public_clue_id || evt.id,
+        reliability: 'high',
+        status: 'verified',
+        loop_observed: s.loop,
+        current_loop_verified: true,
+        visible_to_player: true,
+        carry_to_next_loop: true,
+        counts_as_current_evidence: true,
+        can_unlock_prepositioning: false,
+        tags: clueDetail.tags || [evt.actor || 'scene', 'observation', 'timeline'],
+        contradicts: clueDetail.contradicts || clueDetail.conflicts_with || [],
+        supports: clueDetail.supports || [],
+        description: evt.description || clueDetail.description || '',
+      };
+
+      var entry = addTimelineEntry(s, entryData);
+
+      var isConflict = false;
+      for (var c = 0; c < entry.contradicts.length; c++) {
+        for (var e = 0; e < s.player_timeline.entries.length; e++) {
+          if (s.player_timeline.entries[e].id === entry.contradicts[c] || s.player_timeline.entries[e].source_id === entry.contradicts[c]) {
+            isConflict = true;
+            conflictDetected = true;
+            break;
+          }
+        }
+        if (isConflict) break;
+      }
+
+      discovered.push({
+        entry: entry,
+        is_conflict_with: isConflict ? (entry.contradicts[0] || null) : null,
+        added_to_timeline: true,
+        added_to_clues: !!entry.public_clue_id,
+      });
+    }
+  }
+
+  var failure = maybeFail(s);
+  if (failure) return failure;
+
+  return {
+    state: s,
+    observation_result: {
+      discovered: discovered,
+      nothing_found: nothingFound && discovered.length === 0,
+      conflict_detected: conflictDetected,
+      clock_advanced: clock,
+      ap_remaining: s.ap_remaining,
+    },
+    suggestions: suggestions(s),
+    goal: currentGoal(s),
+  };
+}
+
+function detectConflicts(state) {
+  var s = normalize(state);
+  var conflicts = [];
+  var seen = {};
+  var entries = s.player_timeline.entries || [];
+  for (var i = 0; i < entries.length; i++) {
+    var a = entries[i];
+    if (!a.contradicts || a.contradicts.length === 0) continue;
+    for (var j = 0; j < entries.length; j++) {
+      if (i === j) continue;
+      var b = entries[j];
+      var aKey = a.source_id || a.id;
+      var bKey = b.source_id || b.id;
+      var pairKey = [aKey, bKey].sort().join('||');
+      if (seen[pairKey]) continue;
+      if (a.contradicts.indexOf(b.source_id) >= 0 || a.contradicts.indexOf(b.id) >= 0 || a.contradicts.indexOf(b.public_clue_id) >= 0) {
+        seen[pairKey] = true;
+        conflicts.push({
+          key: pairKey,
+          clueA: aKey,
+          clueB: bKey,
+          verdictSource: 'timeline_contradiction',
+        });
+      }
+    }
+  }
+  return conflicts;
+}
+
+function generateInference(state) {
+  var s = normalize(state);
+  var newInferences = [];
+  var cdKeys = Object.keys(CLUE_DETAILS);
+  var knownIds = s.known_clues.concat([]);
+  var entries = s.player_timeline.entries || [];
+  for (var e = 0; e < entries.length; e++) {
+    if (entries[e].source_id) knownIds.push(entries[e].source_id);
+    if (entries[e].public_clue_id) knownIds.push(entries[e].public_clue_id);
+    if (entries[e].id) knownIds.push(entries[e].id);
+  }
+  knownIds = unique(knownIds);
+
+  for (var i = 0; i < cdKeys.length; i++) {
+    var clue = CLUE_DETAILS[cdKeys[i]];
+    if (!clue || clue.source_type !== 'inference') continue;
+    if (s.player_timeline.inferences.indexOf(clue.id) >= 0) continue;
+
+    var derivedFrom = clue.derived_from || [];
+    if (derivedFrom.length === 0) continue;
+
+    var allDerived = true;
+    for (var d = 0; d < derivedFrom.length; d++) {
+      if (knownIds.indexOf(derivedFrom[d]) < 0) {
+        var foundInEntries = false;
+        for (var de = 0; de < entries.length; de++) {
+          if (entries[de].source_id === derivedFrom[d] || entries[de].id === derivedFrom[d]) {
+            foundInEntries = true;
+            break;
+          }
+        }
+        if (!foundInEntries) { allDerived = false; break; }
+      }
+    }
+    if (!allDerived) continue;
+
+    s.player_timeline.inferences.push(clue.id);
+    newInferences.push(clue.id);
+
+    var infEntry = makeTimelineEntry({
+      id: 'entry_' + clue.id,
+      public_clue_id: clue.id,
+      actor: (clue.tags && clue.tags.length > 0) ? clue.tags[0] : 'scene',
+      time: null,
+      location: null,
+      action: null,
+      source_type: 'inference',
+      source_label: '玩家推理',
+      source_id: clue.id,
+      reliability: 'high',
+      status: 'verified',
+      loop_observed: s.loop,
+      current_loop_verified: true,
+      visible_to_player: true,
+      carry_to_next_loop: clue.carry_to_next_loop !== false,
+      counts_as_current_evidence: true,
+      can_unlock_prepositioning: false,
+      tags: clue.tags || ['inference'],
+      contradicts: clue.contradicts || clue.conflicts_with || [],
+      supports: clue.supports || [],
+      derived_from: derivedFrom,
+      effect: clue.effect || null,
+    });
+
+    s.player_timeline.entries.push(infEntry);
+    if (clue.id) addClue(s, clue.id);
+  }
+
+  return newInferences;
+}
+
+function evaluateEvidence(state) {
+  var s = normalize(state);
+  var score = {
+    physical_anomaly: 0,
+    timeline_conflict: 0,
+    suspect_route: 0,
+    actionable_location: 0,
+    police_context: 0,
+  };
+
+  var knownIds = s.known_clues.concat([]);
+  var entries = s.player_timeline.entries || [];
+  for (var e = 0; e < entries.length; e++) {
+    if (entries[e].source_id) knownIds.push(entries[e].source_id);
+    if (entries[e].public_clue_id) knownIds.push(entries[e].public_clue_id);
+  }
+  knownIds = unique(knownIds);
+
+  function hasEvidence(id) {
+    if (knownIds.indexOf(id) >= 0) return true;
+    for (var ei = 0; ei < entries.length; ei++) {
+      var entry = entries[ei];
+      if (entry.source_type === 'memory' && entry.counts_as_current_evidence === false) continue;
+      if (entry.source_id === id || entry.public_clue_id === id || entry.id === id) return true;
+    }
+    return false;
+  }
+
+  if (hasEvidence('clue_ticking_under_floor')) score.physical_anomaly += 1;
+  if (hasEvidence('clue_sound_not_from_seat')) { score.physical_anomaly += 1; score.actionable_location += 1; }
+  if (hasEvidence('clue_floor_panel_scratch')) score.actionable_location += 1;
+  if (hasEvidence('obs_metal_sound_1408')) score.physical_anomaly += 1;
+  if (hasEvidence('inf_gray_alibi_contradicted')) score.timeline_conflict += 1;
+  if (hasEvidence('inf_gray_denial_false')) score.timeline_conflict += 1;
+  if (hasEvidence('obs_gray_passes_1404')) score.suspect_route += 1;
+  if (hasEvidence('obs_gray_enters_c3_1406')) score.suspect_route += 1;
+  if (hasEvidence('inf_gray_connected_to_c3_anomaly')) score.suspect_route += 1;
+  if (hasEvidence('inf_c3_needs_inspection')) { score.suspect_route += 1; score.actionable_location += 1; }
+  if (hasEvidence('claim_zhao_needs_actionable_evidence') || hasEvidence('claim_zhao_needs_actionable_evidence')) score.police_context += 1;
+
+  return score;
+}
+
+function canConvinceZhao(state) {
+  var s = normalize(state);
+  var e = evaluateEvidence(s);
+
+  if (e.police_context < 1) {
+    if (s.known_clues.indexOf('claim_zhao_needs_actionable_evidence') < 0) {
+      addClue(s, 'claim_zhao_needs_actionable_evidence');
+    }
+    return false;
+  }
+
+  if (e.physical_anomaly >= 2 && e.actionable_location >= 1) return true;
+
+  if (e.physical_anomaly >= 1 && e.timeline_conflict >= 1 && e.suspect_route >= 1 && e.actionable_location >= 1) return true;
+
+  if (hasCurrentEntry(s, 'obs_gray_passes_1404') && hasCurrentEntry(s, 'obs_gray_enters_c3_1406') && hasCurrentEntry(s, 'obs_metal_sound_1408') && e.actionable_location >= 1) return true;
+
+  if (hasInference(s, 'inf_c3_needs_inspection') && e.actionable_location >= 1) return true;
+
+  return false;
+}
+
+function carryTimelineToNextLoop(prevState) {
+  var entries = (prevState.player_timeline && prevState.player_timeline.entries) || [];
+  var carryEntries = [];
+  for (var i = 0; i < entries.length; i++) {
+    if (entries[i].carry_to_next_loop) {
+      carryEntries.push(entries[i]);
+    }
+  }
+  return carryEntries.map(function(entry) {
+    return makeTimelineEntry({
+      id: 'memory_' + (entry.source_id || entry.id) + '_l' + ((prevState.loop || 1) + 1),
+      public_clue_id: null,
+      actor: entry.actor,
+      time: entry.time,
+      time_range: entry.time_range,
+      location: entry.location,
+      action: entry.action,
+      source_type: 'memory',
+      source_label: '上一轮记忆',
+      source_id: entry.source_id || entry.id,
+      reliability: entry.reliability,
+      status: 'remembered',
+      loop_observed: entry.loop_observed,
+      current_loop_verified: false,
+      visible_to_player: true,
+      carry_to_next_loop: true,
+      counts_as_current_evidence: false,
+      can_unlock_prepositioning: true,
+      tags: ['memory'].concat(entry.tags || []),
+      contradicts: [],
+      supports: [],
+      derived_from: entry.derived_from || [],
+      effect: null,
+    });
+  });
 }
 
 // ── Dialogue text lookup (from loaded JSON) ──
@@ -272,8 +735,8 @@ function currentGoalText(state) {
   var s = normalize(state);
   var evidence = countValidEvidence(s);
   if (s.flags.trial_success) return '试玩版已完成：你证明了二号车厢存在异常。';
-  if (evidence >= 2) return '证据已足够。现在可以尝试说服赵乘警检查地板。';
-  if (evidence === 1) return '你已经获得 1 条有效证据，还需要更多证据说服赵乘警。';
+  if (canConvinceZhao(s)) return '证据已足够。现在可以尝试说服赵乘警检查地板。';
+  if (evidence >= 1) return '你已经获得了一些证据，继续调查可以形成更完整的证据链。';
   return '证明二号车厢存在异常，并说服赵乘警检查地板。';
 }
 
@@ -295,9 +758,43 @@ function suggestions(s) {
   s = normalize(s);
   var out = [];
   var loc = s.location || 'carriage_2';
+
+  // Observe actions
+  out.push({ label: '观察当前场景', template: '__OBSERVE_SCENE__' });
+
+  // NPC-specific observe actions
+  var sceneNpcs = (SCENES[loc] && SCENES[loc].npcs) || [];
+  for (var ni = 0; ni < sceneNpcs.length; ni++) {
+    var npcId = sceneNpcs[ni];
+    var npc = NPCS[npcId];
+    if (npc && !npc.hidden) {
+      out.push({ label: '盯住' + npc.name, template: '__OBSERVE_NPC__:' + npcId });
+    }
+  }
+
+  // Location stakeout
   if (loc === 'carriage_2') {
-    if (countValidEvidence(s) >= 2) out.push({ label: '说服赵乘警检查地板', template: '我找到赵乘警，说明小宁听见过声音，而且我也确认声音不来自座位，请他检查地板。' });
-    if (s.carried_memory.includes('xiaoning_heard_ticking')) out.push({ label: '直接安抚小宁', template: '我蹲到小宁面前，温和地说：我知道你听见了地板下面的声音，别怕，我只是想确认它。' });
+    out.push({ label: '守连接处观察', template: '__OBSERVE_LOCATION__:connector_2_3' });
+  } else if (loc === 'connector_2_3') {
+    out.push({ label: '守二号车厢观察', template: '__OBSERVE_LOCATION__:carriage_2' });
+  }
+
+  // Inference-unlocked actions
+  if (hasInference(s, 'inf_xiaoning_statement_incomplete')) {
+    out.push({ label: '温和追问小宁三号车厢的事', template: '我蹲到小宁面前，轻声问：你刚才去三号车厢那边干什么了？' });
+  }
+  if (hasInference(s, 'inf_gray_alibi_contradicted')) {
+    out.push({ label: '质问灰衣乘客的行动轨迹', template: '我拦住灰衣乘客，盯着他的眼睛：你刚才明明经过二号车厢，为什么说自己一直在连接处？' });
+  }
+  if (hasInference(s, 'inf_c3_needs_inspection')) {
+    out.push({ label: '向赵乘警报告三号车厢异常', template: '我找到赵乘警，压低声音：三号车厢和连接处需要立即检查，我有证据。' });
+  }
+
+  if (loc === 'carriage_2') {
+    if (hasInference(s, 'inf_gray_alibi_contradicted') || hasCurrentEntry(s, 'clue_ticking_under_floor')) {
+      out.push({ label: '说服赵乘警检查地板', template: '我找到赵乘警，说明已获得的证据，请他检查地板。' });
+    }
+    if (s.carried_memory.indexOf('claim_xiaoning_heard_ticking') >= 0) out.push({ label: '直接安抚小宁', template: '我蹲到小宁面前，温和地说：我知道你听见了地板下面的声音，别怕，我只是想确认它。' });
     out.push(
       { label: '检查座位下方', template: '我假装系鞋带，低头检查座位下方，判断滴答声来自哪里。' },
       { label: '和小宁对话', template: '我走到小宁身边，蹲下来和她说话。' },
@@ -313,7 +810,7 @@ function suggestions(s) {
     out.push({ label: '返回二号车厢', template: '我从连接处回到二号车厢。' });
   }
   out.push({ label: '强制失败测试', template: '我错过了关键时机，进入失败结算。' });
-  return out.slice(0, 7);
+  return out.slice(0, 12);
 }
 
 function dialogueSuggestions(s) {
@@ -370,7 +867,14 @@ function commitAction(text, state) {
   if (action.intent === 'start_dialogue') return startDialogue(s, action.target_npc);
   if (action.intent === 'force_fail') return failLoop(s, 'time_out_explosion');
   if (action.intent === 'observe_under_seat') {
-    s.ap_remaining -= 1; advanceClock(s, 1); addClue(s, 'sound_not_from_seat');
+    s.ap_remaining -= 1; advanceClock(s, 1); addClue(s, 'clue_sound_not_from_seat');
+    // Auto-grant clue_floor_panel_scratch per spec §10 backward compat
+    var soundDetail = CLUE_DETAILS['clue_sound_not_from_seat'] || {};
+    if (soundDetail.auto_grant) {
+      for (var agi = 0; agi < soundDetail.auto_grant.length; agi++) {
+        addClue(s, soundDetail.auto_grant[agi]);
+      }
+    }
     var failure3 = maybeFail(s); if (failure3) return failure3;
     return { state: s, messages: [{ type: 'system', text: '你假装系鞋带，低头靠近座位下方。声音仍在，但不像来自座位底部。你确认：它更像来自地板夹层。\n【获得线索】声音不来自座位下方' }], suggestions: suggestions(s), goal: currentGoal(s) };
   }
@@ -380,11 +884,11 @@ function commitAction(text, state) {
 
 function convinceZhao(s) {
   s = normalize(s);
-  if (countValidEvidence(s) >= 2) {
+  if (canConvinceZhao(s)) {
     s.ap_remaining -= 2; advanceClock(s, 2); s.flags.zhao_checked_floor = true; s.flags.trial_success = true;
     return { state: s, messages: [{ type: 'outcome', html: successHtml() }], trial_success: true, suggestions: [], goal: currentGoal(s) };
   }
-  s.ap_remaining -= 1; s.npc_states.zhao_police.suspicion += 10; addClue(s, 'zhao_requires_evidence');
+  s.ap_remaining -= 1; s.npc_states.zhao_police.suspicion += 10; addClue(s, 'claim_zhao_needs_actionable_evidence');
   var failure = maybeFail(s); if (failure) return failure;
   return { state: s, messages: [{ type: 'system', text: '赵乘警没有行动："证据不够。你不能只凭感觉让我封锁车厢。"\n【获得信息】赵乘警需要证据才会行动。' }], suggestions: suggestions(s), goal: currentGoal(s) };
 }
@@ -445,32 +949,70 @@ function dialogueMessage(npcId, playerText, state, options) {
   var t = String(playerText || '');
   var response = { state: s, messages: [], suggestions: npc.suggestions };
 
+  // Check NPC suggestions for grants_claim
+  var npcSugs = npc.suggestions || [];
+  for (var si = 0; si < npcSugs.length; si++) {
+    var sug = npcSugs[si];
+    if (sug.grants_claim && sug.template && t.indexOf(sug.template.replace('__END_DIALOGUE__', '').trim()) >= 0) {
+      // Check requires_inference
+      if (sug.requires_inference && s.player_timeline.inferences.indexOf(sug.requires_inference) < 0) break;
+      var claimDetail = CLUE_DETAILS[sug.grants_claim] || {};
+      addTimelineEntry(s, {
+        id: 'entry_' + sug.grants_claim,
+        public_clue_id: sug.grants_claim,
+        actor: npcId,
+        time: null,
+        time_range: null,
+        location: npc.location || s.location,
+        action: null,
+        source_type: 'claim',
+        source_label: npc.name + '自述',
+        source_id: sug.grants_claim,
+        speaker: npcId,
+        reliability: claimDetail.confidence === 'high' ? 'high' : 'unknown',
+        status: 'claimed',
+        loop_observed: s.loop,
+        current_loop_verified: false,
+        visible_to_player: true,
+        carry_to_next_loop: claimDetail.carry_to_next_loop !== false,
+        counts_as_current_evidence: true,
+        can_unlock_prepositioning: false,
+        tags: [npcId, 'claim'],
+        contradicts: claimDetail.contradicts || claimDetail.conflicts_with || [],
+        supports: claimDetail.supports || [],
+        derived_from: [],
+        effect: null,
+      });
+      session.pending_clues = unique([].concat(session.pending_clues || [], [sug.grants_claim]));
+      break;
+    }
+  }
+
   if (npcId === 'xiaoning') {
     var gentle = /别怕|帮你|温和|轻声|压低|我也听见|蹲|相信|保护/.test(t);
     if (gentle) { s.npc_states.xiaoning.trust += 12; s.npc_states.xiaoning.fear = Math.max(0, s.npc_states.xiaoning.fear - 6); }
     var motherTopic = /(你妈妈|妈妈.*(布娃娃|娃娃|玩偶)|布娃娃.*(妈妈|母亲|家人)|娃娃.*(妈妈|母亲|家人)|一个人.*(坐车|上车|害怕)|等谁|谁给你的)/.test(t);
     var emotionalKey = /(别怕|相信|保护|帮你|我会帮你|我会保护你|我也听见)/.test(t);
     if (motherTopic && emotionalKey && s.npc_states.xiaoning.trust >= 36 && s.npc_states.xiaoning.fear <= 55) {
-      session.pending_clues = unique([].concat(session.pending_clues || [], ['mother_doll_memory']));
+      session.pending_clues = unique([].concat(session.pending_clues || [], ['claim_xiaoning_heard_ticking']));
       s.flags.xiaoning_mother_memory_triggered = true;
       reply = _dlgText('xiaoning-dialogue', 'mother_high_trust') || '小宁低头看着怀里的布娃娃，声音轻得像怕惊醒什么："妈妈说，坐火车的时候，不要和陌生人讲话……可是你不像坏人。"';
     } else if (/滴答|声音|下面|地板|听见/.test(t) || gentle) {
-      session.pending_clues = unique([].concat(session.pending_clues || [], ['ticking_under_floor', 'xiaoning_heard_ticking']));
+      session.pending_clues = unique([].concat(session.pending_clues || [], ['clue_ticking_under_floor', 'claim_xiaoning_heard_ticking']));
       reply = _dlgText('xiaoning-dialogue', 'ticking_topic') || '小宁抬头看了你一眼，又很快低下头。她用鞋尖轻轻碰了碰地板："不是座位下面……是下面在响。"';
     } else {
       reply = _dlgText('xiaoning-dialogue', 'default') || '小宁抱紧布娃娃，只用很小的幅度摇了摇头。她还没有完全相信你。';
     }
   } else if (npcId === 'zhao_police') {
-    if (/证据|地板|检查|声音|小宁|滴答/.test(t) && countValidEvidence(s) >= 2) {
+    if (/证据|地板|检查|声音|小宁|滴答/.test(t) && (canConvinceZhao(s) || hasCurrentEntry(s, 'clue_ticking_under_floor'))) {
       reply = _dlgText('zhao-dialogue', 'evidence_enough') || '赵乘警听完你的证据，脸色终于沉下来："你带我过去。别惊动其他乘客。"';
       session.pending_events.push('zhao_ready_to_check_floor');
     } else {
-      addClue(s, 'zhao_requires_evidence');
+      addClue(s, 'claim_zhao_needs_actionable_evidence');
       reply = _dlgText('zhao-dialogue', 'default') || '赵乘警没有立刻行动："你需要给我能查证的东西。谁听见了？你看见了什么？"';
     }
   } else if (npcId === 'gray_passenger') {
     if (/连接处|14:0[0-9]|三号车厢|行李架|离开|去了哪里/.test(t)) {
-      session.pending_clues = unique([].concat(session.pending_clues || [], ['suspicious_connector_movement', 'harmonica_from_dining_car']));
       s.flags.gray_connector_hint_seen = true;
       reply = _dlgText('grey-passenger-dialogue', 'connector_harmonica') || '灰衣乘客没有立刻回答。他似乎在权衡什么："你关心的是我，还是三号车厢？"他没有否认自己离开过座位。';
     } else if (/灰大衣|纸条|相信|不相信/.test(t)) {
@@ -499,7 +1041,22 @@ function endDialogue(state) {
   var session = s.dialogue_session || { pending_clues: [], pending_events: [], ap_cost: npc.cost || 3, started_at: s.clock, turns: [] };
   var pending = unique(session.pending_clues || []);
   pending.forEach(function(id) { addClue(s, id); });
-  if (npcId === 'xiaoning' && pending.includes('ticking_under_floor')) addClue(s, 'harmonica_from_dining_car');
+
+  // Handle auto_grant on clues (e.g., clue_sound_not_from_seat auto-grants clue_floor_panel_scratch)
+  var autoGranted = [];
+  for (var pi = 0; pi < pending.length; pi++) {
+    var detail = CLUE_DETAILS[pending[pi]];
+    if (detail && detail.auto_grant && detail.auto_grant.length > 0) {
+      for (var ag = 0; ag < detail.auto_grant.length; ag++) {
+        var grantId = detail.auto_grant[ag];
+        if (s.known_clues.indexOf(grantId) < 0) {
+          addClue(s, grantId);
+          autoGranted.push(grantId);
+        }
+      }
+    }
+  }
+
   var cost = session.ap_cost || npc.cost || 3;
   var from = session.started_at || s.clock;
   s.ap_remaining -= cost;
@@ -509,15 +1066,19 @@ function endDialogue(state) {
   if (npcId === 'gray_passenger') world_events.push('灰衣乘客重新看向窗外，不再主动开口。');
   if ((session.pending_events || []).includes('zhao_ready_to_check_floor')) {
     s.flags.zhao_checked_floor = true;
-    if (countValidEvidence(s) >= 2) s.flags.trial_success = true;
+    if (canConvinceZhao(s)) s.flags.trial_success = true;
   }
+
+  // Generate inferences after dialogue ends
+  generateInference(s);
+
   var outcome = {
     npc_id: npcId, npc_name: npc.name,
     summary: npc.name + '的对话结束。',
     time_advance: { from: from, to: s.clock }, ap_cost: cost,
     turns_used: session.turns_used || (session.turns || []).length || 0,
     turn_limit: session.turn_limit || npc.turn_limit || null,
-    clues_gained: pending.map(function(id) { return clueDetail(id); }),
+    clues_gained: pending.concat(autoGranted).map(function(id) { return clueDetail(id); }),
     world_events: world_events,
     unlocked_actions: suggestions(s).slice(0, 3),
   };
@@ -533,16 +1094,57 @@ function endDialogue(state) {
 
 function failLoop(state, reason) {
   var s = normalize(state);
-  var carry = unique(s.known_clues.filter(function(id) { return id !== 'gray_coat_note_pressure' && clueDetail(id).carry_to_next_loop; }));
+  var carry = unique(s.known_clues.filter(function(id) { return id !== 'clue_gray_note_warning' && clueDetail(id).carry_to_next_loop; }));
+
+  // Inherit player_timeline entries that carry_to_next_loop
+  var timelineCarry = [];
+  var entries = s.player_timeline.entries || [];
+  for (var i = 0; i < entries.length; i++) {
+    if (entries[i].carry_to_next_loop) {
+      timelineCarry.push(entries[i]);
+    }
+  }
+
+  // Inherit timeline inferences
+  var inferenceCarry = [];
+  var inferences = s.player_timeline.inferences || [];
+  for (var j = 0; j < inferences.length; j++) {
+    var infDetail = CLUE_DETAILS[inferences[j]] || {};
+    if (infDetail.carry_to_next_loop !== false) {
+      inferenceCarry.push(inferences[j]);
+    }
+  }
+
+  // Clear current_loop_verified on inherited entries
+  for (var k = 0; k < timelineCarry.length; k++) {
+    timelineCarry[k] = clone(timelineCarry[k]);
+    timelineCarry[k].current_loop_verified = false;
+  }
+
+  var confirmedFacts = carry.map(function(id) { return Object.assign(clueDetail(id), { text: clueName(id), carry_to_next_loop: true }); });
+
+  // Add timeline entries as confirmed facts too
+  for (var ti = 0; ti < timelineCarry.length; ti++) {
+    var te = timelineCarry[ti];
+    confirmedFacts.push({
+      id: te.source_id || te.id,
+      text: (CLUE_DETAILS[te.source_id] && CLUE_DETAILS[te.source_id].title) || te.source_label || te.id,
+      carry_to_next_loop: true,
+      source_type: te.source_type,
+    });
+  }
+
   return {
     state: s,
     loop_failure_outcome: {
       loop: s.loop, failed_at: s.clock, failure_type: reason,
       failure_reason: reason === 'time_out_explosion' ? '你没能在爆炸前证明异常。' : '行动值不足，错过了关键时机。',
-      confirmed_facts: carry.map(function(id) { return Object.assign(clueDetail(id), { text: clueName(id), carry_to_next_loop: true }); }),
-      suspicions: s.known_clues.includes('harmonica_from_dining_car') ? [{ id: 'harmonica_from_dining_car', text: '餐车方向的口琴声出现得过于巧合。', confidence: 'low', carry_to_next_loop: true }] : [],
-      mistakes: countValidEvidence(s) < 2 ? [{ id: 'insufficient_evidence', text: '你没能形成足够证据链，赵乘警无法行动。' }] : [],
+      confirmed_facts: confirmedFacts,
+      suspicions: [],
+      mistakes: !s.flags.trial_success ? [{ id: 'insufficient_evidence', text: '你没能形成足够证据链，赵乘警无法行动。' }] : [],
       next_loop_suggestions: suggestions(s).slice(0, 3),
+      _timeline_carry: timelineCarry,
+      _inference_carry: inferenceCarry,
     },
     goal: currentGoal(s),
   };
@@ -551,20 +1153,46 @@ function failLoop(state, reason) {
 function nextLoop(previous) {
   var prevState = (previous && previous.state) || {};
   var prevFacts = (previous && previous.loop_failure_outcome && previous.loop_failure_outcome.confirmed_facts) || [];
-  var carry = unique(prevFacts.map(function(x) { return x.id; }).concat(prevState.known_clues ? prevState.known_clues.filter(function(id) { return id !== 'gray_coat_note_pressure'; }) : []));
+  var carry = unique(prevFacts.map(function(x) { return x.id; }).concat(prevState.known_clues ? prevState.known_clues.filter(function(id) { return id !== 'clue_gray_note_warning'; }) : []));
   var s = normalize(START_STATE);
   s.loop = (prevState.loop || 1) + 1;
   s.flags.intro_seen = true;
   s.carried_memory = carry;
-  s.known_clues = unique(['gray_coat_note_pressure'].concat(carry));
+  s.known_clues = unique(['clue_gray_note_warning'].concat(carry));
+
+  // Restore timeline entries as memory
+  var memoryEntries = carryTimelineToNextLoop(prevState);
+  s.player_timeline.entries = memoryEntries;
+
+  // Restore timeline inferences
+  var inheritedInferences = (previous && previous.loop_failure_outcome && previous.loop_failure_outcome._inference_carry) || [];
+  if (prevState.player_timeline && prevState.player_timeline.inferences) {
+    for (var ii = 0; ii < prevState.player_timeline.inferences.length; ii++) {
+      var infId = prevState.player_timeline.inferences[ii];
+      var infD = CLUE_DETAILS[infId] || {};
+      if (infD.carry_to_next_loop !== false && inheritedInferences.indexOf(infId) < 0) {
+        inheritedInferences.push(infId);
+      }
+    }
+  }
+  s.player_timeline.inferences = inheritedInferences;
+
   var opening = '你猛地睁开眼。\n\n二号车厢，14:00。';
   if (carry.length) {
     opening += '\n\n你记得上一轮留下的信息：' + carry.map(clueName).join('、') + '。';
-    if (carry.includes('xiaoning_heard_ticking') || carry.includes('ticking_under_floor')) {
+    if (carry.indexOf('claim_xiaoning_heard_ticking') >= 0 || carry.indexOf('clue_ticking_under_floor') >= 0) {
       opening += '\n\n小宁还坐在靠窗的位置，抱着那只旧布娃娃。你知道，她听见过地板下方的声音。';
     }
-    if (carry.includes('zhao_requires_evidence')) {
+    if (carry.indexOf('claim_zhao_needs_actionable_evidence') >= 0) {
       opening += '\n\n你也记得，赵乘警不会相信没有证据的报警。';
+    }
+
+    // Mention inherited inferences
+    if (inheritedInferences.indexOf('inf_gray_alibi_contradicted') >= 0) {
+      opening += '\n\n你清楚地记得：灰衣乘客曾经说过谎。';
+    }
+    if (inheritedInferences.indexOf('inf_gray_connected_to_c3_anomaly') >= 0) {
+      opening += '\n\n你还记得：灰衣乘客与三号车厢的异常有某种关联。';
     }
   } else {
     opening += '\n\n你只记得上一轮的失败。';
@@ -617,6 +1245,7 @@ if (ctKeys.length === 0) {
 
 module.exports = {
   START_STATE: START_STATE, NPCS: NPCS, SCENES: SCENES, CLUE_TITLES: CLUE_TITLES, CLUE_DETAILS: CLUE_DETAILS,
+  TIMELINE_EVENTS: TIMELINE_EVENTS,
   normalize: normalize, parseAction: parseAction, commitAction: commitAction, startDialogue: startDialogue,
   dialogueMessage: dialogueMessage, endDialogue: endDialogue, failLoop: failLoop, nextLoop: nextLoop,
   suggestions: suggestions, dialogueSuggestions: dialogueSuggestions,
@@ -625,4 +1254,8 @@ module.exports = {
   clueDetail: clueDetail, cleanLlmReply: cleanLlmReply,
   getNpcs: getNpcs, getClueTitles: getClueTitles, getClueDetails: getClueDetails,
   getScenes: getScenes, getNpcInfo: getNpcInfo, sceneName: sceneName,
+  observeEnvironment: observeEnvironment, detectConflicts: detectConflicts,
+  generateInference: generateInference, evaluateEvidence: evaluateEvidence,
+  canConvinceZhao: canConvinceZhao, carryTimelineToNextLoop: carryTimelineToNextLoop,
+  addTimelineEntry: addTimelineEntry, hasCurrentEntry: hasCurrentEntry, hasInference: hasInference,
 };

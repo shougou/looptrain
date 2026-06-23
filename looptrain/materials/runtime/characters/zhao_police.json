@@ -1,6 +1,6 @@
 {
   "name": "赵乘警",
-  "cost": 3,
+  "cost": 2,
   "turn_limit": 8,
   "near_limit_hint_at": 6,
   "turn_limit_policy": "evidence_gate",
@@ -12,7 +12,8 @@
   "limit_message": "赵乘警打断你：\"如果没有新的证据，我不能继续陪你浪费时间。\"",
   "suggestions": [
     { "label": "报告异常", "template": "我压低声音告诉赵乘警：二号车厢有异常声音，我需要你检查地板。" },
-    { "label": "展示证据", "template": "我把目前获得的线索逐条告诉赵乘警，请他亲自听一听地板下方的声音。" },
+    { "label": "询问需要什么证据", "template": "我问赵乘警：你需要什么样的证据才肯行动？", "grants_claim": "claim_zhao_needs_actionable_evidence" },
+    { "label": "展示证据", "template": "我把目前获得的线索逐条告诉赵乘警，请他亲自检查。" },
     { "label": "请求检查地板", "template": "我请求赵乘警不要惊动乘客，只检查二号车厢地板和连接处。" },
     { "label": "结束对话", "template": "__END_DIALOGUE__" }
   ]

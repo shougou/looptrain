@@ -1,3 +1,31 @@
+## v0.10.0-npc-timeline-inference — 2026-06-23
+
+### Added
+- NPC 时间线推理系统：player_timeline 数据结构，玩家通过观察构建 NPC 行动时间线
+- 3 种观察行动：观察当前场景（1AP/1min）、盯住NPC（1AP/2min）、守点观察（1AP/2min）
+- 矛盾检测系统：detectConflicts() 检测 NPC 主张与时间线事实的冲突
+- 推理线索自动生成：generateInference() 基于矛盾对生成推理结论
+- 多维证据评分：evaluateEvidence() 5 维度（物理异常/时间线矛盾/嫌疑人路线/可执行位置/程序要求）
+- canConvinceZhao() 4 条成功路径（物理证据/时间线推理/纯观察/综合推理）
+- 失败继承：timeline entries 转 memory 类型，current_loop_verified 机制
+- "查看NPC时间线"系统指令（零 AP）：查看灰衣/小宁/全部 NPC 时间线
+- 时间线 UI：5 种标签（观察/自述/推理/记忆/矛盾），按 NPC 分组
+- POST /api/action/observe API 端点
+- 5 个新引擎测试（timeline_observation/conflict_detection/inference_generation/evidence_scoring/loop_inheritance）
+- verify_slt.sh 修复：E2E 前自动启动服务器
+
+### Changed
+- 线索系统从 8 条推倒重设计为 20 条（4 物理 + 5 主张 + 6 观察 + 5 推理）
+- trial-timeline.json 从 9 事件扩展为 17 事件，新增 observable 字段
+- NPC 对话 AP 消耗从 3 降至 2
+- NPC 对话新增 grants_claim 机制（对话选项可授予主张线索）
+- 成功判定从 countValidEvidence >= 2 改为 canConvinceZhao() 多维评分
+- engine.js: 628→1261 行，10 个新函数
+
+### Removed
+- 旧线索 ID（gray_coat_note_pressure / ticking_under_floor / xiaoning_heard_ticking 等）
+- hidden_node_test 中的 mother_doll_memory 机制
+
 # Changelog
 
 ## v0.9.0-playwright-e2e — 2026-06-21

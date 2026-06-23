@@ -18,12 +18,12 @@ assert.strictEqual(s.mode, 'dialogue');
 assert.ok(r.messages[0].text.includes('不是座位下面'));
 assert.ok(!r.messages[0].text.includes('获得线索'));
 assert.ok(!r.messages[0].text.includes('AP -3'));
-assert.ok(s.dialogue_session.pending_clues.includes('ticking_under_floor'));
-assert.ok(s.dialogue_session.pending_clues.includes('xiaoning_heard_ticking'));
+assert.ok(s.dialogue_session.pending_clues.includes('clue_ticking_under_floor'));
+assert.ok(s.dialogue_session.pending_clues.includes('claim_xiaoning_heard_ticking'));
 
 r = engine.endDialogue(s);
 s = r.state;
-assert.ok(s.known_clues.includes('ticking_under_floor'));
-assert.ok(s.known_clues.includes('xiaoning_heard_ticking'));
+assert.ok(s.known_clues.includes('clue_ticking_under_floor'));
+assert.ok(s.known_clues.includes('claim_xiaoning_heard_ticking'));
 
 console.log('OK LLM bridge: reply text is performance only, state remains engine-controlled');

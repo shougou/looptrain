@@ -2,7 +2,7 @@
 
 ## 当前版本
 
-v0.9.0-playwright-e2e — 《寒灯初醒》试玩版（Playwright E2E 回归测试 + 工程规范完整治理）
+v0.10.0-npc-timeline-inference — NPC 时间线推理系统（线索重构 + 时间线 + 矛盾检测 + 推理线索）
 
 ## 当前状态
 
@@ -15,6 +15,7 @@ v0.9.0-playwright-e2e — 《寒灯初醒》试玩版（Playwright E2E 回归测
 
 ## 当前重点
 
+- NPC 时间线推理系统已上线（player_timeline + 3 种观察行动 + 矛盾检测 + 推理生成 + 多维证据评分）
 - Goal Engine + 指令系统 + 许知微助手已上线
 - 《寒灯初醒》完整试玩内容已上线
 - 暂用 Mock 模式，待接入真实 LLM
@@ -32,6 +33,7 @@ v0.9.0-playwright-e2e — 《寒灯初醒》试玩版（Playwright E2E 回归测
 
 ## 当前风险
 
+- NPC 时间线推理系统为 v0.10.0 新增，需要实际游玩验证三条通关路径
 - Mock 模式对话文本单一，真实 LLM 接入后需重测全部对话路径
 - 无 Playwright 回归测试，修改后依赖手动验证
 - 手机端真机测试覆盖不足

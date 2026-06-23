@@ -1,13 +1,186 @@
 {
   "events": [
-    { "time": "14:00", "type": "WAKE_UP", "description": "主角醒来，许知微提醒循环已开始" },
-    { "time": "14:02", "type": "NPC_MOVEMENT", "description": "小宁从三号车厢方向回来，神情紧张" },
-    { "time": "14:04", "type": "NPC_MOVEMENT", "description": "灰衣乘客经过二号车厢，手里没有包" },
-    { "time": "14:06", "type": "NPC_MOVEMENT", "description": "灰衣乘客进入三号车厢" },
-    { "time": "14:08", "type": "AMBIENT_SOUND", "description": "三号车厢行李架传出轻微金属碰撞声" },
-    { "time": "14:10", "type": "NPC_AVAILABLE", "description": "赵乘警经过二号车厢，可被拦下" },
-    { "time": "14:12", "type": "NPC_MOVEMENT", "description": "灰衣乘客回到二号车厢，手里仍然没有包" },
-    { "time": "14:13", "type": "AMBIENT_EVENT", "description": "列车进入山洞，车厢灯光短暂闪烁" },
-    { "time": "14:15", "type": "EXPLOSION", "description": "爆炸发生" }
+    {
+      "id": "evt_loop_start",
+      "time": "14:00",
+      "actor": "player",
+      "location": "carriage_2",
+      "action": "wake_up",
+      "description": "主角醒来，循环开始"
+    },
+    {
+      "id": "evt_xiaoning_at_seat",
+      "time": "14:00",
+      "actor": "xiaoning",
+      "location": "carriage_2",
+      "action": "at_seat_nervous",
+      "description": "小宁在座位附近，明显紧张"
+    },
+    {
+      "id": "evt_gray_near_door",
+      "time": "14:00",
+      "actor": "gray_passenger",
+      "location": "connector_2_3",
+      "action": "near_carriage2_door",
+      "description": "灰衣在连接处靠二号车厢门口观察车厢"
+    },
+    {
+      "id": "evt_xiaoning_slips",
+      "time": "14:01",
+      "actor": "xiaoning",
+      "location": "carriage_2",
+      "action": "slips_to_connector",
+      "description": "小宁趁混乱向三号车厢方向走去",
+      "observable": {
+        "window": ["14:01", "14:02"],
+        "locations": ["carriage_2"]
+      }
+    },
+    {
+      "id": "evt_xiaoning_returns",
+      "time": "14:02",
+      "actor": "xiaoning",
+      "location": "carriage_2",
+      "action": "returns_from_c3",
+      "description": "小宁从三号车厢方向回来，神情紧张",
+      "observable": {
+        "window": ["14:02", "14:03"],
+        "locations": ["carriage_2"]
+      },
+      "public_clue_id": "obs_xiaoning_returns_1402"
+    },
+    {
+      "id": "evt_zhao_patrols",
+      "time": "14:03",
+      "actor": "zhao_police",
+      "location": "carriage_2",
+      "action": "patrols",
+      "description": "赵乘警例行经过二号车厢，没有发现异常"
+    },
+    {
+      "id": "evt_gray_checks_watch",
+      "time": "14:03",
+      "actor": "gray_passenger",
+      "location": "connector_2_3",
+      "action": "checks_watch",
+      "description": "灰衣看了一眼表，像在等待时机",
+      "observable": {
+        "window": ["14:03", "14:04"],
+        "locations": ["connector_2_3"]
+      },
+      "public_clue_id": "obs_gray_checks_watch_1403"
+    },
+    {
+      "id": "evt_gray_passes",
+      "time": "14:04",
+      "actor": "gray_passenger",
+      "location": "carriage_2",
+      "action": "passes_through",
+      "description": "灰衣经过二号车厢前部，走向连接处方向",
+      "observable": {
+        "window": ["14:04", "14:05"],
+        "locations": ["carriage_2"]
+      },
+      "public_clue_id": "obs_gray_passes_1404"
+    },
+    {
+      "id": "evt_zhao_called_away",
+      "time": "14:05",
+      "actor": "zhao_police",
+      "location": "carriage_2",
+      "action": "called_away",
+      "description": "赵乘警被其他乘客叫走，暂时离开二号车厢",
+      "observable": {
+        "window": ["14:05", "14:06"],
+        "locations": ["carriage_2"]
+      },
+      "public_clue_id": "obs_zhao_called_away_1405"
+    },
+    {
+      "id": "evt_gray_enters_c3",
+      "time": "14:06",
+      "actor": "gray_passenger",
+      "location": "connector_2_3",
+      "action": "enters_carriage3",
+      "description": "灰衣从连接处进入三号车厢方向",
+      "observable": {
+        "window": ["14:06", "14:07"],
+        "locations": ["connector_2_3"]
+      },
+      "public_clue_id": "obs_gray_enters_c3_1406"
+    },
+    {
+      "id": "evt_metal_sound",
+      "time": "14:08",
+      "actor": "scene",
+      "location": "connector_2_3",
+      "action": "metal_sound",
+      "description": "三号车厢方向传来短促金属碰撞声",
+      "observable": {
+        "window": ["14:08", "14:09"],
+        "locations": ["connector_2_3"]
+      },
+      "public_clue_id": "obs_metal_sound_1408"
+    },
+    {
+      "id": "evt_xiaoning_freezes",
+      "time": "14:09",
+      "actor": "xiaoning",
+      "location": "carriage_2",
+      "action": "freezes",
+      "description": "小宁听到声音后明显僵住",
+      "observable": {
+        "window": ["14:09", "14:10"],
+        "locations": ["carriage_2"]
+      }
+    },
+    {
+      "id": "evt_zhao_returns",
+      "time": "14:10",
+      "actor": "zhao_police",
+      "location": "connector_2_3",
+      "action": "returns_near_connector",
+      "description": "赵乘警回到连接处附近，但没有掌握证据",
+      "observable": {
+        "window": ["14:10", "14:11"],
+        "locations": ["connector_2_3"]
+      }
+    },
+    {
+      "id": "evt_gray_returns",
+      "time": "14:12",
+      "actor": "gray_passenger",
+      "location": "connector_2_3",
+      "action": "returns_to_connector",
+      "description": "灰衣回到连接处，表现镇定",
+      "observable": {
+        "window": ["14:12", "14:13"],
+        "locations": ["connector_2_3"]
+      }
+    },
+    {
+      "id": "evt_tunnel_flicker",
+      "time": "14:13",
+      "actor": "scene",
+      "location": "any",
+      "action": "light_flicker",
+      "description": "列车进入山洞，车厢灯光短暂闪烁"
+    },
+    {
+      "id": "evt_ticking_accel",
+      "time": "14:14",
+      "actor": "scene",
+      "location": "connector_2_3",
+      "action": "ticking_accelerates",
+      "description": "滴答声加快，但容易被列车噪音掩盖"
+    },
+    {
+      "id": "evt_explosion",
+      "time": "14:15",
+      "actor": "scene",
+      "location": "connector_2_3",
+      "action": "explosion",
+      "description": "爆炸发生，循环失败"
+    }
   ]
 }

@@ -19,7 +19,7 @@ LoopTrain 当前本地开发主线是 **SLT（Standalone LoopTrain）**。
 当前版本：
 
 ```text
-v0.9.0-playwright-e2e
+v0.10.0-npc-timeline-inference
 ```
 
 当前状态：

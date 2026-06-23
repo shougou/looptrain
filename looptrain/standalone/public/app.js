@@ -1,6 +1,6 @@
 'use strict';
 
-/* LoopTrain Standalone v0.9.0-playwright-e2e Content Extraction — app.js
+/* LoopTrain Standalone v0.10.0-npc-timeline-inference Content Extraction — app.js
  * Content loaded from /api/intro and /api/app-strings.
  * Scene-driven layout. Pure vanilla JS. No SillyTavern.
  */
@@ -8,7 +8,7 @@
 // ── Save version constants (v0.8 save system) ──
 var LT_SAVE_SCHEMA_VERSION = 1;
 var LT_MIN_COMPATIBLE_SCHEMA_VERSION = 1;
-var LT_RUNTIME_VERSION = 'v0.9.0-playwright-e2e';
+var LT_RUNTIME_VERSION = 'v0.10.0-npc-timeline-inference';
 var LT_STORY_VERSION = 'demo-0.8-handeng';
 var LT_KEY_PREFIX = 'lt:';
 var LT_SAVE_META_KEY = 'lt:save:meta';
@@ -120,6 +120,16 @@ function render() {
   } else if (s.location === 'connector_2_3') {
     npcsHtml += '<button class="lt-scene-chip" data-template="我从连接处回到二号车厢。" data-type="move">返回二号车厢</button>';
   }
+  // Observe suggestion chips
+  if (state._suggestions && state._suggestions.length) {
+    for (var si = 0; si < state._suggestions.length; si++) {
+      var sug = state._suggestions[si];
+      if (sug.template && sug.template.indexOf('__OBSERVE_') === 0) {
+        npcsHtml += '<button class="lt-observe-chip" data-template="' + esc(sug.template) + '" data-type="observe">' + esc(sug.label) + '</button>';
+      }
+    }
+  }
+
   npcWrap.innerHTML = npcsHtml;
 
   // Portrait & dialogue panel
@@ -329,6 +339,9 @@ function handleCommand(text) {
     case 'view_goal': showGoal(target); return true;
     case 'view_memory': showMemory(target); return true;
     case 'view_timeline': showTimeline(target); return true;
+    case 'view_npc_timeline': showNpcTimeline(target); return true;
+    case 'view_gray_timeline': showGrayTimeline(target); return true;
+    case 'view_xiaoning_timeline': showXiaoningTimeline(target); return true;
     case 'view_beliefs': showBeliefs(target); return true;
     case 'end_dialogue': if (inDialogue) endDialogue(); else appendMsg('system', '当前不在对话中。', target); return true;
     case 'next_loop': if (lastFailure) nextLoop(); else appendMsg('system', '只有失败结算后才能进入下一轮。', target); return true;
@@ -369,7 +382,99 @@ function showMemory(target) {
 }
 
 function showTimeline(target) {
-  appendMsg('system', '时间线功能将在后续版本开放。当前为第 ' + state.loop + ' 轮。', target);
+  var entries = state.player_timeline ? (state.player_timeline.entries || []) : [];
+  if (entries.length === 0) {
+    appendMsg('system', '时间线暂为空。通过观察场景、盯住NPC或守点观察来收集时间信息。', target);
+    return;
+  }
+  appendHtml('system', renderTimelineHtml(entries, null), target);
+}
+
+function showNpcTimeline(target) {
+  var entries = state.player_timeline ? (state.player_timeline.entries || []) : [];
+  if (entries.length === 0) {
+    appendMsg('system', '时间线暂为空。', target);
+    return;
+  }
+  appendHtml('system', renderTimelineHtml(entries, null), target);
+}
+
+function showGrayTimeline(target) {
+  var entries = state.player_timeline ? (state.player_timeline.entries || []) : [];
+  var filtered = [];
+  for (var i = 0; i < entries.length; i++) {
+    if (entries[i].actor === 'gray_passenger') filtered.push(entries[i]);
+  }
+  if (filtered.length === 0) {
+    appendMsg('system', '灰衣乘客暂无时间线记录。', target);
+    return;
+  }
+  appendHtml('system', renderTimelineHtml(filtered, 'gray_passenger'), target);
+}
+
+function showXiaoningTimeline(target) {
+  var entries = state.player_timeline ? (state.player_timeline.entries || []) : [];
+  var filtered = [];
+  for (var i = 0; i < entries.length; i++) {
+    if (entries[i].actor === 'xiaoning') filtered.push(entries[i]);
+  }
+  if (filtered.length === 0) {
+    appendMsg('system', '小宁暂无时间线记录。', target);
+    return;
+  }
+  appendHtml('system', renderTimelineHtml(filtered, 'xiaoning'), target);
+}
+
+function renderTimelineHtml(entries, filter) {
+  var groups = {};
+  for (var i = 0; i < entries.length; i++) {
+    var e = entries[i];
+    var actor = e.actor || 'scene';
+    if (!filter || actor === filter) {
+      if (!groups[actor]) groups[actor] = [];
+      groups[actor].push(e);
+    }
+  }
+  var actorNames = { gray_passenger: '灰衣乘客', xiaoning: '小宁', zhao_police: '赵乘警', scene: '场景事件' };
+  var html = '<div class="lt-timeline-panel"><div class="lt-timeline-title">📋 时间线</div>';
+  var actorKeys = Object.keys(groups);
+  for (var a = 0; a < actorKeys.length; a++) {
+    var actor = actorKeys[a];
+    html += '<div class="lt-timeline-group"><div class="lt-timeline-group-header">' + esc(actorNames[actor] || actor) + '</div>';
+    for (var j = 0; j < groups[actor].length; j++) {
+      var entry = groups[actor][j];
+      var time = entry.time || (entry.time_range ? entry.time_range[0] + '-' + entry.time_range[1] : '??:??');
+      var tag = '';
+      var tagClass = '';
+      if (entry.source_type === 'observation') { tag = '[观察]'; tagClass = 'lt-tl-tag-observation'; }
+      else if (entry.source_type === 'claim') { tag = '[自述]'; tagClass = 'lt-tl-tag-claim'; }
+      else if (entry.source_type === 'inference') { tag = '[推理]'; tagClass = 'lt-tl-tag-inference'; }
+      else if (entry.source_type === 'memory') { tag = '[记忆]'; tagClass = 'lt-tl-tag-memory'; }
+      var hasConflict = entry.contradicts && entry.contradicts.length > 0;
+      var conflictInEntries = false;
+      if (hasConflict) {
+        for (var c = 0; c < entry.contradicts.length; c++) {
+          for (var ei = 0; ei < entries.length; ei++) {
+            if (entries[ei].source_id === entry.contradicts[c] || entries[ei].id === entry.contradicts[c] || entries[ei].public_clue_id === entry.contradicts[c]) {
+              conflictInEntries = true; break;
+            }
+          }
+          if (conflictInEntries) break;
+        }
+      }
+      if (conflictInEntries) { tag += ' [矛盾]'; tagClass = 'lt-tl-tag-conflict'; }
+      var verifiedClass = entry.current_loop_verified ? ' lt-tl-verified' : '';
+      var content = entry.description || clueName(entry.source_id) || clueName(entry.public_clue_id) || entry.source_label || '';
+      html += '<div class="lt-timeline-entry' + verifiedClass + '">' +
+        '<span class="lt-tl-time">' + esc(time) + '</span>' +
+        '<span class="' + tagClass + '">' + esc(tag) + '</span>' +
+        '<span class="lt-tl-content">' + esc(content) + '</span>' +
+        '</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
 }
 
 function showBeliefs(target) {
@@ -423,6 +528,8 @@ async function submitInput() {
 
   if (matchLocalCommand(text)) { handleCommand(text); return; }
 
+  if (text.indexOf('__OBSERVE_') === 0) { await handleObserveAction(text); return; }
+
   if (inDialogue) {
     if (/结束|离开|不聊了/.test(text)) { endDialogue(); return; }
     let llmReply = '';
@@ -436,6 +543,57 @@ async function submitInput() {
     const res = await api('/action/commit', { text, state });
     handleResponse(res, false);
   }
+}
+
+async function handleObserveAction(template) {
+  var params = { type: 'scene' };
+  if (template.indexOf('__OBSERVE_NPC__:') === 0) {
+    params.type = 'npc';
+    params.npc_id = template.split(':')[1] || '';
+  } else if (template.indexOf('__OBSERVE_LOCATION__:') === 0) {
+    params.type = 'location';
+    params.location = template.split(':')[1] || '';
+  }
+  var res = await api('/action/observe', { type: params.type, npc_id: params.npc_id, location: params.location, state: state });
+  handleObserveResponse(res);
+}
+
+function handleObserveResponse(res) {
+  if (!res) return;
+  if (res.state) {
+    var prevState = prevAudioState || null;
+    state = res.state;
+    saveState();
+    if (prevState) {
+      var events = deriveAudioEvents(prevState, state, res);
+      if (events.length) AudioManager.dispatchAll(events);
+    }
+    prevAudioState = clone(state);
+  }
+  if (res.suggestions !== undefined) state._suggestions = res.suggestions;
+  if (res.goal !== undefined) {
+    state._goalData = res.goal;
+    state._goal = res.goal;
+  }
+  var obsResult = res.observation_result;
+  if (obsResult) {
+    if (obsResult.nothing_found) {
+      appendMsg('system', '你仔细观察周围，没有发现异常。', logEl);
+    }
+    if (obsResult.discovered && obsResult.discovered.length > 0) {
+      for (var i = 0; i < obsResult.discovered.length; i++) {
+        var d = obsResult.discovered[i];
+        var title = clueName(d.entry.public_clue_id) || clueName(d.entry.source_id) || '';
+        var text = '你注意到：' + (title || '新线索');
+        if (d.entry.description) text += ' — ' + d.entry.description;
+        appendHtml('system', '<div class="lt-observation-result">' + esc(text) + '</div>', logEl);
+      }
+    }
+    if (obsResult.conflict_detected) {
+      appendHtml('system', '<div class="lt-observation-conflict">⚠ 这与你已知的某条线索存在矛盾</div>', logEl);
+    }
+  }
+  render();
 }
 
 async function endDialogue() {

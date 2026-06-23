@@ -584,3 +584,68 @@ body.dialogue-active .lt-dialogue-panel.lt-show {
   min-height: 44px;
 }
 .lt-reset-btn:active { opacity: .85; }
+
+/* ── Observe suggestion chips ── */
+.lt-observe-chip {
+  padding: 8px 16px; border-radius: 999px;
+  background: rgba(110,169,130,.1); color: var(--lt-success);
+  font-size: 13px; border: 1px solid rgba(110,169,130,.3);
+  transition: background .15s; min-height: 44px;
+  display: inline-flex; align-items: center;
+}
+.lt-observe-chip:active { background: rgba(110,169,130,.3); }
+
+/* ── Observation result ── */
+.lt-observation-result {
+  font-size: 13px; line-height: 1.6;
+  color: var(--lt-text);
+}
+.lt-observation-conflict {
+  color: var(--lt-danger);
+  font-weight: 600;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* ── Timeline panel (mobile-first, list-style) ── */
+.lt-timeline-panel {
+  max-height: 60vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.lt-timeline-title {
+  font-size: 15px; font-weight: 700; color: var(--lt-gold);
+  margin-bottom: 10px;
+}
+.lt-timeline-group {
+  margin-bottom: 12px;
+}
+.lt-timeline-group-header {
+  font-size: 13px; font-weight: 600; color: var(--lt-text);
+  padding: 5px 10px;
+  background: rgba(237,231,217,.06);
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+.lt-timeline-entry {
+  display: flex; align-items: baseline; gap: 6px;
+  padding: 5px 10px;
+  font-size: 12px; line-height: 1.6;
+  border-left: 3px solid transparent;
+  margin-bottom: 2px;
+}
+.lt-timeline-entry.lt-tl-verified {
+  border-left-color: var(--lt-success);
+}
+.lt-tl-time {
+  color: var(--lt-muted); flex-shrink: 0; font-size: 11px;
+  min-width: 44px;
+}
+.lt-tl-content {
+  color: var(--lt-text); flex: 1;
+}
+.lt-tl-tag-observation { color: #7fb3d5; font-size: 11px; flex-shrink: 0; }
+.lt-tl-tag-claim { color: #d6a85a; font-size: 11px; flex-shrink: 0; }
+.lt-tl-tag-inference { color: #c0a0d8; font-size: 11px; flex-shrink: 0; }
+.lt-tl-tag-memory { color: var(--lt-muted); font-size: 11px; flex-shrink: 0; }
+.lt-tl-tag-conflict { color: var(--lt-danger); font-size: 11px; flex-shrink: 0; }

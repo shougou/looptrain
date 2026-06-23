@@ -1,23 +1,23 @@
 {
   "play": {
-    "currentVersion": "v0.9.0-playwright-e2e",
+    "currentVersion": "v0.10.0-npc-timeline-inference",
     "playUrl": "/play/game",
     "playLabel": "进入游戏",
     "recommendedDevice": "手机竖屏",
     "stageStatus": "独立运行时 · 试玩版",
-    "stageDescription": "LoopTrain 已从 SillyTavern 剥离为独立运行时。v0.7 建立了目标引擎、12 条指令系统和许知微助手；v0.8 完成《寒灯初醒》全部试玩内容（5 角色、3 场景、8 线索、8 目标、3 轮结算）；v0.8.1 完成存档版本检测与 breaking change 强制重置系统。",
+    "stageDescription": "v0.7 建立了目标引擎、12 条指令系统和许知微助手；v0.8 完成《寒灯初醒》全部试玩内容；v0.10 建立 NPC 时间线推理系统（player_timeline + 3 种观察行动 + 矛盾检测 + 推理生成 + 多维证据评分）。",
     "knownIssues": [
-      "当前对话引擎已接入 DeepSeek LLM，Mock 模式作为 LLM 调用失败时的自动降级兜底。",
-      "游戏支持刷新后恢复进度（localStorage 版），后续需迁移到 IndexedDB 以支持更复杂的状态结构。",
-      "角色素材风格尚未统一，部分立绘为占位素材。",
-      "未建立 Playwright 回归测试，修改后需手动验证完整玩家路径。"
+      "v0.10.0 新增 NPC 时间线推理系统，三条通关路径需实际游玩验证平衡。",
+      "许知微判定交互未实现（verdict_options 数据已预留，下迭代开发）。",
+      "存档系统仍为 localStorage 实现，后续需迁移到 IndexedDB。",
+      "手机端真机测试覆盖不足。"
     ],
     "feedbackNote": "试玩反馈可以直接联系开发者。"
   },
   "site": {
-    "lastUpdated": "2026-06-20",
+    "lastUpdated": "2026-06-23",
     "currentPhase": "试玩版内容完成",
-    "nextFocus": "Playwright 回归测试、IndexedDB 存档迁移、手机端真机适配",
+    "nextFocus": "许知微判定交互、LLM Bridge 接入、手机端真机适配",
     "tagline": "一个互动叙事游戏。也是一个 AI 协同开发实验室。",
     "description": "通过开发这个游戏，探索 AI 与人类如何共同完成复杂软件——状态管理、Prompt 设计、Agent 协作、Runtime 架构、AI Coding 工作流。"
   }

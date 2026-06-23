@@ -1,6 +1,6 @@
 'use strict';
 
-/* PortraitIntro — v0.9.0-playwright-e2e NPC portrait entrance animation.
+/* PortraitIntro — v0.10.0-npc-timeline-inference NPC portrait entrance animation.
  * Web Animations API + CSS transform. No dependencies.
  * Plays once per NPC per loop.
  */

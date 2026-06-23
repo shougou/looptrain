@@ -1,6 +1,6 @@
 {
   "name": "looptrain-standalone",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "LoopTrain Standalone MVP - Local Node prototype without SillyTavern",
   "main": "server.js",
   "scripts": {

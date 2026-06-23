@@ -57,8 +57,14 @@ const roadmap: RoadmapPhase[] = [
       },
       {
         task: '建立 Playwright 回归测试',
-        status: '未开始',
-        description: '覆盖开场→对话→结算→失败→下一轮的完整玩家路径。',
+        status: '已完成',
+        description: 'v0.9.0 建立 12 步 E2E + 存档恢复测试，v0.10.0 修复 verify_slt.sh 服务器启动。',
+        priority: 'high',
+      },
+      {
+        task: 'NPC 时间线推理系统',
+        status: '已完成',
+        description: 'v0.10.0 建立 player_timeline + 3 种观察行动 + 矛盾检测 + 推理生成 + 多维证据评分 + 失败继承。',
         priority: 'high',
       },
       {
@@ -94,9 +100,9 @@ const roadmap: RoadmapPhase[] = [
         priority: 'low',
       },
       {
-        task: '完善 NPC 自主时间线',
+        task: '许知微判定交互',
         status: '未开始',
-        description: 'NPC 在不同时间点会执行不同动作和对话，增加世界真实感。',
+        description: '检测到矛盾时许知微主动发起对话，展示判定选项，玩家选择生成推理线索。',
         priority: 'high',
       },
       {
@@ -108,8 +114,8 @@ const roadmap: RoadmapPhase[] = [
       },
       {
         task: '完善失败后的线索继承',
-        status: '未开始',
-        description: '失败结算后保留关键线索，减少重复操作。',
+        status: '已完成',
+        description: 'v0.10.0 实现 player_timeline memory 转换 + current_loop_verified 机制。',
         priority: 'medium',
       },
       {

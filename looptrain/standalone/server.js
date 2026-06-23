@@ -34,7 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ── API routes (no /api/plugins — standalone) ──
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, engine: 'looptrain', version: 'v0.9.0-playwright-e2e', mode: 'standalone' });
+  res.json({ ok: true, engine: 'looptrain', version: 'v0.10.0-npc-timeline-inference', mode: 'standalone' });
 });
 
 app.post('/api/session/init', (req, res) => {
@@ -44,6 +44,14 @@ app.post('/api/session/init', (req, res) => {
 
 app.post('/api/action/commit', (req, res) => {
   res.json(engine.commitAction(req.body?.text || '', req.body?.state));
+});
+
+app.post('/api/action/observe', (req, res) => {
+  const { type, npc_id, location } = req.body || {};
+  if (!type) return res.status(400).json({ error: 'Missing type parameter' });
+  const state = engine.normalize(req.body?.state || engine.START_STATE);
+  const result = engine.observeEnvironment(state, { type, npc_id, location });
+  res.json(result);
 });
 
 app.post('/api/dialogue/start', (req, res) => {
@@ -266,12 +274,12 @@ app.get('/', (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n  LoopTrain Standalone v0.9.0-playwright-e2e`);
+  console.log(`\n  LoopTrain Standalone v0.10.0-npc-timeline-inference`);
   console.log(`  ────────────────────────`);
   console.log(`  Local:  http://localhost:${PORT}`);
   console.log(`  LLM:    ${LLM_ENABLED && DEEPSEEK_API_KEY ? 'enabled (deepseek)' : 'mock only'}`);
   console.log(`  Memory: ${memoryRuntime ? 'enabled' : 'disabled'}`);
-  console.log(`  Engine: v0.9.0-playwright-e2e\n`);
+  console.log(`  Engine: v0.10.0-npc-timeline-inference\n`);
 });
 
 module.exports = app;

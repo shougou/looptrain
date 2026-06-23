@@ -1,6 +1,6 @@
 {
   "name": "小宁",
-  "cost": 3,
+  "cost": 2,
   "turn_limit": 10,
   "near_limit_hint_at": 8,
   "turn_limit_policy": "soft_close",
@@ -11,8 +11,9 @@
   "near_limit_hint": "小宁低头看了看窗外，像是不想再说太久。你感觉接下来最好问关键问题。",
   "limit_message": "小宁把布娃娃抱得更紧，轻轻摇了摇头。她暂时不愿意再说了。",
   "suggestions": [
-    { "label": "温和询问", "template": "我压低声音，温和地问她：你刚才是不是听到了什么？" },
-    { "label": "提到滴答声", "template": "我轻声说：我也听见了那个滴答声，它是不是从下面传来的？" },
+    { "label": "温和询问", "template": "我压低声音，温和地问她：你刚才是不是听到了什么？", "grants_claim": "claim_xiaoning_heard_ticking" },
+    { "label": "提到滴答声", "template": "我轻声说：我也听见了那个滴答声，它是不是从下面传来的？", "grants_claim": "claim_xiaoning_heard_ticking" },
+    { "label": "问她是否一直在这", "template": "我看着她：你一直坐在这里吗？有没有离开过？", "grants_claim": "claim_xiaoning_stayed_carriage2" },
     { "label": "问布娃娃", "template": "我看着她怀里的布娃娃，轻声问：这是你妈妈给你的吗？" },
     { "label": "结束对话", "template": "__END_DIALOGUE__" }
   ]
