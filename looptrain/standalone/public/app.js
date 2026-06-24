@@ -53,7 +53,6 @@ async function api(route, body) {
     if (!r.ok) throw new Error(`${r.status}`);
     return await r.json();
   } catch (e) {
-    console.warn('[LT] API error:', route, e);
     return null;
   }
 }
@@ -176,8 +175,10 @@ async function submitInput() {
   if (!text) return;
   inputEl.value = '';
   autoSizeInput();
+  var sendBtn = document.getElementById('btn-send');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '...'; }
 
-  if (matchLocalCommand(text)) { handleCommand(text); return; }
+  if (matchLocalCommand(text)) { handleCommand(text); if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '发送'; } return; }
 
   // High-risk action confirmation
   var hr = isHighRisk(text);
@@ -202,6 +203,7 @@ async function submitInput() {
     var obsLabel = text.indexOf('__OBSERVE_NPC__') === 0 ? '盯住 ' + (text.split(':')[1] || '') : text.indexOf('__OBSERVE_LOCATION__') === 0 ? '守点观察 ' + (text.split(':')[1] || '') : '观察当前场景';
     eventFeed.appendMessage('player', obsLabel);
     await handleObserveAction(text);
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '发送'; }
     return;
   }
 
@@ -213,7 +215,7 @@ async function submitInput() {
   AudioManager.play('message_sent');
 
   if (state.mode === 'dialogue') {
-    if (/结束|离开|不聊了/.test(text)) { endDialogue(); return; }
+    if (/结束|离开|不聊了/.test(text)) { endDialogue(); if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '发送'; } return; }
     let llmReply = '';
     if (llmEnabled && llmMode) { const llmRes = await api('/llm/npc-reply', { npc_id: state.active_npc, player_text: text, state }); if (llmRes?.reply) llmReply = llmRes.reply; }
     const res = await api('/dialogue/message', { npc_id: state.active_npc, player_text: text, state, llm_reply: llmReply });
@@ -222,6 +224,7 @@ async function submitInput() {
     const res = await api('/action/commit', { text, state });
     handleResponse(res, false);
   }
+  if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '发送'; }
 }
 
 var _pendingAction = null;
@@ -340,7 +343,7 @@ async function startDialogue(npcId) {
 }
 
 function handleResponse(res, inDialogue) {
-  if (!res) return;
+  if (!res) { toast('操作失败，请稍后重试。'); return; }
   var prevStateForCard = state ? clone(state) : null;
   var prevState = prevAudioState ? clone(prevAudioState) : null;
   if (res.state) {

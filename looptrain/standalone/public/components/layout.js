@@ -17,7 +17,7 @@ class GameShell {
   updateAll() {
     if (!this.state) return;
     for (var i = 0; i < this.components.length; i++) {
-      try { this.components[i].update(this.state); } catch(e) { console.warn('[LT] Component update:', e); }
+      try { this.components[i].update(this.state); } catch(e) {}
     }
   }
 }

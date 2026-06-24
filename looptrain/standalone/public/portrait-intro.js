@@ -46,7 +46,7 @@ const PortraitIntro = (function () {
     var durationMs = options.durationMs || 700;
 
     var dock = document.querySelector(dockSelector);
-    if (!dock) { console.warn('[PortraitIntro] dock not found:', dockSelector); return; }
+    if (!dock) { return; }
 
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

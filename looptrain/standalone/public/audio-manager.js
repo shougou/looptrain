@@ -29,7 +29,6 @@ const AudioManager = (function () {
       if (!resp.ok) throw new Error('manifest fetch ' + resp.status);
       manifest = await resp.json();
     } catch (e) {
-      console.warn('[AudioManager] manifest load failed, audio disabled:', e.message);
       disabled = true;
       return;
     }
@@ -60,9 +59,7 @@ const AudioManager = (function () {
     el.volume = computeVolume(id);
     el.src = AUDIO_BASE + cfg.file;
     el.load();
-    el.addEventListener('error', function () {
-      console.warn('[AudioManager] track load error:', id);
-    });
+    el.addEventListener('error', function () {});
     tracks[id] = el;
   }
 
@@ -88,10 +85,10 @@ const AudioManager = (function () {
   function play(id) {
     if (disabled || muted) return;
     const el = tracks[id];
-    if (!el) { console.warn('[AudioManager] play: unknown track', id); return; }
+    if (!el) { return; }
     el.currentTime = 0;
     el.volume = computeVolume(id);
-    el.play().catch(function (e) { console.warn('[AudioManager] play blocked:', id, e.message); });
+    el.play().catch(function (e) {});
   }
 
   function stop(id) {
@@ -105,7 +102,7 @@ const AudioManager = (function () {
   function fadeIn(id) {
     if (disabled || muted) return;
     const el = tracks[id];
-    if (!el) { console.warn('[AudioManager] fadeIn: unknown track', id); return; }
+    if (!el) { return; }
     const fadeMs = trackMeta[id]?.fadeInMs || 0;
     if (fadeMs <= 0) {
       el.volume = computeVolume(id);
@@ -166,7 +163,7 @@ const AudioManager = (function () {
       case 'fadeOut':   fadeOut(audioEvent.id); break;
       case 'stop':      stop(audioEvent.id); break;
       case 'setMuted':  setMuted(audioEvent.value); break;
-      default: console.warn('[AudioManager] dispatch: unknown action', audioEvent.action);
+      default: break;
     }
   }
 

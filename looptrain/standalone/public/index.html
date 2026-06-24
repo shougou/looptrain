@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <base href="/" />
   <title>LoopTrain · 寒灯初醒</title>
   <link rel="stylesheet" href="style.css" />
@@ -48,7 +48,7 @@
           <div class="lt-objective-card" id="region-objective"></div>
           <div class="lt-scene-card" id="region-scene"></div>
           <div class="lt-focus-watch" id="region-focus-watch" style="display:none"></div>
-          <div class="lt-event-feed" id="region-event-feed"></div>
+          <div class="lt-event-feed" id="region-event-feed" aria-live="polite"></div>
         </div>
 
         <!-- ActionDock region -->
@@ -61,7 +61,7 @@
             <button class="lt-mode-tab" data-mode="action">行动</button>
           </div>
           <div class="lt-input-row">
-            <textarea class="lt-input" rows="1" placeholder="你要做什么？" aria-label="游戏输入"></textarea>
+            <textarea class="lt-input" id="game-input" name="game-input" rows="1" placeholder="你要做什么？" aria-label="游戏输入"></textarea>
             <button class="lt-btn lt-btn-send" id="btn-send">发送</button>
           </div>
         </div>
