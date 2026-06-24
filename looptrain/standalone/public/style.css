@@ -73,7 +73,6 @@ body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
 .lt-objective-text { font-size: 15px; font-weight: 700; color: var(--lt-gold); margin-bottom: 6px; }
 .lt-objective-steps { list-style: none; }
 .lt-step { font-size: 13px; padding: 2px 0; }
-.lt-step-done { color: var(--(--lt-success)); text-decoration: line-through; opacity: 0.7; }
 .lt-step-done { color: var(--lt-success); text-decoration: line-through; opacity: 0.7; }
 .lt-step-pending { color: var(--lt-muted); }
 
@@ -275,3 +274,7 @@ body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
 .lt-more-menu { position: absolute; z-index: 15; top: 90px; right: 14px; background: var(--lt-panel-strong); border: 1px solid var(--lt-border); border-radius: 8px; padding: 4px; min-width: 120px; }
 .lt-more-menu-btn { display: block; width: 100%; padding: 8px 12px; background: none; border: none; border-radius: 6px; font-size: 13px; color: var(--lt-text); cursor: pointer; text-align: left; }
 .lt-more-menu-btn:active { background: rgba(237,231,217,.08); }
+
+/* ── Portrait dock ── */
+.lt-portrait-dock { position: absolute; top: 56px; right: 14px; width: 48px; height: 64px; border-radius: 6px; overflow: hidden; z-index: 12; pointer-events: none; }
+.lt-portrait-dock img { opacity: 0; transition: opacity .3s; }
