@@ -107,7 +107,7 @@ test.describe('LoopTrain v0.11.0 完整玩家路径', () => {
     await page.waitForSelector('.lt-ng.lt-show', { timeout: 5000 });
     await expect(page.locator('#btn-next-loop')).toBeVisible({ timeout: 5000 });
     await page.click('#btn-next-loop');
-    await page.waitForSelector('.lt-ng:not(.lt-show)', { timeout: 5000 });
+    await page.waitForFunction(() => !document.querySelector('#overlay-ng')?.classList.contains('lt-show'), { timeout: 5000 });
     await expect(page.locator('.lt-status-loop')).toContainText(/第 [2-9] 轮/);
   });
 
