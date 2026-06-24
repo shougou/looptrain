@@ -203,7 +203,7 @@ body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
 .lt-tl-tag-conflict { color: var(--lt-danger); font-size: 11px; font-weight: 600; }
 
 /* ── DialogueFocusSheet overlay ── */
-.lt-dialogue-focus { position: absolute; inset: 0; z-index: 20; background: var(--lt-panel-strong); backdrop-filter: blur(12px); display: none; flex-direction: column; padding: 0 0 120px 0; }
+.lt-dialogue-focus { position: absolute; top: 0; right: 0; bottom: 99px; left: 0; z-index: 20; background: var(--lt-panel-strong); backdrop-filter: blur(12px); display: none; flex-direction: column; padding: 0; }
 .lt-dialogue-focus.lt-show { display: flex; }
 .lt-df-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--lt-border); }
 .lt-df-back { background: none; border: none; font-size: 14px; color: var(--lt-muted); cursor: pointer; }
