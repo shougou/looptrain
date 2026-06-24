@@ -178,7 +178,18 @@ async function submitInput() {
   var sendBtn = document.getElementById('btn-send');
   if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '...'; }
 
-  if (matchLocalCommand(text)) { handleCommand(text); if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '发送'; } return; }
+  if (text.indexOf('__OBSERVE_') === 0) {
+    AudioManager.play('message_sent');
+    var obsLabel = text.indexOf('__OBSERVE_NPC__') === 0 ? '盯住 ' + (text.split(':')[1] || '') : text.indexOf('__OBSERVE_LOCATION__') === 0 ? '守点观察 ' + (text.split(':')[1] || '') : '观察当前场景';
+    eventFeed.appendMessage('player', obsLabel);
+    await handleObserveAction(text);
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '发送'; }
+    return;
+  }
+
+  if (text.indexOf('__OBSERVE_') === 0 || text.indexOf('__DIALOGUE__:') === 0 || text.indexOf('__END_DIALOGUE__') === 0) {
+    // Internal template — skip command matching
+  } else if (matchLocalCommand(text)) { handleCommand(text); if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '发送'; } return; }
 
   // High-risk action confirmation
   var hr = isHighRisk(text);
@@ -192,8 +203,8 @@ async function submitInput() {
         evidenceEl.innerHTML = '<div>当前可用证据：' + count + ' 条</div>';
       } else { evidenceEl.innerHTML = ''; }
       confirmOverlay.style.display = 'flex';
-      // Store pending action
       _pendingAction = text;
+      if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '发送'; }
       return;
     }
   }
