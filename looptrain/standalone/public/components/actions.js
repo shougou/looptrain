@@ -11,6 +11,7 @@ class ActionDock extends Component {
     this.moreSheet = null;
   }
   update(state) {
+    this._lastState = state;
     var suggestions = state._suggestions || [];
     var scenes = this.opts.getScenes ? this.opts.getScenes() : {};
     var sceneNpcs = (scenes[state.location] && scenes[state.location].npcs) || [];
@@ -27,6 +28,15 @@ class ActionDock extends Component {
     });
     var allItems = npcButtons.concat(suggestions.filter(function(s) { return s.template && s.template.indexOf('__END_') !== 0; })
       .map(function(s) { var c = classifyAction(s.template); return { label: s.label, template: s.template, actionType: c.actionType, priority: c.priority }; }));
+    // Hide debug buttons (强制失败测试) unless debug flag is set
+    if (!state.flags || !state.flags.debug) {
+      allItems = allItems.filter(function(item) { return item.label.indexOf('强制失败') === -1; });
+    }
+    // Apply filter (e.g. 'dialogue' tab shows only dialogue actions)
+    if (this._filter) {
+      var self = this;
+      allItems = allItems.filter(function(item) { return item.actionType === self._filter; });
+    }
     var seen = {};
     allItems = allItems.filter(function(item) { if (seen[item.template]) return false; seen[item.template] = true; return true; });
     allItems.sort(function(a, b) { return a.priority - b.priority; });
@@ -47,6 +57,11 @@ class ActionDock extends Component {
     this._moreActions = more;
   }
   getMoreActions() { return this._moreActions || []; }
+  setFilter(filter) {
+    this._filter = filter || null;
+    this._suggHash = ''; // force re-render
+    if (this._lastState) this.update(this._lastState);
+  }
 }
 
 // ── MoreActionsSheet ──

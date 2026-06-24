@@ -39,6 +39,9 @@ function classifyAction(template) {
   if (template.indexOf('__OBSERVE_NPC__') === 0) return { actionType: 'observe', priority: 2, label: '盯住' + (template.split(':')[1] || '') };
   if (template.indexOf('__OBSERVE_LOCATION__') === 0) return { actionType: 'observe', priority: 2, label: '守点观察' };
   if (template.indexOf('__END_DIALOGUE__') === 0) return { actionType: 'system', priority: 99 };
+  if (template.indexOf('__DIALOGUE__:') === 0) return { actionType: 'dialogue', priority: 3 };
+  if (/检查|查看|调查|搜索/.test(template)) return { actionType: 'observe', priority: 2 };
+  if (/询问|对话|交谈|试探/.test(template)) return { actionType: 'dialogue', priority: 3 };
   if (/前往|返回|走到|穿过/.test(template)) return { actionType: 'move', priority: 4 };
   for (var i = 0; i < HIGH_RISK_ACTIONS.length; i++) {
     if (HIGH_RISK_ACTIONS[i].pattern.test(template)) return { actionType: 'high_risk', priority: 5 };

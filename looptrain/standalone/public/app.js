@@ -580,7 +580,16 @@ async function init() {
   document.querySelector('.lt-mode-tabs').addEventListener('click', async function(ev) {
     var tab = ev.target.closest('[data-mode]'); if (!tab) return;
     var mode = tab.dataset.mode;
-    if (mode === 'action') { if (state.mode === 'dialogue') await endDialogue(); }
+    if (mode === 'action') {
+      if (state.mode === 'dialogue') await endDialogue();
+      document.querySelectorAll('.lt-mode-tab').forEach(function(t) { t.classList.remove('lt-active'); });
+      tab.classList.add('lt-active');
+      if (actionDock && actionDock.setFilter) actionDock.setFilter(null);
+    } else if (mode === 'dialogue') {
+      document.querySelectorAll('.lt-mode-tab').forEach(function(t) { t.classList.remove('lt-active'); });
+      tab.classList.add('lt-active');
+      if (actionDock && actionDock.setFilter) actionDock.setFilter('dialogue');
+    }
   });
 
   // High-risk confirm
