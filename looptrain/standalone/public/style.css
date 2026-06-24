@@ -203,7 +203,7 @@ body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
 .lt-tl-tag-conflict { color: var(--lt-danger); font-size: 11px; font-weight: 600; }
 
 /* ── DialogueFocusSheet overlay ── */
-.lt-dialogue-focus { position: absolute; inset: 0; z-index: 20; background: var(--lt-panel-strong); backdrop-filter: blur(12px); display: none; flex-direction: column; padding: 0; }
+.lt-dialogue-focus { position: absolute; inset: 0; z-index: 20; background: var(--lt-panel-strong); backdrop-filter: blur(12px); display: none; flex-direction: column; padding: 0 0 120px 0; }
 .lt-dialogue-focus.lt-show { display: flex; }
 .lt-df-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--lt-border); }
 .lt-df-back { background: none; border: none; font-size: 14px; color: var(--lt-muted); cursor: pointer; }
@@ -214,7 +214,7 @@ body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
 .lt-df-log { flex: 1; overflow-y: auto; padding: 8px 14px; display: flex; flex-direction: column; gap: 6px; }
 .lt-df-suggestions { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 14px; }
 .lt-df-sugg-btn { background: rgba(237,231,217,.06); border: 1px solid var(--lt-border); border-radius: 6px; padding: 6px 10px; font-size: 13px; color: var(--lt-text); cursor: pointer; min-height: 36px; }
-.lt-df-end { margin: 6px 14px max(6px, env(safe-area-inset-bottom)); padding: 8px; border-radius: 8px; background: rgba(180,71,71,.1); border: 1px solid var(--lt-danger); color: var(--lt-danger); font-size: 15px; font-weight: 600; cursor: pointer; min-height: 44px; }
+.lt-df-end { margin: 8px 14px 8px; padding: 10px; border-radius: 8px; background: rgba(180,71,71,.18); border: 1px solid var(--lt-danger); color: var(--lt-danger); font-size: 15px; font-weight: 600; cursor: pointer; min-height: 44px; text-align: center; }
 
 /* ── Confirm overlay ── */
 .lt-confirm-overlay { position: absolute; inset: 0; z-index: 30; background: rgba(0,0,0,.7); display: flex; align-items: center; justify-content: center; padding: 20px; }
