@@ -34,7 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ── API routes (no /api/plugins — standalone) ──
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, engine: 'looptrain', version: 'v0.10.0-npc-timeline-inference', mode: 'standalone' });
+  res.json({ ok: true, engine: 'looptrain', version: 'v0.11.0-mobile-portrait-ui-redesign', mode: 'standalone' });
 });
 
 app.post('/api/session/init', (req, res) => {
@@ -274,12 +274,12 @@ app.get('/', (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n  LoopTrain Standalone v0.10.0-npc-timeline-inference`);
+  console.log(`\n  LoopTrain Standalone v0.11.0-mobile-portrait-ui-redesign`);
   console.log(`  ────────────────────────`);
   console.log(`  Local:  http://localhost:${PORT}`);
   console.log(`  LLM:    ${LLM_ENABLED && DEEPSEEK_API_KEY ? 'enabled (deepseek)' : 'mock only'}`);
   console.log(`  Memory: ${memoryRuntime ? 'enabled' : 'disabled'}`);
-  console.log(`  Engine: v0.10.0-npc-timeline-inference\n`);
+  console.log(`  Engine: v0.11.0-mobile-portrait-ui-redesign\n`);
 });
 
 module.exports = app;
