@@ -14,10 +14,35 @@ SLT = Standalone LoopTrain
 
 ## 当前本地默认入口
 
-启动本地 SLT：
+> **注意**：`node server.js` 是长期运行的守护进程，直接执行会阻塞终端。使用 tmux/screen 将其放入后台 session。
+
+启动本地 SLT（推荐使用 tmux，不阻塞终端）：
 
 ```bash
-bash scripts/start_slt.sh
+# 方式一：tmux（推荐）
+tmux new-session -d -s lt 'cd /home/shougou/11_looptrain && bash scripts/start_slt.sh'
+
+# 方式二：screen（备选）
+screen -dmS lt bash -c 'cd /home/shougou/11_looptrain && bash scripts/start_slt.sh'
+
+# 方式三：nohup（简易，但重启不方便）
+cd looptrain/standalone && nohup node server.js > /tmp/lt-server.log 2>&1 & disown
+```
+
+查看服务器输出：
+
+```bash
+tmux capture-pane -p -t lt | tail -20    # tmux
+screen -S lt -X hardcopy /dev/stdout     # screen
+tail -f /tmp/lt-server.log              # nohup
+```
+
+停止服务器：
+
+```bash
+tmux kill-session -t lt                 # tmux
+screen -S lt -X quit                    # screen
+pkill -f "node server.js"               # nohup
 ```
 
 访问：

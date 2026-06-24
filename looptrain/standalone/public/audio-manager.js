@@ -1,6 +1,6 @@
 'use strict';
 
-/* AudioManager — LoopTrain v0.10.0-npc-timeline-inference
+/* AudioManager — LoopTrain v0.11.0-mobile-portrait-ui-redesign
  * Pure vanilla JS. HTMLAudioElement-based, degrade-safe.
  * No Web Audio API. No game judgment. Audio-only.
  */

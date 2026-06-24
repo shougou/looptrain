@@ -2,7 +2,7 @@
   "name": "looptrain_standalone_runtime",
   "type": "standalone-game-runtime",
   "local_default_runtime": "SLT",
-  "looptrain_version": "v0.10.0-npc-timeline-inference",
+  "looptrain_version": "v0.11.0-mobile-portrait-ui-redesign",
   "devlog_site": "devlog/",
   "game_runtime": "looptrain/standalone/",
   "start_command": "bash scripts/start_slt.sh",

@@ -1,14 +1,14 @@
 'use strict';
 
-/* LoopTrain Standalone v0.10.0-npc-timeline-inference Content Extraction — app.js
- * Content loaded from /api/intro and /api/app-strings.
- * Scene-driven layout. Pure vanilla JS. No SillyTavern.
+/* LoopTrain Standalone v0.11.0-mobile-portrait-ui-redesign
+ * Component-based UI. Pure vanilla JS. No SillyTavern.
+ * Preserves all game logic from v0.10.0; replaces rendering layer.
  */
 
-// ── Save version constants (v0.8 save system) ──
+// ── Save version constants ──
 var LT_SAVE_SCHEMA_VERSION = 1;
 var LT_MIN_COMPATIBLE_SCHEMA_VERSION = 1;
-var LT_RUNTIME_VERSION = 'v0.10.0-npc-timeline-inference';
+var LT_RUNTIME_VERSION = 'v0.11.0-mobile-portrait-ui-redesign';
 var LT_STORY_VERSION = 'demo-0.8-handeng';
 var LT_KEY_PREFIX = 'lt:';
 var LT_SAVE_META_KEY = 'lt:save:meta';
@@ -18,7 +18,7 @@ var LT_SETTINGS_KEY = 'lt:settings';
 const API_BASE = '/api';
 const ASSET_BASE = '/assets/';
 
-// ── Content loaded dynamically ──
+// ── Content ──
 let START_STATE = null;
 let SCENES = {};
 let NPC_INFO = {};
@@ -35,37 +35,14 @@ let prevAudioState = null;
 let COMMANDS = [];
 let XU_DIALOGUES = null;
 
-function clone(x) { return JSON.parse(JSON.stringify(x)); }
+// ── GameShell + Components ──
+let gameShell = null;
+let statusBar, timelineMiniBar, objectiveCard, sceneStateCard, commandInput;
+let actionDock, moreActionsSheet, focusWatchBar;
+let eventFeed, archiveSheet, dialogueFocusSheet;
 
-// ── DOM refs ──
+function clone(x) { return JSON.parse(JSON.stringify(x)); }
 const $ = (sel) => document.querySelector(sel);
-const phone = $('.lt-phone');
-const topLeft = $('.lt-topbar-left');
-const topRight = $('.lt-topbar-right');
-const locationEl = $('.lt-location');
-const sceneText = $('.lt-scene-text');
-const goalEl = $('.lt-current-goal');
-const npcWrap = $('.lt-visible-npcs');
-const logEl = $('.lt-log-drawer .lt-log');
-const dialogueLog = $('.lt-dialogue-log');
-const portraitLayer = $('.lt-portrait-layer');
-const portraitImg = $('.lt-portrait');
-const dialoguePanel = $('.lt-dialogue-panel');
-const dialogueNpc = $('.lt-dialogue-npc');
-const latestMsg = $('.lt-latest-msg');
-const logDrawer = $('.lt-log-drawer');
-const inputEl = $('.lt-input');
-const modeTabs = $('.lt-mode-tabs');
-const ngLayer = $('.lt-ng');
-const ngBg = $('.lt-ng-bg');
-const ngCard = $('.lt-ng-card');
-const introLayer = $('.lt-intro');
-const contentEl = $('.lt-content');
-const bottomEl = $('.lt-bottom');
-const goalBarEl = $('.lt-goal-bar');
-const goalBarText = $('.lt-goal-bar-text');
-const goalBarLoop = $('.lt-goal-bar-loop');
-const commandBarEl = $('.lt-command-bar');
 
 // ── API ──
 async function api(route, body) {
@@ -83,435 +60,114 @@ async function api(route, body) {
 
 function s(key) { return (APP_STRINGS && APP_STRINGS[key]) || key; }
 
-// ── Render ──
-function render() {
-  const s = state;
-  const isDialogue = s.mode === 'dialogue';
+// ── Engine helpers ──
+function clueName(id) { return (npcCache?.clue_titles || {})[id] || id; }
+function npcName(id) { return NPC_INFO[id]?.name || id; }
+function sceneName(id) { return SCENES[id]?.name || id; }
 
-  document.body.classList.toggle('dialogue-active', isDialogue);
-
-  // Clean up portrait dock when not in dialogue
-  if (!isDialogue) {
-    var dock = document.querySelector('.lt-portrait-dock');
-    if (dock) dock.style.display = '';
-  }
-
-  // Topbar: time / loop / location
-  topLeft.innerHTML = `第 ${s.loop} 轮 · ${esc(s.clock)}`;
-  topRight.innerHTML = `${sceneName(s.location)} · AP ${s.ap_remaining}`;
-
-  // Scene card
-  locationEl.textContent = sceneName(s.location);
-  sceneText.textContent = getSceneText();
-  goalEl.textContent = '当前目标：' + goalDisplayText();
-
-  // Goal bar (v0.7)
-  renderGoalBar();
-  renderCommandBar();
-  let npcsHtml = getSceneNpcs().map(id => {
-    const n = NPC_INFO[id];
-    if (!n) return '';
-    const cls = n.hidden ? ' lt-hidden-npc-chip' : (id === 'xu_zhiwei' ? ' lt-companion-chip' : '');
-    const verbLabel = n.name;
-    return `<button class="lt-npc-chip${cls}" data-npc-id="${id}" data-type="person">${verbLabel}</button>`;
-  }).join('');
-  if (s.location === 'carriage_2') {
-    npcsHtml += '<button class="lt-scene-chip" data-template="我起身穿过过道，走向二号车厢和三号车厢之间的连接处。" data-type="move">前往连接处</button>';
-  } else if (s.location === 'connector_2_3') {
-    npcsHtml += '<button class="lt-scene-chip" data-template="我从连接处回到二号车厢。" data-type="move">返回二号车厢</button>';
-  }
-  // Observe suggestion chips
-  if (state._suggestions && state._suggestions.length) {
-    for (var si = 0; si < state._suggestions.length; si++) {
-      var sug = state._suggestions[si];
-      if (sug.template && sug.template.indexOf('__OBSERVE_') === 0) {
-        npcsHtml += '<button class="lt-observe-chip" data-template="' + esc(sug.template) + '" data-type="observe">' + esc(sug.label) + '</button>';
-      }
-    }
-  }
-
-  npcWrap.innerHTML = npcsHtml;
-
-  // Portrait & dialogue panel
-  if (isDialogue) {
-    renderPortrait();
-    if (portraitLayer) portraitLayer.classList.add('lt-show');
-    dialoguePanel.classList.add('lt-show');
-    dialogueNpc.textContent = npcName(s.active_npc);
-  } else {
-    if (portraitLayer) portraitLayer.classList.remove('lt-show');
-    dialoguePanel.classList.remove('lt-show');
-  }
-
-  // Latest message
-  updateLatestMsg();
-
-  // Log drawer toggle button
-  if (!document.getElementById('log-toggle')) {
-    const btn = document.createElement('button');
-    btn.id = 'log-toggle';
-    btn.className = 'lt-log-toggle';
-    btn.textContent = '📋 对话记录';
-    btn.addEventListener('click', function () {
-      logDrawer.classList.add('lt-show');
-      requestAnimationFrame(() => {
-        const log = document.querySelector('.lt-log-drawer .lt-log');
-        if (log) {
-          if (!log.children.length) {
-            const hint = document.createElement('div');
-            hint.className = 'lt-msg lt-msg-system';
-            hint.textContent = APP_STRINGS.noDialogueRecord || '当前没有对话记录';
-            log.appendChild(hint);
-          }
-          log.scrollTop = log.scrollHeight;
-        }
-      });
-    });
-    latestMsg.after(btn);
-  }
-
-  // Input placeholder
-  inputEl.placeholder = inputPlaceholder();
-
-  // Mode tab active state
-  modeTabs.querySelectorAll('[data-mode]').forEach(tab => {
-    tab.classList.toggle('lt-active', tab.dataset.mode === (isDialogue ? 'dialogue' : 'action'));
-  });
-
-  // Intro overlay
-  const showIntro = !s.flags.intro_seen;
-  introLayer.classList.toggle('lt-show', showIntro);
-  contentEl.style.display = showIntro ? 'none' : '';
-  bottomEl.style.display = showIntro ? 'none' : '';
+// ── Persistence ──
+function saveState() {
+  try {
+    var toSave = clone(state);
+    delete toSave._ui; // Don't persist UI state
+    localStorage.setItem(LT_SAVE_RUNTIME_KEY, JSON.stringify(toSave));
+  } catch (_) {}
+  saveSaveMeta();
+}
+function saveSaveMeta() {
+  try {
+    var now = new Date().toISOString();
+    var existing = loadSaveMeta();
+    var meta = { appId: 'looptrain', saveSchemaVersion: LT_SAVE_SCHEMA_VERSION, runtimeVersion: LT_RUNTIME_VERSION, storyVersion: LT_STORY_VERSION, createdAt: (existing && existing.createdAt) || now, updatedAt: now };
+    localStorage.setItem(LT_SAVE_META_KEY, JSON.stringify(meta));
+  } catch (_) {}
+}
+function loadSaveMeta() { try { var raw = localStorage.getItem(LT_SAVE_META_KEY); return raw ? JSON.parse(raw) : null; } catch (_) { return null; } }
+function loadState() {
+  try { var raw = localStorage.getItem(LT_SAVE_RUNTIME_KEY); if (raw) state = JSON.parse(raw); } catch (_) {}
+  if (!state) { state = clone(START_STATE); return; }
+  if (state.mode === 'dialogue') { state.mode = 'explore'; state.active_npc = null; }
+  if (!state._goalData && state._goal) state._goalData = state._goal;
+  if (!state._goal && state._goalData) state._goal = state._goalData;
 }
 
-function getSceneText() {
-  const scene = SCENES[state.location] || {};
-  const mem = state.loop > 1 && state.carried_memory.length
-    ? `你记得上一轮留下的信息：${state.carried_memory.map(clueName).join('、')}。` : '';
-  return `${mem}${scene.text || '1939 年冬，渝江线 307 次夜行列车从重庆驶向江城。窗外远方的火光渐远，车厢里灯光昏黄。'}`;
+// ── Legacy detection & cleanup ──
+function detectLegacyKeys() { var legacy = []; try { for (var i = 0; i < localStorage.length; i++) { var key = localStorage.key(i); if (key === 'looptrain.standalone.v1' && !localStorage.getItem(LT_SAVE_META_KEY)) legacy.push(key); } } catch (_) {} return legacy; }
+function archiveLegacyData(legacyKeys) { var ts = Date.now(); legacyKeys.forEach(function(key) { try { var raw = localStorage.getItem(key); if (raw) localStorage.setItem('lt:legacy:' + ts, raw); localStorage.removeItem(key); } catch (e) {} }); }
+function clearLtKeys() { try { var toRemove = []; for (var i = 0; i < localStorage.length; i++) { var key = localStorage.key(i); if (key.indexOf(LT_KEY_PREFIX) === 0 && key.indexOf('lt:legacy:') !== 0 && key !== LT_SETTINGS_KEY) toRemove.push(key); } toRemove.forEach(function(key) { localStorage.removeItem(key); }); } catch (_) {} }
+function clearOldIndexedDBs() { if (!window.indexedDB || !window.indexedDB.deleteDatabase) return; ['LoopTrainDB','LoopTrainRuntimeDB','LoopTrainMemoryDB'].forEach(function(dbName) { try { window.indexedDB.deleteDatabase(dbName); } catch (e) {} }); }
+function initNewSave() { state = clone(START_STATE); state.flags.intro_seen = false; saveState(); prevAudioState = null; }
+function migrateAudioSettings() { try { var oldMuted = localStorage.getItem('looptrain.audio.muted'); if (oldMuted === 'true' || oldMuted === 'false') { localStorage.setItem(LT_SETTINGS_KEY, JSON.stringify({ muted: oldMuted === 'true' })); } } catch (_) {} }
+
+// ── Reset modal ──
+function showResetModal(reason) { var overlay = document.getElementById('lt-reset-modal'); if (!overlay) return; var bodyEl = overlay.querySelector('.lt-reset-body'); if (bodyEl) bodyEl.textContent = reason === 'legacy' ? '《寒灯初醒》试玩是一次全面重构。旧存档无法兼容，需要重新开始。' : '检测到旧版本存档。需要重新开始。'; overlay.style.display = 'flex'; var intro = document.getElementById('overlay-intro'); if (intro) intro.classList.remove('lt-show'); }
+function hideResetModal() { var overlay = document.getElementById('lt-reset-modal'); if (overlay) overlay.style.display = 'none'; }
+function handleReset() { var legacyKeys = detectLegacyKeys(); if (legacyKeys.length) archiveLegacyData(legacyKeys); clearLtKeys(); initNewSave(); hideResetModal(); var intro = document.getElementById('overlay-intro'); if (intro) intro.classList.add('lt-show'); state.flags.intro_seen = false; eventFeed.clear(); dialogueFocusSheet.close(); var ng = document.getElementById('overlay-ng'); if (ng) ng.classList.remove('lt-show'); inputEl.value = ''; autoSizeInput(); gameShell.setState(state); }
+
+// ── Audio events ──
+function deriveAudioEvents(prevState, nextState, res) {
+  const events = [];
+  if ((nextState.known_clues?.length || 0) > (prevState.known_clues?.length || 0)) events.push({ action: 'play', id: 'clue_found' });
+  if (prevState.ap_remaining > 3 && nextState.ap_remaining <= 3) events.push({ action: 'fadeIn', id: 'faint_ticking_loop' });
+  if (prevState.ap_remaining <= 3 && nextState.ap_remaining > 3) events.push({ action: 'fadeOut', id: 'faint_ticking_loop' });
+  if (res.loop_failure_outcome) { events.push({ action: 'fadeOut', id: 'faint_ticking_loop' }); events.push({ action: 'play', id: 'explosion_muffled' }); }
+  if (res.trial_success) events.push({ action: 'fadeOut', id: 'faint_ticking_loop' });
+  return events;
 }
 
-function getSceneNpcs() {
-  const base = (SCENES[state.location] || {}).npcs || [];
-  const hidden = Object.keys(NPC_INFO).filter(id =>
-    NPC_INFO[id].hidden && NPC_INFO[id].location === state.location &&
-    (state.flags.visible_hidden_npcs || []).includes(id)
-  );
-  return [...new Set([...base, ...hidden])];
-}
+// ── UI helpers ──
+var inputEl, phone;
+function autoSizeInput() { if (inputEl) { inputEl.style.height = 'auto'; inputEl.style.height = Math.min(96, inputEl.scrollHeight) + 'px'; } }
+function toast(text) { var t = document.createElement('div'); t.className = 'lt-toast'; t.textContent = text; phone.appendChild(t); setTimeout(function() { t.remove(); }, 2200); }
+function showClueBadge(count) { var badge = document.createElement('div'); badge.className = 'lt-clue-badge'; badge.textContent = '🧩 线索 +' + count; phone.appendChild(badge); setTimeout(function() { badge.remove(); }, 3000); }
 
-function renderPortrait() {
-  if (!portraitImg) return;
-  if (state.mode === 'dialogue' && state.active_npc) {
-    const npc = NPC_INFO[state.active_npc];
-    const src = ASSET_BASE + (npc?.portrait || 'xiaoning_portrait.png');
-    portraitImg.src = src;
-    portraitImg.alt = npc?.name || '';
-    portraitImg.onerror = () => { portraitImg.src = ASSET_BASE + 'xiaoning_portrait.png'; };
-  }
-}
-
-function updateLatestMsg() {
-  const playerMsgs = document.querySelectorAll('.lt-dialogue-log .lt-msg-player, .lt-dialogue-log .lt-msg-npc');
-  const isDialogue = state.mode === 'dialogue';
-  if (playerMsgs.length && !isDialogue) {
-    const last = playerMsgs[playerMsgs.length - 1];
-    latestMsg.innerHTML = last.outerHTML;
-    latestMsg.classList.add('lt-show');
-  } else {
-    latestMsg.classList.remove('lt-show');
-  }
-}
-
-function inputPlaceholder() {
-  if (state.mode === 'dialogue') {
-    return `和${npcName(state.active_npc)}说些什么……`;
-  }
-  return '你要做什么？例如：检查座位下方';
-}
-
-// ── Goal display helpers (v0.7) ──
-function goalDisplayText() {
-  if (!state._goalData) return state._goal || '证明二号车厢存在异常，并说服赵乘警检查地板。';
-  const g = state._goalData;
-  if (typeof g === 'string') return g;
-  if (g.goals && g.goals.length) return g.goals[0].title || '';
-  return state._goal || '';
-}
-
-function renderGoalBar() {
-  if (!goalBarText || !goalBarLoop) return;
-  const text = goalDisplayText();
-  goalBarText.textContent = '📋 ' + (text || '当前目标');
-  const s = state;
-  goalBarLoop.textContent = s.loop > 1 ? '第 ' + s.loop + ' 轮' : '';
-
-  var progressEl = document.querySelector('.lt-goal-progress');
-  if (progressEl) {
-    var gd = s._goalData;
-    if (gd && gd.goals && gd.goals.length) {
-      var total = gd.goals.length;
-      var checked = gd.goals.filter(function(g) { return g.checked || g.done; }).length;
-      if (checked >= 0 && total > 0) {
-        progressEl.textContent = checked + '/' + total;
-        progressEl.style.display = '';
-      } else {
-        progressEl.textContent = '';
-        progressEl.style.display = 'none';
-      }
-    } else {
-      progressEl.textContent = '';
-      progressEl.style.display = 'none';
-    }
-  }
-
-  // Loop 1 highlight animation
-  var loop = s.loop || 1;
-  goalBarEl.classList.toggle('lt-goal-highlight', loop === 1);
-}
-
-function renderCommandBar() {
-  if (!commandBarEl) return;
-  const loop = state.loop || 1;
-  // 3-loop learning curve: visible loops 1-3, hidden loop 4+
-  if (loop <= 3) {
-    commandBarEl.style.display = '';
-    commandBarEl.classList.toggle('lt-cmd-highlight', loop === 1);
-  } else {
-    commandBarEl.style.display = 'none';
-  }
-}
-
+// ── Goal feedback ──
 function showGoalFeedback(prevTitle, newTitle, memoryNote) {
   if (!prevTitle || prevTitle === newTitle) return;
-  const fb = document.querySelector('.lt-goal-feedback');
+  var fb = document.getElementById('overlay-goal-feedback');
   if (!fb) return;
-
-  const titleEl = fb.querySelector('.lt-fb-title');
-  const descEl = fb.querySelector('.lt-fb-desc');
-  const memoryEl = fb.querySelector('.lt-fb-memory');
-  const nextEl = fb.querySelector('.lt-fb-next');
-
-  if (titleEl) titleEl.textContent = '✅ 目标完成';
-  if (descEl) descEl.textContent = prevTitle || '';
-  if (memoryEl) memoryEl.textContent = memoryNote || '🧠 该信息已加入下一轮记忆';
-  if (nextEl) nextEl.textContent = newTitle ? '📋 新目标：' + newTitle : '';
-
+  fb.querySelector('.lt-fb-title').textContent = '✅ 目标完成';
+  fb.querySelector('.lt-fb-desc').textContent = prevTitle || '';
+  fb.querySelector('.lt-fb-memory').textContent = memoryNote || '🧠 该信息已加入下一轮记忆';
+  fb.querySelector('.lt-fb-next').textContent = newTitle ? '📋 新目标：' + newTitle : '';
   fb.style.display = '';
   fb.classList.add('lt-fb-show');
-  setTimeout(function () {
-    fb.classList.remove('lt-fb-show');
-    setTimeout(function () { fb.style.display = 'none'; }, 400);
-  }, 4000);
+  setTimeout(function() { fb.classList.remove('lt-fb-show'); setTimeout(function() { fb.style.display = 'none'; }, 400); }, 4000);
 }
 
-// ── Commands (v0.7.0 command registry) ──
+// ── Commands ──
 function matchLocalCommand(text) {
-  const t = (text || '').trim();
-  if (!t) return null;
+  const t = (text || '').trim(); if (!t) return null;
   const tl = t.toLowerCase();
-  for (const cmd of COMMANDS) {
-    for (const trigger of cmd.triggers) {
-      if (trigger.toLowerCase() === tl) return cmd;
-    }
-  }
-  for (const cmd of COMMANDS) {
-    for (const trigger of cmd.triggers) {
-      if (tl.includes(trigger.toLowerCase())) return cmd;
-    }
-  }
+  for (const cmd of COMMANDS) { for (const trigger of cmd.triggers) { if (trigger.toLowerCase() === tl) return cmd; } }
+  for (const cmd of COMMANDS) { for (const trigger of cmd.triggers) { if (tl.includes(trigger.toLowerCase())) return cmd; } }
   return null;
 }
-
 function handleCommand(text) {
-  const t = text.trim();
-  const inDialogue = state.mode === 'dialogue';
-  const target = inDialogue ? dialogueLog : contentEl;
-  const cmd = matchLocalCommand(t);
-
-  if (!cmd) { appendMsg('system', '未知指令。输入"帮助"查看可用指令。', target); return true; }
-
+  const cmd = matchLocalCommand(text);
+  if (!cmd) { eventFeed.appendMessage('system', '未知指令。输入"帮助"查看可用指令。'); return true; }
   switch (cmd.id) {
-    case 'view_clues': showClues(target); return true;
-    case 'view_characters': showCharacters(target); return true;
-    case 'view_status': showStatus(target); return true;
-    case 'view_goal': showGoal(target); return true;
-    case 'view_memory': showMemory(target); return true;
-    case 'view_timeline': showTimeline(target); return true;
-    case 'view_npc_timeline': showNpcTimeline(target); return true;
-    case 'view_gray_timeline': showGrayTimeline(target); return true;
-    case 'view_xiaoning_timeline': showXiaoningTimeline(target); return true;
-    case 'view_beliefs': showBeliefs(target); return true;
-    case 'end_dialogue': if (inDialogue) endDialogue(); else appendMsg('system', '当前不在对话中。', target); return true;
-    case 'next_loop': if (lastFailure) nextLoop(); else appendMsg('system', '只有失败结算后才能进入下一轮。', target); return true;
+    case 'view_clues': archiveSheet.open('clues'); return true;
+    case 'view_characters': archiveSheet.open('characters'); return true;
+    case 'view_status': eventFeed.appendMessage('system', state.clock + '｜AP ' + state.ap_remaining + '｜第 ' + state.loop + ' 轮｜' + (state.mode === 'dialogue' ? '对话：' + npcName(state.active_npc) : '探索')); return true;
+    case 'view_goal': eventFeed.appendMessage('system', '当前目标：' + (state._goal || '')); return true;
+    case 'view_memory': archiveSheet.open('memory'); return true;
+    case 'view_timeline': case 'view_npc_timeline': case 'view_gray_timeline': case 'view_xiaoning_timeline': archiveSheet.open('timeline'); return true;
+    case 'view_beliefs': eventFeed.appendMessage('system', '推测功能将在后续版本开放。'); return true;
+    case 'end_dialogue': if (state.mode === 'dialogue') endDialogue(); else eventFeed.appendMessage('system', '当前不在对话中。'); return true;
+    case 'next_loop': if (lastFailure) nextLoop(); else eventFeed.appendMessage('system', '只有失败结算后才能进入下一轮。'); return true;
     case 'reset_loop': resetLoop(); return true;
     case 'reset_game': if (confirm('确定要重置游戏吗？所有进度将丢失。')) resetGame(); return true;
-    case 'ask_xu': showXuPanel(target); return true;
+    case 'ask_xu': showXuPanel(); return true;
     default: return false;
   }
 }
 
-function showClues(target) {
-  const clues = state.known_clues.length
-    ? state.known_clues.map(id => '<li><strong>' + esc((npcCache?.clue_titles || {})[id] || id) + '</strong></li>').join('')
-    : '<li>' + (APP_STRINGS.noClueText || '暂无线索') + '</li>';
-  appendHtml('system', '<div class="lt-msg-title">已获得线索</div><ul>' + clues + '</ul>', target);
-}
-
-function showCharacters(target) {
-  const summaries = APP_STRINGS.npcSummaries || {};
-  appendHtml('system', '<div class="lt-msg-title">人物</div><ul><li>' + (summaries.xiaoning || '小宁：线索来源') + '</li><li>' + (summaries.zhao || '赵乘警：证据门槛') + '</li><li>' + (summaries.gray || '灰衣乘客：可疑人物') + '</li></ul>', target);
-}
-
-function showStatus(target) {
-  appendHtml('system', '<div class="lt-msg-title">当前状态</div><div>' + esc(state.clock) + '｜AP ' + state.ap_remaining + '｜第 ' + state.loop + ' 轮｜' + (state.mode === 'dialogue' ? '对话：' + npcName(state.active_npc) : '探索') + '</div><div class="lt-subtitle">当前目标</div><div>' + esc(state._goal || '证明二号车厢存在异常，并说服赵乘警检查地板。') + '</div>', target);
-}
-
-function showGoal(target) {
-  appendHtml('system', '<div class="lt-msg-title">当前任务</div><div>' + esc(state._goal || '证明二号车厢存在异常，并说服赵乘警检查地板。') + '</div>', target);
-}
-
-function showMemory(target) {
-  if (state.carried_memory && state.carried_memory.length) {
-    const items = state.carried_memory.map(function(id) { return '<li>' + esc(clueName(id)) + '</li>'; }).join('');
-    appendHtml('system', '<div class="lt-msg-title">跨循环记忆</div><ul>' + items + '</ul>', target);
-  } else {
-    appendMsg('system', APP_STRINGS.noClueText || '暂无跨循环记忆。', target);
-  }
-}
-
-function showTimeline(target) {
-  var entries = state.player_timeline ? (state.player_timeline.entries || []) : [];
-  if (entries.length === 0) {
-    appendMsg('system', '时间线暂为空。通过观察场景、盯住NPC或守点观察来收集时间信息。', target);
-    return;
-  }
-  appendHtml('system', renderTimelineHtml(entries, null), target);
-}
-
-function showNpcTimeline(target) {
-  var entries = state.player_timeline ? (state.player_timeline.entries || []) : [];
-  if (entries.length === 0) {
-    appendMsg('system', '时间线暂为空。', target);
-    return;
-  }
-  appendHtml('system', renderTimelineHtml(entries, null), target);
-}
-
-function showGrayTimeline(target) {
-  var entries = state.player_timeline ? (state.player_timeline.entries || []) : [];
-  var filtered = [];
-  for (var i = 0; i < entries.length; i++) {
-    if (entries[i].actor === 'gray_passenger') filtered.push(entries[i]);
-  }
-  if (filtered.length === 0) {
-    appendMsg('system', '灰衣乘客暂无时间线记录。', target);
-    return;
-  }
-  appendHtml('system', renderTimelineHtml(filtered, 'gray_passenger'), target);
-}
-
-function showXiaoningTimeline(target) {
-  var entries = state.player_timeline ? (state.player_timeline.entries || []) : [];
-  var filtered = [];
-  for (var i = 0; i < entries.length; i++) {
-    if (entries[i].actor === 'xiaoning') filtered.push(entries[i]);
-  }
-  if (filtered.length === 0) {
-    appendMsg('system', '小宁暂无时间线记录。', target);
-    return;
-  }
-  appendHtml('system', renderTimelineHtml(filtered, 'xiaoning'), target);
-}
-
-function renderTimelineHtml(entries, filter) {
-  var groups = {};
-  for (var i = 0; i < entries.length; i++) {
-    var e = entries[i];
-    var actor = e.actor || 'scene';
-    if (!filter || actor === filter) {
-      if (!groups[actor]) groups[actor] = [];
-      groups[actor].push(e);
-    }
-  }
-  var actorNames = { gray_passenger: '灰衣乘客', xiaoning: '小宁', zhao_police: '赵乘警', scene: '场景事件' };
-  var html = '<div class="lt-timeline-panel"><div class="lt-timeline-title">📋 时间线</div>';
-  var actorKeys = Object.keys(groups);
-  for (var a = 0; a < actorKeys.length; a++) {
-    var actor = actorKeys[a];
-    html += '<div class="lt-timeline-group"><div class="lt-timeline-group-header">' + esc(actorNames[actor] || actor) + '</div>';
-    for (var j = 0; j < groups[actor].length; j++) {
-      var entry = groups[actor][j];
-      var time = entry.time || (entry.time_range ? entry.time_range[0] + '-' + entry.time_range[1] : '??:??');
-      var tag = '';
-      var tagClass = '';
-      if (entry.source_type === 'observation') { tag = '[观察]'; tagClass = 'lt-tl-tag-observation'; }
-      else if (entry.source_type === 'claim') { tag = '[自述]'; tagClass = 'lt-tl-tag-claim'; }
-      else if (entry.source_type === 'inference') { tag = '[推理]'; tagClass = 'lt-tl-tag-inference'; }
-      else if (entry.source_type === 'memory') { tag = '[记忆]'; tagClass = 'lt-tl-tag-memory'; }
-      var hasConflict = entry.contradicts && entry.contradicts.length > 0;
-      var conflictInEntries = false;
-      if (hasConflict) {
-        for (var c = 0; c < entry.contradicts.length; c++) {
-          for (var ei = 0; ei < entries.length; ei++) {
-            if (entries[ei].source_id === entry.contradicts[c] || entries[ei].id === entry.contradicts[c] || entries[ei].public_clue_id === entry.contradicts[c]) {
-              conflictInEntries = true; break;
-            }
-          }
-          if (conflictInEntries) break;
-        }
-      }
-      if (conflictInEntries) { tag += ' [矛盾]'; tagClass = 'lt-tl-tag-conflict'; }
-      var verifiedClass = entry.current_loop_verified ? ' lt-tl-verified' : '';
-      var content = entry.description || clueName(entry.source_id) || clueName(entry.public_clue_id) || entry.source_label || '';
-      html += '<div class="lt-timeline-entry' + verifiedClass + '">' +
-        '<span class="lt-tl-time">' + esc(time) + '</span>' +
-        '<span class="' + tagClass + '">' + esc(tag) + '</span>' +
-        '<span class="lt-tl-content">' + esc(content) + '</span>' +
-        '</div>';
-    }
-    html += '</div>';
-  }
-  html += '</div>';
-  return html;
-}
-
-function showBeliefs(target) {
-  appendMsg('system', '推测功能将在后续版本开放。', target);
-}
-
-function showXuPanel(target) {
+function showXuPanel() {
   var helpText = '';
-  if (XU_DIALOGUES && XU_DIALOGUES.templates) {
-    var helpTpl = XU_DIALOGUES.templates.find(function(t) { return t.intent === 'command_help'; });
-    if (helpTpl) helpText = helpTpl.text;
-  }
-  if (!helpText) {
-    helpText = '你可以随时使用下面的指令。\n\n📋 信息查询：查看线索、查看人物、查看状态、查看任务\n🧠 记忆系统：查看记忆、查看时间线、查看推测\n⚡ 行动指令：结束对话、进入下一轮、重置本轮、重置游戏';
-  }
-  appendHtml('system', '<div class="lt-msg-title">调查助手：许知微</div><div>' + esc(helpText) + '</div>', target);
-}
-
-async function resetLoop() {
-  PortraitIntro.reset();
-  const res = await api('/session/init', { state: clone(START_STATE) });
-  if (res?.state) {
-    res.state.flags.intro_seen = true;
-    res.state._goal = res.goal || '';
-    res.state._suggestions = res.suggestions || [];
-    state = res.state;
-    logEl.innerHTML = '';
-    dialogueLog.innerHTML = '';
-    ngLayer.classList.remove('lt-show');
-    if (portraitLayer) portraitLayer.classList.remove('lt-show');
-    dialoguePanel.classList.remove('lt-show');
-    latestMsg.classList.remove('lt-show');
-    inputEl.value = '';
-    autoSizeInput();
-    appendMsg('system', '本轮已重置。', logEl);
-    render();
-  }
+  if (XU_DIALOGUES && XU_DIALOGUES.templates) { var helpTpl = XU_DIALOGUES.templates.find(function(t) { return t.intent === 'command_help'; }); if (helpTpl) helpText = helpTpl.text; }
+  if (!helpText) helpText = '你可以随时使用下面的指令。\n\n📋 信息查询：查看线索、查看人物、查看状态、查看任务\n🧠 记忆系统：查看记忆、查看时间线、查看推测\n⚡ 行动指令：结束对话、进入下一轮、重置本轮、重置游戏';
+  eventFeed.appendHtml('system', '<div class="lt-msg-title">调查助手：许知微</div><div>' + esc(helpText) + '</div>');
 }
 
 // ── Game actions ──
@@ -521,30 +177,45 @@ async function submitInput() {
   inputEl.value = '';
   autoSizeInput();
 
-  const inDialogue = state.mode === 'dialogue';
-
   if (matchLocalCommand(text)) { handleCommand(text); return; }
+
+  // High-risk action confirmation
+  var hr = isHighRisk(text);
+  if (hr) {
+    var confirmOverlay = document.getElementById('overlay-confirm');
+    if (confirmOverlay) {
+      confirmOverlay.querySelector('.lt-confirm-body').textContent = '你要执行：' + hr.label + '。这可能改变 NPC 态度或导致失败。';
+      var evidenceEl = confirmOverlay.querySelector('.lt-confirm-evidence');
+      if (hr.requiresEvidence) {
+        var count = (state.known_clues || []).length;
+        evidenceEl.innerHTML = '<div>当前可用证据：' + count + ' 条</div>';
+      } else { evidenceEl.innerHTML = ''; }
+      confirmOverlay.style.display = 'flex';
+      // Store pending action
+      _pendingAction = text;
+      return;
+    }
+  }
 
   if (text.indexOf('__OBSERVE_') === 0) {
     AudioManager.play('message_sent');
-    var obsLabel = text.indexOf('__OBSERVE_NPC__') === 0 ? '盯住 ' + (text.split(':')[1] || '') :
-      text.indexOf('__OBSERVE_LOCATION__') === 0 ? '守点观察 ' + (text.split(':')[1] || '') :
-      '观察当前场景';
-    appendMsg('player', obsLabel, logEl);
+    var obsLabel = text.indexOf('__OBSERVE_NPC__') === 0 ? '盯住 ' + (text.split(':')[1] || '') : text.indexOf('__OBSERVE_LOCATION__') === 0 ? '守点观察 ' + (text.split(':')[1] || '') : '观察当前场景';
+    eventFeed.appendMessage('player', obsLabel);
     await handleObserveAction(text);
     return;
   }
 
-  appendMsg('player', text, inDialogue ? dialogueLog : logEl);
+  if (dialogueFocusSheet.isActive()) {
+    dialogueFocusSheet.appendMsg('player', text);
+  } else {
+    eventFeed.appendMessage('player', text);
+  }
   AudioManager.play('message_sent');
 
-  if (inDialogue) {
+  if (state.mode === 'dialogue') {
     if (/结束|离开|不聊了/.test(text)) { endDialogue(); return; }
     let llmReply = '';
-    if (llmEnabled && llmMode) {
-      const llmRes = await api('/llm/npc-reply', { npc_id: state.active_npc, player_text: text, state });
-      if (llmRes?.reply) llmReply = llmRes.reply;
-    }
+    if (llmEnabled && llmMode) { const llmRes = await api('/llm/npc-reply', { npc_id: state.active_npc, player_text: text, state }); if (llmRes?.reply) llmReply = llmRes.reply; }
     const res = await api('/dialogue/message', { npc_id: state.active_npc, player_text: text, state, llm_reply: llmReply });
     handleResponse(res, true);
   } else {
@@ -553,65 +224,48 @@ async function submitInput() {
   }
 }
 
+var _pendingAction = null;
+
 async function handleObserveAction(template) {
   var params = { type: 'scene' };
-  if (template.indexOf('__OBSERVE_NPC__:') === 0) {
-    params.type = 'npc';
-    params.npc_id = template.split(':')[1] || '';
-  } else if (template.indexOf('__OBSERVE_LOCATION__:') === 0) {
-    params.type = 'location';
-    params.location = template.split(':')[1] || '';
-  }
+  if (template.indexOf('__OBSERVE_NPC__:') === 0) { params.type = 'npc'; params.npc_id = template.split(':')[1] || ''; }
+  else if (template.indexOf('__OBSERVE_LOCATION__:') === 0) { params.type = 'location'; params.location = template.split(':')[1] || ''; }
   var res = await api('/action/observe', { type: params.type, npc_id: params.npc_id, location: params.location, state: state });
-  if (!res) {
-    appendMsg('system', '观察失败，请稍后重试。如果持续失败请刷新页面。', logEl);
-    return;
-  }
-  handleObserveResponse(res);
+  if (!res) { eventFeed.appendMessage('system', '观察失败，请稍后重试。'); return; }
+  handleObserveResponse(res, template);
 }
 
-function handleObserveResponse(res) {
+function handleObserveResponse(res, template) {
   if (!res) return;
+  var prevStateForCard = state ? clone(state) : null;
+  var prevState = prevAudioState ? clone(prevAudioState) : null;
   if (res.state) {
-    var prevState = prevAudioState || null;
-    state = res.state;
-    saveState();
-    if (prevState) {
-      var events = deriveAudioEvents(prevState, state, res);
-      if (events.length) AudioManager.dispatchAll(events);
-    }
-    prevAudioState = clone(state);
+    if (prevState) { var events = deriveAudioEvents(prevState, res.state, res); if (events.length) AudioManager.dispatchAll(events); }
+    state = res.state; saveState(); prevAudioState = clone(state);
   }
   if (res.suggestions !== undefined) state._suggestions = res.suggestions;
-  if (res.goal !== undefined) {
-    state._goalData = res.goal;
-    state._goal = res.goal;
+  if (res.goal !== undefined) { state._goalData = res.goal; state._goal = res.goal; }
+
+  // Build and append ActionResultCard
+  var card = buildActionResultCard(res, prevStateForCard, 'observe', '观察结果');
+  eventFeed.appendCard(card);
+
+  if (res.observation_result) {
+    if (res.observation_result.nothing_found) toast('没有发现异常');
+    if (res.observation_result.discovered && res.observation_result.discovered.length > 0) {
+      var firstTitle = clueName(res.observation_result.discovered[0].entry.public_clue_id) || clueName(res.observation_result.discovered[0].entry.source_id) || '';
+      toast(firstTitle ? '发现: ' + firstTitle : '注意到了一些细节');
+    }
+    if (res.observation_result.conflict_detected) toast('⚠ 发现线索矛盾');
   }
-  var obsResult = res.observation_result;
-  if (obsResult) {
-    if (obsResult.nothing_found) {
-      appendMsg('system', '你仔细观察周围，没有发现异常。', logEl);
-      toast('没有发现异常');
-    }
-    if (obsResult.discovered && obsResult.discovered.length > 0) {
-      for (var i = 0; i < obsResult.discovered.length; i++) {
-        var d = obsResult.discovered[i];
-        var title = clueName(d.entry.public_clue_id) || clueName(d.entry.source_id) || '';
-        var text = '你注意到：' + (title || '新线索');
-        if (d.entry.description) text += ' — ' + d.entry.description;
-        appendHtml('system', '<div class="lt-observation-result">' + esc(text) + '</div>', logEl);
-      }
-      var firstTitle = clueName(obsResult.discovered[0].entry.public_clue_id) || clueName(obsResult.discovered[0].entry.source_id) || '';
-      var toastText = firstTitle ? '发现: ' + firstTitle : '注意到了一些细节';
-      if (obsResult.discovered.length > 1) toastText += ' 等' + obsResult.discovered.length + '项';
-      toast(toastText);
-    }
-    if (obsResult.conflict_detected) {
-      appendHtml('system', '<div class="lt-observation-conflict">⚠ 这与你已知的某条线索存在矛盾</div>', logEl);
-      toast('⚠ 发现线索矛盾');
-    }
+
+  // Start FocusWatch if observe NPC
+  if (template && template.indexOf('__OBSERVE_NPC__:') === 0) {
+    var npcId = template.split(':')[1];
+    if (npcId) focusWatchBar.startWatch('npc', npcId);
   }
-  render();
+
+  gameShell.setState(state);
 }
 
 async function endDialogue() {
@@ -626,36 +280,46 @@ async function failLoop() {
 
 async function nextLoop() {
   const res = await api('/loop/next', { state, loop_failure_outcome: lastFailure });
-  ngLayer.classList.remove('lt-show');
+  var ng = document.getElementById('overlay-ng'); if (ng) ng.classList.remove('lt-show');
   lastFailure = null;
   if (res?.state) state = res.state;
-  appendMsg('system', res?.opening || '你回到了 14:00。', logEl);
-  dialogueLog.innerHTML = '';
+  if (res?.opening) eventFeed.appendMessage('system', res.opening);
+  else eventFeed.appendMessage('system', '你回到了 14:00。');
+  focusWatchBar.stopWatch();
   toast(APP_STRINGS.nextLoopToast || '进入下一轮');
-  render();
-  setTimeout(function () { showXuWelcome(state.loop); }, 1000);
+  gameShell.setState(state);
+  setTimeout(function() { showXuWelcome(state.loop); }, 1000);
 }
 
 async function resetGame() {
   PortraitIntro.reset();
   lastFailure = null;
-  var legacyKeys = detectLegacyKeys();
-  if (legacyKeys.length) archiveLegacyData(legacyKeys);
-  clearLtKeys();
-  initNewSave();
+  var legacyKeys = detectLegacyKeys(); if (legacyKeys.length) archiveLegacyData(legacyKeys);
+  clearLtKeys(); initNewSave();
   state.flags.intro_seen = false;
-  logEl.innerHTML = '';
-  dialogueLog.innerHTML = '';
-  ngLayer.classList.remove('lt-show');
-  if (portraitLayer) portraitLayer.classList.remove('lt-show');
-  dialoguePanel.classList.remove('lt-show');
-  logDrawer.classList.remove('lt-show');
-  latestMsg.classList.remove('lt-show');
-  document.activeElement && document.activeElement.blur();
-  inputEl.value = '';
-  autoSizeInput();
-  appendMsg('system', APP_STRINGS.resetToast || '已重置试玩版。开场背景将重新显示。', logEl);
-  render();
+  eventFeed.clear(); dialogueFocusSheet.close();
+  var ng = document.getElementById('overlay-ng'); if (ng) ng.classList.remove('lt-show');
+  focusWatchBar.stopWatch();
+  inputEl.value = ''; autoSizeInput();
+  eventFeed.appendMessage('system', APP_STRINGS.resetToast || '已重置试玩版。');
+  gameShell.setState(state);
+}
+
+async function resetLoop() {
+  PortraitIntro.reset();
+  const res = await api('/session/init', { state: clone(START_STATE) });
+  if (res?.state) {
+    res.state.flags.intro_seen = true;
+    res.state._goal = res.goal || '';
+    res.state._suggestions = res.suggestions || [];
+    state = res.state;
+    eventFeed.clear(); dialogueFocusSheet.close();
+    var ng = document.getElementById('overlay-ng'); if (ng) ng.classList.remove('lt-show');
+    focusWatchBar.stopWatch();
+    inputEl.value = ''; autoSizeInput();
+    eventFeed.appendMessage('system', '本轮已重置。');
+    gameShell.setState(state);
+  }
 }
 
 async function startDialogue(npcId) {
@@ -664,415 +328,77 @@ async function startDialogue(npcId) {
   if (npc) {
     var portraitSrc = ASSET_BASE + (npc.portrait || 'xiaoning_portrait.png');
     if (PortraitIntro.shouldPlay(npcId, loop)) {
-      try {
-        await PortraitIntro.play({ src: portraitSrc, alt: npc.name || npcId });
-      } catch (_) {
-        // Clean up orphaned portrait overlay if animation failed
-        document.querySelectorAll('div[style*="z-index:9999"]').forEach(function(el) { el.remove(); });
-      }
+      try { await PortraitIntro.play({ src: portraitSrc, alt: npc.name || npcId }); } catch (_) { document.querySelectorAll('div[style*="z-index:9999"]').forEach(function(el) { el.remove(); }); }
       PortraitIntro.markPlayed(npcId, loop);
-    } else {
-      PortraitIntro.setImage({ src: portraitSrc, alt: npc.name || npcId });
-    }
+    } else { PortraitIntro.setImage({ src: portraitSrc, alt: npc.name || npcId }); }
   }
   const res = await api('/dialogue/start', { state, npc_id: npcId });
+  // Open DialogueFocusSheet
+  dialogueFocusSheet.open(npcId);
+  focusWatchBar.setPaused(true);
   handleResponse(res, true);
 }
 
 function handleResponse(res, inDialogue) {
   if (!res) return;
+  var prevStateForCard = state ? clone(state) : null;
+  var prevState = prevAudioState ? clone(prevAudioState) : null;
   if (res.state) {
-    const prevState = prevAudioState || null;
-    state = res.state;
-    saveState();
-    if (prevState) {
-      const events = deriveAudioEvents(prevState, state, res);
-      if (events.length) AudioManager.dispatchAll(events);
-    }
+    state = res.state; saveState();
+    if (prevState) { var events = deriveAudioEvents(prevState, state, res); if (events.length) AudioManager.dispatchAll(events); }
     prevAudioState = clone(state);
   }
   if (res.suggestions !== undefined) state._suggestions = res.suggestions;
   if (res.goal !== undefined) {
-    const prevTitle = state._goalData && state._goalData.goals && state._goalData.goals.length
-      ? state._goalData.goals[0].title : '';
-    state._goalData = res.goal;
-    state._goal = res.goal;
-    const newTitle = state._goalData && state._goalData.goals && state._goalData.goals.length
-      ? state._goalData.goals[0].title : '';
-    if (prevTitle && newTitle && prevTitle !== newTitle) {
-      showGoalFeedback(prevTitle, newTitle, '🧠 该信息已加入下一轮记忆');
-    }
+    var prevTitle = state._goalData && state._goalData.goals && state._goalData.goals.length ? state._goalData.goals[0].title : '';
+    state._goalData = res.goal; state._goal = res.goal;
+    var newTitle = state._goalData && state._goalData.goals && state._goalData.goals.length ? state._goalData.goals[0].title : '';
+    if (prevTitle && newTitle && prevTitle !== newTitle) showGoalFeedback(prevTitle, newTitle, '🧠 该信息已加入下一轮记忆');
   }
+
+  // Messages to dialogue or event feed
   if (res.messages) {
-    const target = inDialogue || state.mode === 'dialogue' ? dialogueLog : logEl;
     for (const m of res.messages) {
-      if (m.type === 'outcome' && m.html) appendHtml('outcome', m.html, logEl);
-      else appendMsg(m.type || 'system', m.text || '', target);
+      if (m.type === 'npc' && dialogueFocusSheet.isActive()) dialogueFocusSheet.appendMsg('npc', m.text || '');
+      else if (m.type === 'outcome' && m.html) eventFeed.appendHtml('outcome', m.html);
+      else eventFeed.appendMessage(m.type || 'system', m.text || '');
     }
   }
+
+  // Dialogue outcome → summary card
   if (res.dialogue_outcome) {
-    if (res.dialogue_outcome.clues_gained && res.dialogue_outcome.clues_gained.length) {
-      showClueBadge(res.dialogue_outcome.clues_gained.length);
-    }
-    renderDialogueOutcome(res.dialogue_outcome);
+    if (res.dialogue_outcome.clues_gained && res.dialogue_outcome.clues_gained.length) showClueBadge(res.dialogue_outcome.clues_gained.length);
+    var card = buildActionResultCard(res, prevStateForCard, 'dialogue', '对话摘要：' + npcName(res.dialogue_outcome.npc_id || state.active_npc));
+    eventFeed.appendCard(card);
+    dialogueFocusSheet.close();
+    focusWatchBar.setPaused(false);
   }
+
+  // Failure outcome
   if (res.loop_failure_outcome) renderFailureOutcome(res.loop_failure_outcome);
   if (res.trial_success) toast(APP_STRINGS.trialSuccessToast || '试玩版成功');
-  if (res.memory_node) {
-    appendMsg('system', '💭 触发隐藏记忆：' + (res.memory_node.title || ''), dialogueLog);
-    showMemoryPortrait(res.memory_node);
-  }
-  render();
-}
+  if (res.memory_node) { eventFeed.appendMessage('system', '💭 触发隐藏记忆：' + (res.memory_node.title || '')); }
 
-function showMemoryPortrait(node) {
-  if (!node.portrait) return;
-  PortraitIntro.setImage({ src: ASSET_BASE + node.portrait, alt: node.name || '' });
-  var dockImg = document.querySelector('.lt-portrait-dock img');
-  if (!dockImg) return;
-  dockImg.style.filter = 'sepia(.3) saturate(.8) brightness(1.15)';
-  dockImg.style.opacity = '0';
-  requestAnimationFrame(function () {
-    dockImg.style.transition = 'opacity .5s ease';
-    dockImg.style.opacity = '1';
-  });
-  setTimeout(function () {
-    dockImg.style.opacity = '0';
-    setTimeout(function () {
-      dockImg.style.filter = '';
-      dockImg.style.transition = '';
-      dockImg.style.opacity = '';
-    }, 500);
-  }, 2000);
-}
-
-function renderDialogueOutcome(out) {
-  const clues = (out.clues_gained || []).map(x => {
-    const c = x.source ? x : {};
-    return '<li><strong>' + esc(c.title || clueName(x.id)) + '</strong><br><span class="lt-muted">来源：' + esc(c.source || '未知') + '｜可信度：' + esc(c.confidence || 'unknown') + '</span></li>';
-  }).join('') || '<li>' + (APP_STRINGS.noNewClues || '没有获得新线索') + '</li>';
-  const events = (out.world_events || []).map(x => '<li>' + esc(x) + '</li>').join('') || '<li>' + (APP_STRINGS.noWorldEvents || '世界仍在继续推进') + '</li>';
-  const actions = (out.unlocked_actions || []).slice(0, 3).map(x => '<li>' + esc(x.label || '') + '</li>').join('') || '<li>继续观察车厢</li>';
-  const turnLine = out.turn_limit ? '｜对话 ' + (out.turns_used || 0) + '/' + out.turn_limit + ' 轮' : '';
-  appendHtml('outcome', '<div class="lt-msg-title">对话结算：' + esc(out.npc_name || npcName(out.npc_id)) + '</div><div>AP -' + (out.ap_cost || 0) + '｜' + esc(out.time_advance?.from || '') + ' → ' + esc(out.time_advance?.to || '') + turnLine + '</div><div class="lt-subtitle">获得线索</div><ul>' + clues + '</ul><div class="lt-subtitle">世界推进</div><ul>' + events + '</ul><div class="lt-subtitle">下一步可行动</div><ul>' + actions + '</ul>', logEl);
-  dialogueLog.innerHTML = '';
+  gameShell.setState(state);
 }
 
 function renderFailureOutcome(out) {
   lastFailure = out;
-  const facts = (out.confirmed_facts || []).map(x => '<li>' + esc(x.text) + '</li>').join('') || '<li>没有确认事实</li>';
-  const sus = (out.suspicions || []).map(x => '<li>' + esc(x.text) + '</li>').join('');
-  const sug = (out.next_loop_suggestions || []).map(x => '<li>' + esc(x.label) + '</li>').join('') || '<li>重新规划路线</li>';
-  ngBg.style.backgroundImage = 'url(' + ASSET_BASE + 'train_explosion_landscape_concept.png)';
-  ngCard.innerHTML = '<div class="lt-ng-title">循环失败</div><div>' + esc(out.failure_reason || '你没能阻止爆炸。') + '</div><div class="lt-subtitle">带入下一轮的记忆</div><ul>' + facts + '</ul>' + (sus ? '<div class="lt-subtitle">疑点</div><ul>' + sus + '</ul>' : '') + '<div class="lt-subtitle">下一轮建议</div><ul>' + sug + '</ul><button class="lt-btn lt-next" id="btn-next-loop">进入第 ' + (Number(out.loop || state.loop) + 1) + ' 轮</button>';
-  ngLayer.classList.add('lt-show');
+  var ng = document.getElementById('overlay-ng');
+  if (!ng) return;
+  var ngBg = ng.querySelector('.lt-ng-bg');
+  var ngCard = ng.querySelector('.lt-ng-card');
+  if (ngBg) ngBg.style.backgroundImage = 'url(' + ASSET_BASE + 'train_explosion_landscape_concept.png)';
+  var facts = (out.confirmed_facts || []).map(function(x) { return '<li>' + esc(x.text) + '</li>'; }).join('') || '<li>没有确认事实</li>';
+  var sus = (out.suspicions || []).map(function(x) { return '<li>' + esc(x.text) + '</li>'; }).join('');
+  var sug = (out.next_loop_suggestions || []).map(function(x) { return '<li>' + esc(x.label) + '</li>'; }).join('') || '<li>重新规划路线</li>';
+  if (ngCard) ngCard.innerHTML = '<div class="lt-ng-title">循环失败</div><div>' + esc(out.failure_reason || '你没能阻止爆炸。') + '</div><div class="lt-subtitle">带入下一轮的记忆</div><ul>' + facts + '</ul>' + (sus ? '<div class="lt-subtitle">疑点</div><ul>' + sus + '</ul>' : '') + '<div class="lt-subtitle">下一轮建议</div><ul>' + sug + '</ul><button class="lt-btn lt-next" id="btn-next-loop">进入第 ' + (Number(out.loop || state.loop) + 1) + ' 轮</button>';
+  ng.classList.add('lt-show');
 }
 
-// ── UI helpers ──
-function appendMsg(type, text, target) {
-  const div = document.createElement('div');
-  div.className = 'lt-msg lt-msg-' + type;
-  div.textContent = text;
-  target.appendChild(div);
-  scrollBottom(target);
-}
-
-function appendHtml(type, html, target) {
-  const div = document.createElement('div');
-  div.className = 'lt-msg lt-msg-' + type;
-  div.innerHTML = html;
-  target.appendChild(div);
-  scrollBottom(target);
-}
-
-function scrollBottom(target) {
-  requestAnimationFrame(() => {
-    if (target) { target.scrollTop = target.scrollHeight; }
-  });
-}
-
-function toast(text) {
-  const t = document.createElement('div');
-  t.className = 'lt-toast';
-  t.textContent = text;
-  phone.appendChild(t);
-  setTimeout(() => t.remove(), 2200);
-}
-
-function showClueBadge(count) {
-  const badge = document.createElement('div');
-  badge.className = 'lt-clue-badge';
-  badge.textContent = '🧩 线索 +' + count;
-  phone.appendChild(badge);
-  setTimeout(function () { badge.remove(); }, 3000);
-}
-
-function autoSizeInput() {
-  inputEl.style.height = 'auto';
-  inputEl.style.height = Math.min(96, inputEl.scrollHeight) + 'px';
-}
-
-// ── Engine helpers ──
-function clueName(id) { return (npcCache?.clue_titles || {})[id] || id; }
-function npcName(id) { return NPC_INFO[id]?.name || id; }
-function sceneName(id) { return SCENES[id]?.name || id; }
-
-// ── Persistence (v0.8 save system) ──
-function saveState() {
-  try {
-    localStorage.setItem(LT_SAVE_RUNTIME_KEY, JSON.stringify(state));
-  } catch (_) {}
-  saveSaveMeta();
-}
-
-function saveSaveMeta() {
-  try {
-    var now = new Date().toISOString();
-    var existing = loadSaveMeta();
-    var meta = {
-      appId: 'looptrain',
-      saveSchemaVersion: LT_SAVE_SCHEMA_VERSION,
-      runtimeVersion: LT_RUNTIME_VERSION,
-      storyVersion: LT_STORY_VERSION,
-      createdAt: (existing && existing.createdAt) || now,
-      updatedAt: now,
-    };
-    localStorage.setItem(LT_SAVE_META_KEY, JSON.stringify(meta));
-  } catch (_) {}
-}
-
-function loadSaveMeta() {
-  try {
-    var raw = localStorage.getItem(LT_SAVE_META_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (_) { return null; }
-}
-
-function loadState() {
-  try {
-    var raw = localStorage.getItem(LT_SAVE_RUNTIME_KEY);
-    if (raw) state = JSON.parse(raw);
-  } catch (_) {}
-  if (!state) { state = clone(START_STATE); return; }
-  if (state.mode === 'dialogue') { state.mode = 'explore'; state.active_npc = null; }
-  if (!state._goalData && state._goal) state._goalData = state._goal;
-  if (!state._goal && state._goalData) state._goal = state._goalData;
-}
-
-// ── Legacy detection & cleanup (v0.8 save system) ──
-function detectLegacyKeys() {
-  var legacy = [];
-  try {
-    for (var i = 0; i < localStorage.length; i++) {
-      var key = localStorage.key(i);
-      if (key === 'looptrain.standalone.v1') {
-        if (!localStorage.getItem(LT_SAVE_META_KEY)) {
-          legacy.push(key);
-        }
-      }
-    }
-  } catch (_) {}
-  return legacy;
-}
-
-function archiveLegacyData(legacyKeys) {
-  var ts = Date.now();
-  legacyKeys.forEach(function (key) {
-    try {
-      var raw = localStorage.getItem(key);
-      if (raw) {
-        localStorage.setItem('lt:legacy:' + ts, raw);
-      }
-      localStorage.removeItem(key);
-    } catch (e) {
-      console.warn('[LT] Failed to archive legacy key:', key, e);
-    }
-  });
-}
-
-function clearLtKeys() {
-  try {
-    var toRemove = [];
-    for (var i = 0; i < localStorage.length; i++) {
-      var key = localStorage.key(i);
-      if (key.indexOf(LT_KEY_PREFIX) === 0 &&
-          key.indexOf('lt:legacy:') !== 0 &&
-          key !== LT_SETTINGS_KEY) {
-        toRemove.push(key);
-      }
-    }
-    toRemove.forEach(function (key) { localStorage.removeItem(key); });
-  } catch (_) {}
-}
-
-function clearOldIndexedDBs() {
-  if (!window.indexedDB || !window.indexedDB.deleteDatabase) return;
-  var OLD_DBS = ['LoopTrainDB', 'LoopTrainRuntimeDB', 'LoopTrainMemoryDB'];
-  OLD_DBS.forEach(function (dbName) {
-    try {
-      var req = window.indexedDB.deleteDatabase(dbName);
-      req.onsuccess = function () { console.info('[LT] Deleted old IndexedDB:', dbName); };
-      req.onerror = function () { console.warn('[LT] Failed to delete old IndexedDB:', dbName); };
-      req.onblocked = function () { console.warn('[LT] IndexedDB deletion blocked:', dbName); };
-    } catch (e) {
-      console.warn('[LT] IndexedDB deleteDatabase threw:', dbName, e);
-    }
-  });
-}
-
-function initNewSave() {
-  state = clone(START_STATE);
-  state.flags.intro_seen = false;
-  saveState();
-  prevAudioState = null;
-}
-
-// ── Reset modal ──
-function showResetModal(reason) {
-  var overlay = document.getElementById('lt-reset-modal');
-  if (!overlay) return;
-  var bodyEl = overlay.querySelector('.lt-reset-body');
-  if (bodyEl) {
-    if (reason === 'legacy') {
-      bodyEl.textContent = '《寒灯初醒》试玩是一次全面重构，剧情、人物和游戏系统都已更新。旧存档无法兼容，需要重新开始。\n\n你的旧进度已保留在浏览器中，不会丢失（开发侧留档）。';
-    } else {
-      bodyEl.textContent = '检测到旧版本存档（剧情版本不匹配）。新版试玩已重构，需要重新开始。\n\n你的旧进度已保留在浏览器中，不会丢失。';
-    }
-  }
-  overlay.style.display = 'flex';
-  introLayer.classList.remove('lt-show');
-  contentEl.style.display = 'none';
-  bottomEl.style.display = 'none';
-}
-
-function hideResetModal() {
-  var overlay = document.getElementById('lt-reset-modal');
-  if (overlay) overlay.style.display = 'none';
-}
-
-function migrateAudioSettings() {
-  try {
-    var oldMuted = localStorage.getItem('looptrain.audio.muted');
-    if (oldMuted === 'true' || oldMuted === 'false') {
-      var settings = { muted: oldMuted === 'true' };
-      localStorage.setItem(LT_SETTINGS_KEY, JSON.stringify(settings));
-    }
-  } catch (_) {}
-}
-
-function handleReset() {
-  var legacyKeys = detectLegacyKeys();
-  if (legacyKeys.length) archiveLegacyData(legacyKeys);
-  clearLtKeys();
-  initNewSave();
-  try {
-    var oldMuted = localStorage.getItem('looptrain.audio.muted');
-    if (oldMuted === 'true' || oldMuted === 'false') {
-      AudioManager.setMuted(oldMuted === 'true');
-    }
-  } catch (_) {}
-  hideResetModal();
-  introLayer.classList.add('lt-show');
-  state.flags.intro_seen = false;
-  contentEl.style.display = 'none';
-  bottomEl.style.display = 'none';
-  logEl.innerHTML = '';
-  dialogueLog.innerHTML = '';
-  ngLayer.classList.remove('lt-show');
-  if (portraitLayer) portraitLayer.classList.remove('lt-show');
-  dialoguePanel.classList.remove('lt-show');
-  latestMsg.classList.remove('lt-show');
-  inputEl.value = '';
-  autoSizeInput();
-  render();
-}
-
-window.LT_RESET = function () {
-  var legacyKeys = detectLegacyKeys();
-  if (legacyKeys.length) archiveLegacyData(legacyKeys);
-  clearLtKeys();
-  location.reload();
-};
-
-// ── Audio event mapping ──
-function knownCluesIncreased(prev, next) { return (next.known_clues?.length || 0) > (prev.known_clues?.length || 0); }
-function crossedLowApThreshold(prev, next) { return (prev.ap_remaining > 3 && next.ap_remaining <= 3); }
-function recoveredFromLowAp(prev, next) { return (prev.ap_remaining <= 3 && next.ap_remaining > 3); }
-function deriveAudioEvents(prevState, nextState, res) {
-  const events = [];
-  if (knownCluesIncreased(prevState, nextState)) events.push({ action: 'play', id: 'clue_found' });
-  if (crossedLowApThreshold(prevState, nextState)) events.push({ action: 'fadeIn', id: 'faint_ticking_loop' });
-  if (recoveredFromLowAp(prevState, nextState)) events.push({ action: 'fadeOut', id: 'faint_ticking_loop' });
-  if (res.loop_failure_outcome) {
-    events.push({ action: 'fadeOut', id: 'faint_ticking_loop' });
-    events.push({ action: 'play', id: 'explosion_muffled' });
-  }
-  if (res.trial_success) events.push({ action: 'fadeOut', id: 'faint_ticking_loop' });
-  return events;
-}
-
-// ── Intro rendering ──
-function renderIntro(data) {
-  if (!data) return;
-  INTRO_DATA = data;
-  const kickerEl = document.querySelector('.lt-intro-kicker');
-  const titleEl = document.querySelector('.lt-intro-title');
-  const stepsEl = document.querySelector('.lt-intro-steps');
-  const memoryEl = document.querySelector('.lt-intro-memory');
-  const btnEl = document.getElementById('intro-start-btn');
-  const skipEl = document.querySelector('.lt-intro-skip');
-
-  if (kickerEl) kickerEl.textContent = data.kicker || '';
-  if (titleEl) titleEl.textContent = data.title || '';
-  if (stepsEl && Array.isArray(data.steps)) {
-    stepsEl.innerHTML = data.steps.map(function(s) {
-      return '<div><strong>' + esc(s.role) + '</strong><span>' + esc(s.text) + '</span></div>';
-    }).join('');
-  }
-  if (memoryEl) memoryEl.textContent = data.memory || '';
-  if (btnEl) btnEl.textContent = data.buttonLabel || '进入二号车厢';
-  if (skipEl) skipEl.textContent = data.skipLabel || '点击任意位置跳过';
-}
-
-// ── Content boot ──
-async function bootContent() {
-  try {
-    // Load game data
-    const [scenesRes, npcsRes, sessionRes] = await Promise.all([
-      api('/scenes'), api('/npcs'), api('/session/init', {}),
-    ]);
-    if (scenesRes?.scenes) SCENES = scenesRes.scenes;
-    if (npcsRes) { if (npcsRes.npc_info) NPC_INFO = npcsRes.npc_info; npcCache = npcsRes; }
-    if (sessionRes?.state) {
-      START_STATE = clone(sessionRes.state);
-      START_STATE._goal = sessionRes.goal || '';
-      START_STATE._goalData = sessionRes.goal || '';
-      START_STATE._suggestions = sessionRes.suggestions || [];
-    }
-    // Load content strings
-    const [introRes, stringsRes, configRes, commandsRes] = await Promise.all([
-      api('/intro'), api('/app-strings'), api('/config'), api('/commands'),
-    ]);
-    if (introRes) renderIntro(introRes);
-    if (stringsRes) APP_STRINGS = stringsRes;
-    if (configRes?.llm_enabled) llmEnabled = true;
-    if (commandsRes?.commands) COMMANDS = commandsRes.commands;
-    // Xu Zhiwei dialogue (non-blocking)
-    api('/xu-dialogue').then(function(d) { if (d) XU_DIALOGUES = d; }).catch(function() {});
-  } catch (_) {}
-}
-
-// ── Utilities ──
-function esc(s) {
-  const div = document.createElement('div');
-  div.textContent = String(s || '');
-  return div.innerHTML;
-}
-
+// ── Xu Zhiwei welcome ──
 async function showXuWelcome(loop) {
-  // Guard: do not interrupt an active dialogue with another NPC
   if (state.mode === 'dialogue') return;
-
   var text = '';
   if (XU_DIALOGUES && XU_DIALOGUES.templates) {
     var tpl;
@@ -1082,208 +408,223 @@ async function showXuWelcome(loop) {
     if (tpl) text = tpl.text;
   }
   if (!text) text = '我是许知微。有什么需要帮助的吗？';
-
-  // Play portrait intro animation (once per loop, matching startDialogue pattern)
-  var xuKey = 'xu_zhiwei';
-  if (PortraitIntro.shouldPlay(xuKey, loop)) {
-    var dock = document.querySelector('.lt-portrait-dock');
-    try {
-      if (dock) dock.style.display = 'block';
-      await PortraitIntro.play({
-        src: ASSET_BASE + 'xu_zhiwei_portrait.png',
-        alt: '许知微',
-        holdMs: 400,
-        durationMs: 700,
-      });
-      PortraitIntro.markPlayed(xuKey, loop);
-    } catch (_) {} finally {
-      if (dock) dock.style.display = '';
-      var layers = document.querySelectorAll('div[style*="z-index:9999"]');
-      for (var i = 0; i < layers.length; i++) layers[i].remove();
-    }
-  }
-
-  appendHtml('system', '<div class="lt-msg-title">许知微</div><div>' + esc(text) + '</div>', contentEl);
-  scrollBottom(contentEl);
+  eventFeed.appendHtml('system', '<div class="lt-msg-title">许知微</div><div>' + esc(text) + '</div>');
 }
 
-// ── Event bindings ──
+// ── Intro rendering ──
+function renderIntro(data) {
+  if (!data) return;
+  INTRO_DATA = data;
+  var kickerEl = document.querySelector('.lt-intro-kicker');
+  var titleEl = document.querySelector('.lt-intro-title');
+  var stepsEl = document.querySelector('.lt-intro-steps');
+  var memoryEl = document.querySelector('.lt-intro-memory');
+  var btnEl = document.getElementById('intro-start-btn');
+  var skipEl = document.querySelector('.lt-intro-skip');
+  if (kickerEl) kickerEl.textContent = data.kicker || '';
+  if (titleEl) titleEl.textContent = data.title || '';
+  if (stepsEl && Array.isArray(data.steps)) stepsEl.innerHTML = data.steps.map(function(s) { return '<div><strong>' + esc(s.role) + '</strong><span>' + esc(s.text) + '</span></div>'; }).join('');
+  if (memoryEl) memoryEl.textContent = data.memory || '';
+  if (btnEl) btnEl.textContent = data.buttonLabel || '进入游戏';
+  if (skipEl) skipEl.textContent = data.skipLabel || '点击任意位置跳过';
+}
+
+// ── Content boot ──
+async function bootContent() {
+  try {
+    const [scenesRes, npcsRes, sessionRes] = await Promise.all([api('/scenes'), api('/npcs'), api('/session/init', {})]);
+    if (scenesRes?.scenes) SCENES = scenesRes.scenes;
+    if (npcsRes) { if (npcsRes.npc_info) NPC_INFO = npcsRes.npc_info; npcCache = npcsRes; }
+    if (sessionRes?.state) { START_STATE = clone(sessionRes.state); START_STATE._goal = sessionRes.goal || ''; START_STATE._goalData = sessionRes.goal || ''; START_STATE._suggestions = sessionRes.suggestions || []; }
+    const [introRes, stringsRes, configRes, commandsRes] = await Promise.all([api('/intro'), api('/app-strings'), api('/config'), api('/commands')]);
+    if (introRes) renderIntro(introRes);
+    if (stringsRes) APP_STRINGS = stringsRes;
+    if (configRes?.llm_enabled) llmEnabled = true;
+    if (commandsRes?.commands) COMMANDS = commandsRes.commands;
+    api('/xu-dialogue').then(function(d) { if (d) XU_DIALOGUES = d; }).catch(function() {});
+  } catch (_) {}
+}
+
+// ── Init ──
 async function init() {
   await bootContent();
   await AudioManager.init();
-
-  // ── Audio settings migration ──
   migrateAudioSettings();
 
-  // ── Save bootstrap: version detection ──
+  // ── DOM refs ──
+  phone = $('.lt-phone');
+  inputEl = $('.lt-input');
+
+  // ── Initialize GameShell + Components ──
+  gameShell = new GameShell();
+  statusBar = gameShell.register(new StatusBar(document.getElementById('region-status-bar')));
+  timelineMiniBar = gameShell.register(new TimelineMiniBar(document.getElementById('region-timeline-mini')));
+  objectiveCard = gameShell.register(new ObjectiveCard(document.getElementById('region-objective')));
+  sceneStateCard = gameShell.register(new SceneStateCard(document.getElementById('region-scene'), { scenes: SCENES, npcInfo: NPC_INFO, clueName: clueName }));
+  eventFeed = gameShell.register(new EventFeed(document.getElementById('region-event-feed')));
+  actionDock = gameShell.register(new ActionDock(document.getElementById('region-action-dock'), { getScenes: function() { return SCENES; }, getNpcInfo: function() { return NPC_INFO; } }));
+  moreActionsSheet = gameShell.register(new MoreActionsSheet(document.getElementById('overlay-more-actions')));
+  focusWatchBar = gameShell.register(new FocusWatchBar(document.getElementById('region-focus-watch'), {
+    npcName: npcName,
+    onNewEntry: function(entry) {
+      var card = { id: 'watch-' + entry.id, actionType: 'timeline', title: '持续观察', time: entry.time || '', cost: { ap: 0, minutes: 0 }, narrative: entry.description || entry.source_label || '观察到新动态', timelineEvents: [{ entryId: entry.id, time: entry.time, actor: entry.actor, action: entry.action, source_type: entry.source_type, contradicts: entry.contradicts || [] }] };
+      eventFeed.appendCard(card);
+    }
+  }));
+  archiveSheet = gameShell.register(new ArchiveSheet(document.getElementById('overlay-archive'), { getState: function() { return state; }, npcCache: npcCache, npcInfo: NPC_INFO, clueName: clueName }));
+  dialogueFocusSheet = gameShell.register(new DialogueFocusSheet(document.getElementById('overlay-dialogue-focus'), { npcInfo: NPC_INFO, getState: function() { return state; }, assetBase: ASSET_BASE, npcName: npcName }));
+  commandInput = gameShell.register(new CommandInput(document.getElementById('region-bottom'), { npcName: npcName }));
+
+  // ── Save bootstrap ──
   var urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('reset') === '1') {
-    // AC-5: ?reset=1 → force reset → clean URL
     handleReset();
-    if (window.history && window.history.replaceState) {
-      var cleanUrl = window.location.pathname;
-      window.history.replaceState(null, '', cleanUrl);
-    }
+    if (window.history && window.history.replaceState) window.history.replaceState(null, '', window.location.pathname);
   } else {
     var meta = loadSaveMeta();
     var legacyKeys = detectLegacyKeys();
-
-    if (legacyKeys.length > 0) {
-      // AC-2: legacy key exists without new meta → show reset modal
-      showResetModal('legacy');
-    } else if (meta) {
-      // AC-3: version incompatibility detection
-      if (meta.storyVersion !== LT_STORY_VERSION ||
-          meta.saveSchemaVersion < LT_MIN_COMPATIBLE_SCHEMA_VERSION) {
-        showResetModal('incompatible');
-      } else {
-        // AC-4: compatible save → normal restore
-        loadState();
-        render();
-      }
-    } else {
-      // AC-1: new player → create fresh save
-      initNewSave();
-      render();
-    }
+    if (legacyKeys.length > 0) { showResetModal('legacy'); }
+    else if (meta) {
+      if (meta.storyVersion !== LT_STORY_VERSION || meta.saveSchemaVersion < LT_MIN_COMPATIBLE_SCHEMA_VERSION) showResetModal('incompatible');
+      else { loadState(); gameShell.setState(state); }
+    } else { initNewSave(); gameShell.setState(state); }
   }
-
-  // ── IndexedDB cleanup (async, non-blocking) ──
   clearOldIndexedDBs();
 
-  // Xu Zhiwei proactive welcome triggers when intro is dismissed (see intro-start-btn handler)
+  // ── Event bindings ──
 
   // Mute toggle
-  const muteBtn = document.getElementById('btn-audio-mute');
+  var muteBtn = document.getElementById('btn-audio-mute');
   if (muteBtn) {
-    muteBtn.addEventListener('click', function () {
-      const nowMuted = !AudioManager.isMuted();
+    muteBtn.addEventListener('click', function() {
+      var nowMuted = !AudioManager.isMuted();
       AudioManager.setMuted(nowMuted);
       muteBtn.textContent = nowMuted ? '🔇' : '🔊';
       muteBtn.setAttribute('aria-label', nowMuted ? '开启声音' : '关闭声音');
     });
-    if (AudioManager.isMuted()) {
-      muteBtn.textContent = '🔇';
-      muteBtn.setAttribute('aria-label', '开启声音');
-    }
+    if (AudioManager.isMuted()) { muteBtn.textContent = '🔇'; muteBtn.setAttribute('aria-label', '开启声音'); }
   }
 
-  // Reset modal confirm button (AC-2, AC-3)
+  // Reset modal confirm
   var resetConfirm = document.getElementById('lt-reset-confirm');
-  if (resetConfirm) {
-    resetConfirm.addEventListener('click', function () {
-      handleReset();
-    });
-  }
+  if (resetConfirm) resetConfirm.addEventListener('click', handleReset);
 
-  // Manual reset button (AC-6)
-  var manualResetBtn = document.getElementById('btn-manual-reset');
-  if (manualResetBtn) {
-    manualResetBtn.addEventListener('click', function () {
-      if (confirm('确定要重新开始吗？当前进度将清除。')) {
-        handleReset();
-      }
-    });
-  }
-
-  // Input
-  $('#btn-send').addEventListener('click', submitInput);
-  inputEl.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submitInput(); }
-  });
+  // Send button + input
+  document.getElementById('btn-send').addEventListener('click', submitInput);
+  inputEl.addEventListener('keydown', function(ev) { if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); submitInput(); } });
   inputEl.addEventListener('input', autoSizeInput);
 
-  // Command bar buttons (v0.7)
-  if (commandBarEl) {
-    commandBarEl.addEventListener('click', function (ev) {
-      const btn = ev.target.closest('.lt-cmd-btn');
-      if (!btn) return;
-      const cmdId = btn.dataset.cmd;
-      const cmdMap = { view_clues: '查看线索', view_characters: '查看人物', view_memory: '查看记忆', ask_xu: '帮助' };
-      const triggerText = cmdMap[cmdId] || cmdId;
-      inputEl.value = triggerText;
-      autoSizeInput();
-      submitInput();
-    });
+  // Archive button
+  document.getElementById('btn-archive').addEventListener('click', function() { archiveSheet.open('clues'); });
+  // Xu button
+  document.getElementById('btn-xu').addEventListener('click', function() { showXuPanel(); });
+  // More menu
+  var moreMenuBtn = document.getElementById('btn-more-menu');
+  var moreMenu = document.getElementById('overlay-more-menu');
+  if (moreMenuBtn && moreMenu) {
+    moreMenuBtn.addEventListener('click', function(e) { e.stopPropagation(); moreMenu.style.display = moreMenu.style.display === 'none' ? 'block' : 'none'; });
+    document.addEventListener('click', function() { moreMenu.style.display = 'none'; });
+    var resetBtn = document.getElementById('btn-reset-game');
+    if (resetBtn) resetBtn.addEventListener('click', function() { if (confirm('确定要重新开始吗？当前进度将清除。')) resetGame(); });
   }
 
-  // Mode tabs (2-tab: 对话 / 行动)
-  modeTabs.addEventListener('click', async (ev) => {
-    const tab = ev.target.closest('[data-mode]');
-    if (!tab) return;
+  // Archive close + tab switching (delegated)
+  document.getElementById('overlay-archive').addEventListener('click', function(e) {
+    if (e.target.id === 'lt-archive-close') archiveSheet.close();
+    if (e.target.dataset && e.target.dataset.tab) archiveSheet.openTab(e.target.dataset.tab);
+  });
 
-    logDrawer.classList.remove('lt-show');
+  // MoreActionsSheet close
+  document.getElementById('overlay-more-actions').addEventListener('click', function(e) {
+    if (e.target.id === 'lt-more-close') moreActionsSheet.close();
+  });
 
-    const mode = tab.dataset.mode;
-    if (mode === 'dialogue') {
-      if (state.mode === 'dialogue') return;
-      modeTabs.querySelectorAll('[data-mode]').forEach(t => t.classList.toggle('lt-active', t.dataset.mode === 'action'));
-      return;
-    }
-
-    if (mode === 'action') {
-      if (state.mode === 'dialogue') await endDialogue();
-      modeTabs.querySelectorAll('[data-mode]').forEach(t => t.classList.toggle('lt-active', t.dataset.mode === 'action'));
-      return;
+  // ActionDock: more actions button + action button clicks
+  document.getElementById('region-action-dock').addEventListener('click', function(e) {
+    if (e.target.id === 'lt-action-more-btn') { moreActionsSheet.open(actionDock.getMoreActions()); return; }
+    var btn = e.target.closest('[data-template]');
+    if (btn) {
+      var t = btn.dataset.template;
+      if (t === '__END_DIALOGUE__') { if (state.mode === 'dialogue') endDialogue(); return; }
+      if (t.indexOf('__DIALOGUE__:') === 0) { var npcId = t.split(':')[1]; if (npcId) startDialogue(npcId); return; }
+      inputEl.value = t; autoSizeInput(); submitInput();
     }
   });
 
-  // Log drawer close
-  const logClose = document.getElementById('log-close');
-  if (logClose) logClose.addEventListener('click', () => logDrawer.classList.remove('lt-show'));
-
-  // Global click delegation
-  document.getElementById('lt-root').addEventListener('click', async (ev) => {
-    const npcChip = ev.target.closest('[data-npc-id]');
-    if (npcChip) { await startDialogue(npcChip.dataset.npcId); return; }
-
-    const chip = ev.target.closest('[data-template]');
-    if (chip) {
-      const t = chip.dataset.template;
-      if (t === '__END_DIALOGUE__') { await endDialogue(); return; }
-      inputEl.value = t;
-      autoSizeInput();
-      await submitInput();
-      return;
+  // MoreActionsSheet action clicks
+  document.getElementById('overlay-more-actions').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-template]');
+    if (btn) {
+      moreActionsSheet.close();
+      var t = btn.dataset.template;
+      if (t.indexOf('__DIALOGUE__:') === 0) { var npcId = t.split(':')[1]; if (npcId) startDialogue(npcId); return; }
+      if (t === '__END_DIALOGUE__') { if (state.mode === 'dialogue') endDialogue(); return; }
+      inputEl.value = t; autoSizeInput(); submitInput();
     }
+  });
 
+  // FocusWatchBar stop button
+  document.getElementById('region-focus-watch').addEventListener('click', function(e) {
+    if (e.target.id === 'lt-focus-stop') focusWatchBar.stopWatch();
+  });
+
+  // DialogueFocusSheet events
+  var dfEl = document.getElementById('overlay-dialogue-focus');
+  dfEl.addEventListener('click', function(e) {
+    if (e.target.id === 'lt-df-back' || e.target.id === 'lt-df-end') { if (state.mode === 'dialogue') endDialogue(); return; }
+    var btn = e.target.closest('[data-template]');
+    if (btn) { var t = btn.dataset.template; if (t === '__END_DIALOGUE__') { endDialogue(); return; } inputEl.value = t; autoSizeInput(); submitInput(); }
+  });
+
+  // Mode tabs
+  document.querySelector('.lt-mode-tabs').addEventListener('click', async function(ev) {
+    var tab = ev.target.closest('[data-mode]'); if (!tab) return;
+    var mode = tab.dataset.mode;
+    if (mode === 'action') { if (state.mode === 'dialogue') await endDialogue(); }
+  });
+
+  // High-risk confirm
+  document.getElementById('lt-confirm-cancel').addEventListener('click', function() { document.getElementById('overlay-confirm').style.display = 'none'; _pendingAction = null; });
+  document.getElementById('lt-confirm-ok').addEventListener('click', function() {
+    document.getElementById('overlay-confirm').style.display = 'none';
+    if (_pendingAction) { var action = _pendingAction; _pendingAction = null; inputEl.value = action; autoSizeInput(); submitInput(); }
+  });
+
+  // TimelineMiniBar click → open timeline archive
+  document.getElementById('region-timeline-mini').addEventListener('click', function() { archiveSheet.open('timeline'); });
+
+  // Global click delegation for intro, next-loop, unlocked actions
+  document.getElementById('lt-root').addEventListener('click', async function(ev) {
+    // Intro start button
     if (ev.target.id === 'intro-start-btn') {
-      state.flags.intro_seen = true;
-      saveState(state);
+      state.flags.intro_seen = true; saveState();
       AudioManager.unlock();
-      setTimeout(function () { AudioManager.play('rail_loop_low'); }, 200);
-      contentEl.style.display = '';
-      bottomEl.style.display = '';
-      setTimeout(function () { showXuWelcome(state.loop); }, 2000);
-      const startMsg = (INTRO_DATA && INTRO_DATA.gameStartMessage) || '1939 年冬，江城号列车。窗外夜色流动，车厢灯光昏黄。你醒来，不记得自己是谁——但你知道：14:15，这列火车会爆炸。许知微合上笔记本抬起头："你又醒了。"';
-      appendMsg('system', startMsg, logEl);
+      setTimeout(function() { AudioManager.play('rail_loop_low'); }, 200);
+      var intro = document.getElementById('overlay-intro');
+      if (intro) intro.classList.remove('lt-show');
+      setTimeout(function() { showXuWelcome(state.loop); }, 2000);
+      var startMsg = (INTRO_DATA && INTRO_DATA.gameStartMessage) || '1939 年冬，江城号列车。窗外夜色流动，车厢灯光昏黄。你醒来，不记得自己是谁——但你知道：14:15，这列火车会爆炸。许知微合上笔记本抬起头："你又醒了。"';
+      eventFeed.appendMessage('system', startMsg);
       toast(APP_STRINGS.gameStartToast || '第 1 轮开始');
-      render();
+      gameShell.setState(state);
       return;
     }
-
-    if (introLayer.classList.contains('lt-show') && ev.target.closest('.lt-intro') && !ev.target.closest('.lt-intro-card')) {
-      state.flags.intro_seen = true;
-      saveState(state);
-      contentEl.style.display = '';
-      bottomEl.style.display = '';
-      render();
+    // Intro skip
+    var introLayer = document.getElementById('overlay-intro');
+    if (introLayer && introLayer.classList.contains('lt-show') && ev.target.closest('.lt-intro') && !ev.target.closest('.lt-intro-card')) {
+      state.flags.intro_seen = true; saveState();
+      introLayer.classList.remove('lt-show');
+      gameShell.setState(state);
       return;
     }
-
-    if (ev.target.id === 'end-dialogue-btn' || ev.target.closest('#end-dialogue-btn')) {
-      if (state.mode === 'dialogue') await endDialogue();
-      return;
-    }
-
-    if (ev.target.id === 'btn-next-loop') {
-      AudioManager.dispatch({ action: 'play', id: 'loop_rewind' });
-      await nextLoop();
-      return;
-    }
+    // Next loop button
+    if (ev.target.id === 'btn-next-loop') { AudioManager.dispatch({ action: 'play', id: 'loop_rewind' }); await nextLoop(); return; }
+    // Unlocked action buttons in event feed
+    var unlockBtn = ev.target.closest('.lt-unlock-btn');
+    if (unlockBtn) { inputEl.value = unlockBtn.dataset.template; autoSizeInput(); submitInput(); return; }
   });
 
-  api('/npcs').then(data => { if (data) npcCache = data; });
+  api('/npcs').then(function(data) { if (data) npcCache = data; });
   api('/health');
 }
 

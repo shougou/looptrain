@@ -1,6 +1,6 @@
 {
   "play": {
-    "currentVersion": "v0.10.0-npc-timeline-inference",
+    "currentVersion": "v0.11.0-mobile-portrait-ui-redesign",
     "playUrl": "/play/game",
     "playLabel": "进入游戏",
     "recommendedDevice": "手机竖屏",

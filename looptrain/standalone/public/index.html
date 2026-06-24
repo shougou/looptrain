@@ -15,79 +15,91 @@
         <!-- Stage background -->
         <div class="lt-stage"></div>
 
-        <!-- Top bar: status -->
-        <div class="lt-topbar">
-          <span class="lt-topbar-left"></span>
-          <span class="lt-topbar-right"></span>
+        <!-- StatusBar region -->
+        <div class="lt-status-bar" id="region-status-bar">
+          <span class="lt-status-loop">第 1 轮</span>
+          <span class="lt-status-sep">·</span>
+          <span class="lt-status-clock">14:00</span>
+          <span class="lt-status-ap">AP 10</span>
           <button class="lt-audio-mute" id="btn-audio-mute" aria-label="关闭声音" title="声音开关">🔊</button>
         </div>
 
-        <!-- Goal bar -->
-        <div class="lt-goal-bar">
-          <span class="lt-goal-bar-text">📋 当前目标</span>
-          <span class="lt-goal-progress"></span>
-          <span class="lt-goal-bar-loop"></span>
+        <!-- TimelineMiniBar region -->
+        <div class="lt-timeline-mini" id="region-timeline-mini">
+          <span class="lt-tl-start">14:00</span>
+          <div class="lt-tl-track">
+            <div class="lt-tl-progress" style="width: 0%"></div>
+          </div>
+          <span class="lt-tl-end">14:15</span>
         </div>
 
-        <!-- Command bar -->
-        <div class="lt-command-bar">
-          <button class="lt-cmd-btn" data-cmd="view_clues">🔍线索</button>
-          <button class="lt-cmd-btn" data-cmd="view_characters">👤人物</button>
-          <button class="lt-cmd-btn" data-cmd="view_memory">🧠记忆</button>
-          <button class="lt-cmd-btn" data-cmd="ask_xu">❓帮助</button>
-          <button class="lt-cmd-btn" id="btn-manual-reset" title="重新开始试玩版">🔄重置</button>
+        <!-- Top entry buttons -->
+        <div class="lt-top-entries">
+          <button class="lt-entry-btn" id="btn-archive">📋 档案</button>
+          <button class="lt-entry-btn" id="btn-xu">💡 许知微</button>
+          <button class="lt-entry-btn lt-entry-more" id="btn-more-menu">⚙</button>
         </div>
 
-        <!-- Goal completion feedback -->
-        <div class="lt-goal-feedback" style="display:none;">
+        <!-- Main content (scrollable) -->
+        <div class="lt-content" id="region-content">
+          <div class="lt-objective-card" id="region-objective"></div>
+          <div class="lt-scene-card" id="region-scene"></div>
+          <div class="lt-focus-watch" id="region-focus-watch" style="display:none"></div>
+          <div class="lt-event-feed" id="region-event-feed"></div>
+        </div>
+
+        <!-- ActionDock region -->
+        <div class="lt-action-dock" id="region-action-dock"></div>
+
+        <!-- CommandInput region -->
+        <div class="lt-bottom" id="region-bottom">
+          <div class="lt-mode-tabs">
+            <button class="lt-mode-tab lt-active" data-mode="dialogue">对话</button>
+            <button class="lt-mode-tab" data-mode="action">行动</button>
+          </div>
+          <div class="lt-input-row">
+            <textarea class="lt-input" rows="1" placeholder="你要做什么？" aria-label="游戏输入"></textarea>
+            <button class="lt-btn lt-btn-send" id="btn-send">发送</button>
+          </div>
+        </div>
+
+        <!-- MoreActionsSheet overlay -->
+        <div class="lt-more-actions-sheet" id="overlay-more-actions"></div>
+
+        <!-- ArchiveSheet overlay -->
+        <div class="lt-archive-sheet" id="overlay-archive"></div>
+
+        <!-- DialogueFocusSheet overlay -->
+        <div class="lt-dialogue-focus" id="overlay-dialogue-focus"></div>
+
+        <!-- High-risk confirm overlay -->
+        <div class="lt-confirm-overlay" id="overlay-confirm" style="display:none">
+          <div class="lt-confirm-card">
+            <div class="lt-confirm-title">高风险行动</div>
+            <div class="lt-confirm-body"></div>
+            <div class="lt-confirm-evidence"></div>
+            <div class="lt-confirm-actions">
+              <button class="lt-btn-cancel" id="lt-confirm-cancel">取消</button>
+              <button class="lt-btn-confirm" id="lt-confirm-ok">继续</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- NG (failure) overlay -->
+        <div class="lt-ng" id="overlay-ng">
+          <div class="lt-ng-bg"></div>
+          <div class="lt-ng-card"></div>
+        </div>
+
+        <!-- Goal feedback overlay -->
+        <div class="lt-goal-feedback" id="overlay-goal-feedback" style="display:none">
           <div class="lt-fb-title"></div>
           <div class="lt-fb-desc"></div>
           <div class="lt-fb-memory"></div>
           <div class="lt-fb-next"></div>
         </div>
 
-        <!-- Main content: scene-driven -->
-        <div class="lt-content">
-          <!-- Scene card -->
-          <div class="lt-card lt-scene-card">
-            <div class="lt-location"></div>
-            <div class="lt-scene-text"></div>
-            <div class="lt-current-goal"></div>
-            <div class="lt-visible-npcs"></div>
-          </div>
-
-          <!-- Latest message (1-2 lines, scene-focused) -->
-          <div class="lt-latest-msg"></div>
-        </div>
-
-        <!-- Log drawer (hidden, slide-up) -->
-        <div class="lt-log-drawer" id="log-drawer">
-          <div class="lt-log-drawer-header">
-            <span>对话记录</span>
-            <button class="lt-log-close" id="log-close">✕</button>
-          </div>
-          <div class="lt-log"></div>
-        </div>
-
-        <!-- Dialogue panel (portrait + latest line + end button) -->
-        <div class="lt-dialogue-panel">
-          <div class="lt-dialogue-header">
-            <span class="lt-dialogue-npc"></span>
-            <div class="lt-portrait-dock"></div>
-          </div>
-          <div class="lt-log lt-dialogue-log"></div>
-          <div class="lt-dialogue-footer">
-            <button class="lt-end-dialogue-btn" id="end-dialogue-btn">结束对话</button>
-          </div>
-        </div>
-
-        <!-- Failure overlay -->
-        <div class="lt-ng">
-          <div class="lt-ng-bg"></div>
-          <div class="lt-ng-card"></div>
-        </div>
-
-        <!-- Reset modal (version-incompatible / legacy data detected) -->
+        <!-- Reset modal -->
         <div id="lt-reset-modal" class="lt-reset-overlay" style="display:none">
           <div class="lt-reset-card">
             <h2 class="lt-reset-title">新版试玩已重构</h2>
@@ -96,8 +108,13 @@
           </div>
         </div>
 
-        <!-- Intro overlay (populated dynamically from /api/intro) -->
-        <div class="lt-intro lt-show">
+        <!-- More menu dropdown -->
+        <div class="lt-more-menu" id="overlay-more-menu" style="display:none">
+          <button class="lt-more-menu-btn" id="btn-reset-game">🔄 重置游戏</button>
+        </div>
+
+        <!-- Intro overlay -->
+        <div class="lt-intro lt-show" id="overlay-intro">
           <div class="lt-intro-card">
             <div class="lt-intro-kicker"></div>
             <div class="lt-intro-title"></div>
@@ -108,24 +125,17 @@
           <div class="lt-intro-skip"></div>
         </div>
 
-        <!-- Bottom bar: 3-tab mode -->
-        <div class="lt-bottom">
-          <div class="lt-mode-tabs">
-            <button class="lt-mode-tab lt-active" data-mode="dialogue">对话</button>
-            <button class="lt-mode-tab" data-mode="action">行动</button>
-          </div>
-          <div class="lt-input-row">
-            <textarea class="lt-input" rows="1" placeholder="和小宁说些什么……" aria-label="游戏输入"></textarea>
-            <button class="lt-btn lt-btn-send" id="btn-send">发送</button>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
 
   <script src="audio-manager.js"></script>
   <script src="portrait-intro.js"></script>
+  <script src="components/utils.js"></script>
+  <script src="components/layout.js"></script>
+  <script src="components/actions.js"></script>
+  <script src="components/feedback.js"></script>
+  <script src="components/overlays.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
