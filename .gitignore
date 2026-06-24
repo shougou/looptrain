@@ -9,3 +9,4 @@ todos/
 tmp/
 *.log
 
+test-results/
