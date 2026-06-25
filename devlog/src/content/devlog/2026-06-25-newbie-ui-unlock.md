@@ -2,7 +2,7 @@
 title: 'v0.11.0：渐进式 UI 解锁系统——从 overwhelm 到 flow'
 date: 2026-06-25T12:00:00+08:00
 version: 'v0.11.0-newbie-ui-unlock'
-status: 'published'
+status: 'done'
 summary: '实现 UIStage 7 阶段状态机，许知微主界面化提示卡，案件板 CaseBoard，加载状态管理，按钮点击反馈动效。解决新手面对 12 个按钮和复杂行动选项的认知负荷问题。'
 ---
 
