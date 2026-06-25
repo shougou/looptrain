@@ -12,6 +12,9 @@ echo "[SLT] Syntax and smoke tests"
 npm run check
 npm test
 
+echo "[SLT] Nginx proxy config check"
+bash "$ROOT_DIR/scripts/check_nginx_proxy.sh"
+
 echo "[SLT] Materials validation"
 python3 "$ROOT_DIR/looptrain/materials/tools/validate_materials.py"
 
