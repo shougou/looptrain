@@ -19,6 +19,8 @@ test.describe('LT v0.11.0 UI Components', () => {
   });
 
   test('TimelineMiniBar shows progress bar', async ({ page }) => {
+    await page.click('.lt-action-btn[data-template="__OBSERVE_SCENE__"]');
+    await page.waitForTimeout(500);
     await expect(page.locator('.lt-tl-progress')).toBeVisible();
     await expect(page.locator('.lt-tl-start')).toHaveText('14:00');
     await expect(page.locator('.lt-tl-end')).toHaveText('14:15');
@@ -48,6 +50,9 @@ test.describe('LT v0.11.0 UI Components', () => {
   });
 
   test('Archive button opens ArchiveSheet', async ({ page }) => {
+    // Do an action to move from intro stage so archive button is visible
+    await page.click('.lt-action-btn[data-template="__OBSERVE_SCENE__"]');
+    await page.waitForTimeout(500);
     await page.click('#btn-archive');
     await expect(page.locator('.lt-archive-sheet')).toHaveClass(/lt-show/);
     await expect(page.locator('.lt-archive-tabs .lt-tab')).toHaveCount(4);

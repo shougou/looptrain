@@ -6,6 +6,8 @@ test.describe('LoopTrain v0.11.0 存档/恢复/重置', () => {
     await page.waitForSelector('#intro-start-btn', { timeout: 10000 });
     await page.click('#intro-start-btn');
     await page.waitForSelector('.lt-scene-card', { timeout: 5000 });
+    await page.click('.lt-action-btn[data-template="__OBSERVE_SCENE__"]');
+    await page.waitForTimeout(500);
     await page.reload();
     await page.waitForTimeout(2000);
     const introVisible = await page.locator('.lt-intro.lt-show').isVisible({ timeout: 3000 }).catch(() => false);

@@ -1,3 +1,29 @@
+## v0.11.0-newbie-ui-unlock — 2026-06-25
+
+### Added
+- UIStage 渐进解锁系统：7 阶段状态机（intro → first_observation → first_dialogue → loop_memory_intro → caseboard_intro → contradiction_intro → normal_play）
+- 每阶段控制 UI 元素可见性（按钮数、输入框、Archive 按钮等）
+- 许知微主界面化：从顶部按钮改为场景描述下方提示卡，提供动态提示和推荐行动
+- 案件板 (CaseBoard)：已确认事实、NPC 说法、待验证、关键矛盾、下一步建议
+- 加载状态管理：按钮点击加载动画、全局遮罩、prefers-reduced-motion 支持
+- 按钮点击反馈：缩放效果、涟漪高光、150ms 过渡动画
+- 4 个新前端模块：`ui-stage.js`（状态机）、`assistant-hint.js`（提示生成）、`case-board.js`（案件板）、`loading-state.js`（加载状态）
+- 2 个单元测试 + 1 个 E2E 测试（newbie-flow.spec.js）
+- `/api/ui-stage` 端点：获取当前 UI 阶段配置
+
+### Changed
+- `app.js`：集成 UIStage 状态切换（~150 行新增），updateUIVisibility()，renderAssistantHint()
+- `actions.js`：ActionDock 支持 setActionCount() 方法
+- `style.css`：新增 150+ 行样式（提示卡、案件板、加载、动画、安全区）
+- `index.html`：引入 4 个新模块
+- `server.js`：新增 `/api/ui-stage` 端点
+- `start_slt.sh`：修复超时问题（nohup 后台运行）
+
+### Removed
+- 无
+
+---
+
 ## v0.10.0-npc-timeline-inference — 2026-06-23
 
 ### Added

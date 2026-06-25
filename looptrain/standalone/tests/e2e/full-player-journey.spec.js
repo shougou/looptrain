@@ -62,8 +62,15 @@ test.describe('LoopTrain v0.11.0 完整玩家路径', () => {
     await page.click('#intro-start-btn');
     await page.waitForSelector('.lt-scene-card', { timeout: 5000 });
     await page.waitForTimeout(1000);
-    await page.fill('.lt-input', '观察车厢');
-    await page.click('#btn-send');
+    // Click the observe action button instead of typing
+    const observeBtn = page.locator('.lt-action-btn[data-template="__OBSERVE_SCENE__"]');
+    if (await observeBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await observeBtn.click();
+    } else {
+      // Fallback: type in input if visible (for normal_play stage)
+      await page.fill('.lt-input', '观察车厢');
+      await page.click('#btn-send');
+    }
     await page.waitForTimeout(500);
     await expect(page.locator('.lt-scene-text')).toBeVisible();
   });
@@ -72,8 +79,17 @@ test.describe('LoopTrain v0.11.0 完整玩家路径', () => {
     await page.click('#intro-start-btn');
     await page.waitForSelector('.lt-scene-card', { timeout: 5000 });
     await page.waitForTimeout(1000);
-    await page.fill('.lt-input', '走向连接处');
-    await page.click('#btn-send');
+    // Use more actions menu for movement
+    await page.click('#lt-action-more-btn');
+    await page.waitForTimeout(200);
+    const moveBtn = page.locator('.lt-action-btn:has-text("前往连接处")');
+    if (await moveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await moveBtn.click();
+    } else {
+      // Fallback: type in input if visible
+      await page.fill('.lt-input', '走向连接处');
+      await page.click('#btn-send');
+    }
     await page.waitForTimeout(1000);
     await expect(page.locator('.lt-scene-location')).toBeVisible();
   });
@@ -82,8 +98,13 @@ test.describe('LoopTrain v0.11.0 完整玩家路径', () => {
     await page.click('#intro-start-btn');
     await page.waitForSelector('.lt-scene-card', { timeout: 5000 });
     await page.waitForTimeout(1000);
-    await page.fill('.lt-input', '走向连接处');
-    await page.click('#btn-send');
+    // Use more actions to move to connection area first
+    await page.click('#lt-action-more-btn');
+    await page.waitForTimeout(200);
+    const moveBtn = page.locator('.lt-action-btn[data-template="__OBSERVE_LOCATION__:connection_area"]');
+    if (await moveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await moveBtn.click();
+    }
     await page.waitForTimeout(1000);
     const grayBtn = page.locator('[data-npc-id="gray_passenger"]');
     if (await grayBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -102,8 +123,21 @@ test.describe('LoopTrain v0.11.0 完整玩家路径', () => {
     await page.click('#intro-start-btn');
     await page.waitForSelector('.lt-scene-card', { timeout: 5000 });
     await page.waitForTimeout(1000);
-    await page.fill('.lt-input', '强制失败测试');
-    await page.click('#btn-send');
+    // First do an action to transition from intro stage
+    await page.click('.lt-action-btn[data-template="__OBSERVE_SCENE__"]');
+    await page.waitForTimeout(1000);
+    // Now use more actions to find the debug fail button
+    await page.click('#lt-action-more-btn');
+    await page.waitForTimeout(200);
+    const failBtn = page.locator('.lt-action-btn:has-text("强制失败")');
+    if (await failBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await failBtn.click();
+    } else {
+      await page.click('#lt-more-close');
+      await page.waitForTimeout(200);
+      await page.fill('.lt-input', '强制失败测试');
+      await page.click('#btn-send');
+    }
     await page.waitForSelector('.lt-ng.lt-show', { timeout: 5000 });
     await expect(page.locator('#btn-next-loop')).toBeVisible({ timeout: 5000 });
     await page.click('#btn-next-loop');

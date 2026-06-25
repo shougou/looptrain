@@ -62,6 +62,12 @@ const roadmap: RoadmapPhase[] = [
         priority: 'high',
       },
       {
+        task: '渐进式 UI 解锁系统',
+        status: '已完成',
+        description: 'v0.11.0 实现 7 阶段 UIStage 状态机、许知微主界面化提示卡、案件板 CaseBoard、加载状态管理、按钮点击反馈动效。',
+        priority: 'high',
+      },
+      {
         task: 'NPC 时间线推理系统',
         status: '已完成',
         description: 'v0.10.0 建立 player_timeline + 3 种观察行动 + 矛盾检测 + 推理生成 + 多维证据评分 + 失败继承。',

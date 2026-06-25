@@ -34,7 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ── API routes (no /api/plugins — standalone) ──
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, engine: 'looptrain', version: 'v0.11.0-mobile-portrait-ui-redesign', mode: 'standalone' });
+  res.json({ ok: true, engine: 'looptrain', version: 'v0.11.0-newbie-ui-unlock', mode: 'standalone' });
 });
 
 app.post('/api/session/init', (req, res) => {
@@ -175,6 +175,25 @@ app.get('/api/app-strings', (_req, res) => {
   }
 });
 
+app.get('/api/ui-stage', (req, res) => {
+  try {
+    const state = req.query.state ? JSON.parse(req.query.state) : engine.START_STATE;
+    const stage = getUIStage(state);
+    const actionCount = getActionCount(stage);
+    const hint = generateHint(state, stage);
+    
+    res.json({
+      stage,
+      action_count: actionCount,
+      visible_controls: getVisibleControls(stage),
+      assistant_hint: hint
+    });
+  } catch (e) {
+    console.error('[LT] /api/ui-stage error:', e);
+    res.status(500).json({ error: 'ui_stage_error', message: '计算 UI 阶段时出错' });
+  }
+});
+
 // ── Runtime v0.6 API routes (spec Section 6) ──
 
 const assistantController = new runtime.AssistantController(memoryRuntime);
@@ -274,12 +293,12 @@ app.get('/', (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n  LoopTrain Standalone v0.11.0-mobile-portrait-ui-redesign`);
+  console.log(`\n  LoopTrain Standalone v0.11.0-newbie-ui-unlock`);
   console.log(`  ────────────────────────`);
   console.log(`  Local:  http://localhost:${PORT}`);
   console.log(`  LLM:    ${LLM_ENABLED && DEEPSEEK_API_KEY ? 'enabled (deepseek)' : 'mock only'}`);
   console.log(`  Memory: ${memoryRuntime ? 'enabled' : 'disabled'}`);
-  console.log(`  Engine: v0.11.0-mobile-portrait-ui-redesign\n`);
+  console.log(`  Engine: v0.11.0-newbie-ui-unlock\n`);
 });
 
 module.exports = app;

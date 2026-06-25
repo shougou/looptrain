@@ -2,7 +2,7 @@
 
 ## 当前版本
 
-v0.11.0-mobile-portrait-ui-redesign — 手机竖版 UX/UI 重设计（组件化架构 + EventFeed + ActionDock + FocusWatchBar + ArchiveSheet）
+v0.11.0-newbie-ui-unlock — 渐进式 UI 解锁系统（UIStage 状态机 + 许知微主界面化 + 案件板 + 加载状态 + 按钮反馈）
 
 ## 当前状态
 
@@ -15,16 +15,18 @@ v0.11.0-mobile-portrait-ui-redesign — 手机竖版 UX/UI 重设计（组件化
 
 ## 当前重点
 
-- 手机竖版 UI 重设计已上线（12 组件 + GameShell + flex 布局 + EventFeed + ActionDock + FocusWatchBar + ArchiveSheet + DialogueFocusSheet）
+- 渐进式 UI 解锁系统已上线（7 阶段 UIStage + 许知微提示卡 + 案件板 + 加载状态 + 按钮动效）
+- 手机竖版 UI 重设计已上线（12 组件 + GameShell + flex 布局 + EventFeed + ActionDock + FocusWatchBar + ArchiveSheet）
 - NPC 时间线推理系统已上线（player_timeline + 3 种观察行动 + 矛盾检测 + 推理生成 + 多维证据评分）
 - Goal Engine + 指令系统 + 许知微助手已上线
 - 《寒灯初醒》完整试玩内容已上线
 - 暂用 Mock 模式，待接入真实 LLM
-- 测试: Playwright E2E 12 步回归测试 + ui-components.spec.js 组件测试（Mock 模式）
+- 测试: Playwright E2E 25 步回归测试 + ui-components.spec.js 组件测试 + newbie-flow.spec.js 新手流程测试（Mock 模式）
 - 版本号治理: VERSION 文件作为唯一源，sync_version.sh 自动同步 11 个位置
 
 ## 最近完成
 
+- v0.11.0 渐进式 UI 解锁系统：UIStage 7 阶段状态机、许知微主界面化提示卡、案件板 CaseBoard、加载状态管理、按钮点击反馈
 - v0.11.0 手机竖版 UX/UI 重设计：组件化架构（12 组件 + GameShell）、flex 流式布局、EventFeed + ActionResultCard、ActionDock + MoreActionsSheet、FocusWatchBar 持续观察、ArchiveSheet 档案抽屉、DialogueFocusSheet 对话聚焦、高风险确认面板
 - v0.10.0 NPC 时间线推理系统：player_timeline + 3 种观察行动 + 矛盾检测 + 推理生成 + 多维证据评分
 - v0.9.0 Playwright E2E 12 步回归测试

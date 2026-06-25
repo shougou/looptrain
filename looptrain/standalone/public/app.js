@@ -1,6 +1,6 @@
 'use strict';
 
-/* LoopTrain Standalone v0.11.0-mobile-portrait-ui-redesign
+/* LoopTrain Standalone v0.11.0-newbie-ui-unlock
  * Component-based UI. Pure vanilla JS. No SillyTavern.
  * Preserves all game logic from v0.10.0; replaces rendering layer.
  */
@@ -8,7 +8,7 @@
 // ── Save version constants ──
 var LT_SAVE_SCHEMA_VERSION = 1;
 var LT_MIN_COMPATIBLE_SCHEMA_VERSION = 1;
-var LT_RUNTIME_VERSION = 'v0.11.0-mobile-portrait-ui-redesign';
+var LT_RUNTIME_VERSION = 'v0.11.0-newbie-ui-unlock';
 var LT_STORY_VERSION = 'demo-0.8-handeng';
 var LT_KEY_PREFIX = 'lt:';
 var LT_SAVE_META_KEY = 'lt:save:meta';
@@ -34,6 +34,11 @@ let npcCache = null;
 let prevAudioState = null;
 let COMMANDS = [];
 let XU_DIALOGUES = null;
+
+// UIStage State
+let currentUIStage = 'intro';
+let assistantHintCard = null;
+let caseboardButton = null;
 
 // ── GameShell + Components ──
 let gameShell = null;
@@ -88,6 +93,116 @@ function loadState() {
   if (state.mode === 'dialogue') { state.mode = 'explore'; state.active_npc = null; }
   if (!state._goalData && state._goal) state._goalData = state._goal;
   if (!state._goal && state._goalData) state._goal = state._goalData;
+}
+
+function updateUIVisibility() {
+  if (!state) return;
+  var stage = getUIStage(state);
+  if (stage === currentUIStage && state._uiRendered) return;
+  currentUIStage = stage;
+  state._uiRendered = true;
+
+  var controls = getVisibleControls(stage);
+
+  // Intro overlay: show only when not seen
+  var introOverlay = document.getElementById('overlay-intro');
+  if (introOverlay) {
+    if (state.flags.intro_seen) {
+      introOverlay.classList.remove('lt-show');
+    } else {
+      introOverlay.classList.add('lt-show');
+    }
+  }
+
+  var archiveBtn = document.getElementById('btn-archive');
+  var xuBtn = document.getElementById('btn-xu');
+  var moreMenuBtn = document.getElementById('btn-more-menu');
+
+  if (archiveBtn) {
+    var shouldShowArchive = controls.indexOf('caseboard') >= 0 || controls.indexOf('caseboard_button') >= 0;
+    archiveBtn.style.display = shouldShowArchive ? 'block' : 'none';
+    if (shouldShowArchive) archiveBtn.textContent = '已发现的事';
+  }
+  if (xuBtn) xuBtn.style.display = 'none';
+  if (moreMenuBtn) moreMenuBtn.style.display = controls.indexOf('settings') >= 0 ? 'block' : 'none';
+
+  var bottomRegion = document.getElementById('region-bottom');
+  if (bottomRegion) {
+    var shouldShowInput = controls.indexOf('input') >= 0 || state.mode === 'dialogue';
+    bottomRegion.style.display = shouldShowInput ? 'block' : 'none';
+  }
+
+  var modeTabs = document.querySelector('.lt-mode-tabs');
+  if (modeTabs) {
+    modeTabs.style.display = controls.indexOf('input') >= 0 ? 'flex' : 'none';
+  }
+
+  if (actionDock && actionDock.setActionCount) {
+    actionDock.setActionCount(getActionCount(stage));
+  }
+
+  renderAssistantHint();
+
+  var statusBarEl = document.getElementById('region-status-bar');
+  if (statusBarEl) {
+    var existingBadge = statusBarEl.querySelector('.lt-stage-badge');
+    if (!existingBadge && stage !== 'normal_play') {
+      var badge = document.createElement('span');
+      badge.className = 'lt-stage-badge';
+      badge.textContent = getStageLabel(stage);
+      statusBarEl.appendChild(badge);
+    } else if (existingBadge) {
+      existingBadge.textContent = getStageLabel(stage);
+      existingBadge.style.display = stage === 'normal_play' ? 'none' : 'inline-block';
+    }
+  }
+}
+
+function renderAssistantHint() {
+  var hint = generateHint(state, currentUIStage);
+  if (!hint) return;
+
+  var existing = document.getElementById('lt-assistant-hint');
+  if (existing) existing.remove();
+
+  var content = document.getElementById('region-content');
+  if (!content) return;
+
+  var card = document.createElement('div');
+  card.id = 'lt-assistant-hint';
+  card.className = 'lt-assistant-hint';
+  card.innerHTML = '<div class="lt-assistant-hint-header"><div class="lt-assistant-avatar">许</div><div class="lt-assistant-name">' + esc(hint.speaker) + '</div></div><div class="lt-assistant-text">' + esc(hint.text) + '</div>';
+
+  if (hint.recommendedActions && hint.recommendedActions.length > 0) {
+    var actionsDiv = document.createElement('div');
+    actionsDiv.className = 'lt-assistant-actions';
+    for (var i = 0; i < hint.recommendedActions.length; i++) {
+      var btn = document.createElement('button');
+      btn.className = 'lt-assistant-action-btn';
+      btn.textContent = hint.recommendedActions[i];
+      btn.onclick = (function(action) {
+        return function() {
+          inputEl.value = action;
+          autoSizeInput();
+          submitInput();
+        };
+      })(hint.recommendedActions[i]);
+      actionsDiv.appendChild(btn);
+    }
+    card.appendChild(actionsDiv);
+  }
+
+  var sceneCard = document.getElementById('region-scene');
+  if (sceneCard && sceneCard.nextSibling) {
+    content.insertBefore(card, sceneCard.nextSibling);
+  } else {
+    content.appendChild(card);
+  }
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ── Legacy detection & cleanup ──
@@ -315,6 +430,7 @@ async function resetGame() {
   var ng = document.getElementById('overlay-ng'); if (ng) ng.classList.remove('lt-show');
   focusWatchBar.stopWatch();
   inputEl.value = ''; autoSizeInput();
+  var intro = document.getElementById('overlay-intro'); if (intro) intro.classList.add('lt-show');
   eventFeed.appendMessage('system', APP_STRINGS.resetToast || '已重置试玩版。');
   gameShell.setState(state);
 }
@@ -471,6 +587,11 @@ async function init() {
 
   // ── Initialize GameShell + Components ──
   gameShell = new GameShell();
+  var originalSetState = gameShell.setState;
+  gameShell.setState = function(newState) {
+    originalSetState.call(gameShell, newState);
+    updateUIVisibility();
+  };
   statusBar = gameShell.register(new StatusBar(document.getElementById('region-status-bar')));
   timelineMiniBar = gameShell.register(new TimelineMiniBar(document.getElementById('region-timeline-mini')));
   objectiveCard = gameShell.register(new ObjectiveCard(document.getElementById('region-objective')));

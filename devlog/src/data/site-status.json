@@ -1,11 +1,11 @@
 {
   "play": {
-    "currentVersion": "v0.11.0-mobile-portrait-ui-redesign",
+    "currentVersion": "v0.11.0-newbie-ui-unlock",
     "playUrl": "/play/game",
     "playLabel": "进入游戏",
     "recommendedDevice": "手机竖屏",
     "stageStatus": "独立运行时 · 试玩版",
-    "stageDescription": "v0.7 建立了目标引擎、12 条指令系统和许知微助手；v0.8 完成《寒灯初醒》全部试玩内容；v0.10 建立 NPC 时间线推理系统（player_timeline + 3 种观察行动 + 矛盾检测 + 推理生成 + 多维证据评分）。",
+    "stageDescription": "v0.7 建立了目标引擎、12 条指令系统和许知微助手；v0.8 完成《寒灯初醒》全部试玩内容；v0.10 建立 NPC 时间线推理系统；v0.11 实现渐进式 UI 解锁系统（7 阶段 UIStage + 许知微主界面化 + 案件板 + 加载状态 + 按钮动效）。",
     "knownIssues": [
       "v0.10.0 新增 NPC 时间线推理系统，三条通关路径需实际游玩验证平衡。",
       "许知微判定交互未实现（verdict_options 数据已预留，下迭代开发）。",
@@ -15,7 +15,7 @@
     "feedbackNote": "试玩反馈可以直接联系开发者。"
   },
   "site": {
-    "lastUpdated": "2026-06-23",
+    "lastUpdated": "2026-06-25",
     "currentPhase": "试玩版内容完成",
     "nextFocus": "许知微判定交互、LLM Bridge 接入、手机端真机适配",
     "tagline": "一个互动叙事游戏。也是一个 AI 协同开发实验室。",

@@ -9,6 +9,13 @@ class ActionDock extends Component {
     this.opts = opts || {};
     this._suggHash = '';
     this.moreSheet = null;
+    this._actionCount = 3;
+    this._filter = null;
+  }
+  setActionCount(count) {
+    this._actionCount = count || 3;
+    this._suggHash = '';
+    if (this._lastState) this.update(this._lastState);
   }
   update(state) {
     this._lastState = state;
@@ -40,9 +47,10 @@ class ActionDock extends Component {
     var seen = {};
     allItems = allItems.filter(function(item) { if (seen[item.template]) return false; seen[item.template] = true; return true; });
     allItems.sort(function(a, b) { return a.priority - b.priority; });
-    var recommended = allItems.slice(0, 3);
-    var more = allItems.slice(3);
-    var suggHash = allItems.map(function(s) { return s.template; }).join('|');
+    var count = this._actionCount || 3;
+    var recommended = allItems.slice(0, count);
+    var more = allItems.slice(count);
+    var suggHash = allItems.map(function(s) { return s.template; }).join('|') + '|' + count;
     if (this._suggHash === suggHash) return;
     this._suggHash = suggHash;
     if (!this.el) return;
