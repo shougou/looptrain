@@ -16,7 +16,7 @@ LoopTrain（《寒灯初醒》）是一款手机端互动叙事解谜游戏。
 
 当前版本：**v0.11.0-newbie-ui-unlock**，已从 SillyTavern 完全独立，本地运行时代号为 **SLT（Standalone LoopTrain）**。
 
-线上部署：https://looptrain.me/play/game
+线上部署：https://looptrain.me
 
 ---
 
@@ -41,7 +41,7 @@ SLT Server (Node.js + Express, 端口 3030)
 线上部署 (Alibaba Cloud ECS)
   ├── nginx 反向代理
   ├── pm2 进程管理
-  └── https://looptrain.me/play/game
+  └── https://looptrain.me
 ```
 
 ---
@@ -172,7 +172,7 @@ scripts/                   # SLT 启动/验证/部署脚本 (10 个)
 - 存档系统 (localStorage 版本化双 key + breaking change 检测)
 - Playwright E2E 回归测试 (4 spec)
 - TypeScript Runtime (MemoryRuntime + 事件溯源 + Assistant AI 子系统)
-- 已部署线上: https://looptrain.me/play/game
+- 已部署线上: https://looptrain.me
 - 真实 LLM 动态对话 (DeepSeek, 线上已启用, Mock 为降级模式)
 
 ### SLT 尚未具备
