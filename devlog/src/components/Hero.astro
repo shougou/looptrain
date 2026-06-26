@@ -1,5 +1,6 @@
 ---
 /** Hero — homepage hero section */
+import { GITHUB_REPO } from '../data/site';
 import VersionBadge from './VersionBadge.astro';
 import PlayButton from './PlayButton.astro';
 
@@ -27,6 +28,7 @@ const { version, playUrl } = Astro.props;
     <div class="hero-actions">
       <PlayButton href={playUrl}>开始试玩</PlayButton>
       <PlayButton href="/devlog" variant="secondary">开发日记</PlayButton>
+      <PlayButton href={GITHUB_REPO} variant="secondary">GitHub 仓库</PlayButton>
     </div>
   </div>
 </section>

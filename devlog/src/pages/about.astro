@@ -1,6 +1,7 @@
 ---
 /** About page `/about` — project introduction */
 import Layout from '../components/Layout.astro';
+import { GITHUB_REPO } from '../data/site';
 ---
 
 <Layout
@@ -71,6 +72,12 @@ import Layout from '../components/Layout.astro';
 
       <p>
         如需反馈试玩体验或交流项目方向，可以直接联系开发者。正式反馈渠道将在后续版本中建立。
+      </p>
+
+      <h2>开源仓库</h2>
+      <p>
+        LoopTrain 项目代码托管在 GitHub：
+        <a href={GITHUB_REPO} rel="noopener noreferrer">github.com/shougou/looptrain</a>。
       </p>
     </article>
   </div>

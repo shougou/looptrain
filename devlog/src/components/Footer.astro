@@ -1,6 +1,6 @@
 ---
 /** Footer — copyright, domain, links */
-import { SITE_DOMAIN, CURRENT_YEAR } from '../data/site';
+import { SITE_DOMAIN, CURRENT_YEAR, GITHUB_REPO } from '../data/site';
 ---
 
 <footer class="footer">
@@ -9,7 +9,7 @@ import { SITE_DOMAIN, CURRENT_YEAR } from '../data/site';
       LoopTrain Devlog · {SITE_DOMAIN}<br />
       &copy; {CURRENT_YEAR} ·
       <a href="/about">关于</a> ·
-      <a href="/characters">角色</a>
+      <a href="/characters">角色</a> · <a href={GITHUB_REPO} rel="noopener noreferrer">GitHub</a>
     </p>
     <p class="footer-sub">
       素材授权记录持续整理中。

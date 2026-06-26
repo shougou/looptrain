@@ -7,6 +7,7 @@ export const SITE_NAME = 'LoopTrain 开发日志';
 export const SITE_TITLE = 'LoopTrain Devlog';
 export const SITE_DOMAIN = 'looptrain.me';
 export const SITE_URL = 'https://looptrain.me';
+export const GITHUB_REPO = 'https://github.com/shougou/looptrain.git';
 export const SITE_DESCRIPTION =
   'LoopTrain 是一个互动叙事游戏，也是一个 AI 协同开发实验室。本站记录项目试玩、开发日志、AI 工程笔记、版本更新与路线计划。';
 
