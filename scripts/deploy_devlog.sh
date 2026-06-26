@@ -3,8 +3,18 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEVLOG_DIR="$ROOT_DIR/devlog"
-REMOTE="<USER>@<SERVER_IP>"
-REMOTE_ROOT="/var/www/looptrain-devlog"
+
+# 从 .env.deploy 加载服务器配置
+ENV_FILE="$ROOT_DIR/.env.deploy"
+if [ ! -f "$ENV_FILE" ]; then
+  echo "ERROR: $ENV_FILE not found. Copy .env.deploy.example to .env.deploy and fill in real values." >&2
+  exit 1
+fi
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+
+REMOTE="${DEPLOY_REMOTE_USER:-root}@${DEPLOY_REMOTE_HOST}"
+REMOTE_ROOT="${DEPLOY_DEVLOG_ROOT:-/var/www/looptrain-devlog}"
 BRANCH="$(git -C "$ROOT_DIR" branch --show-current)"
 UPSTREAM="$(git -C "$ROOT_DIR" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)"
 

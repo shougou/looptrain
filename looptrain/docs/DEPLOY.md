@@ -1,5 +1,7 @@
 # LoopTrain Standalone 部署文档
 
+> **注意**: 服务器地址和用户名已移至 `.env.deploy`（不入 git）。复制 `.env.deploy.example` 填入真实值。下文 `<SERVER_IP>` 和 `<USER>` 为占位符。
+
 ## 概述
 
 LoopTrain Standalone (SLT) 是独立 Node.js 游戏运行时，不依赖 SillyTavern。
