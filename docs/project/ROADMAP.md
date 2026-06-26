@@ -11,13 +11,13 @@
 - [x] 接入音效系统
 - [x] UX/UI 场景驱动布局 + 立绘入场动画
 - [x] 内容一致性全面审计（时间线、角色、场景、文本）
-- [ ] LLM Bridge 真实接入（DeepSeek）
+- [x] LLM Bridge 真实接入（DeepSeek，线上已启用）
 - [x] Playwright 回归测试
 - [x] 状态持久化（localStorage 版本化存档 + breaking change 检测，后续需迁移 IndexedDB）
 
 ## 下一阶段：体验增强
 
-- [ ] 真实 LLM NPC 动态对话
+- [x] 真实 LLM NPC 动态对话（DeepSeek，线上已启用）
 - [ ] Playwright 自动回归测试
 - [ ] 手机端真机适配验证
 - [ ] 背景音乐 + 关键事件音效

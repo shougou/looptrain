@@ -1,18 +1,69 @@
-# LoopTrain Standalone Runtime
+# LoopTrain -- 《寒灯初醒》
 
-LoopTrain 是一个互动叙事解谜游戏项目。
+## 项目介绍
 
-当前本地开发主线已经切换为：
+LoopTrain（《寒灯初醒》）是一款手机端互动叙事解谜游戏。
 
-```text
-SLT = Standalone LoopTrain
-```
+故事发生在 1939 年冬，一列名为"江城号"的列车上。玩家被困在一段 15 分钟的时间循环里，必须反复调查车厢、与 NPC 对话、收集线索，将碎片化的信息拼接成完整的时间线，逼近爆炸背后的真相。
 
-也就是说，本地运行和验证不再依赖 SillyTavern。
+核心玩法：
+
+- **时间循环**：每一轮 15 分钟，失败后重置世界但保留玩家记忆（知识继承）。
+- **AP 行动点系统**：每次探索消耗 AP，对话消耗多轮 AP，资源管理是生存关键。
+- **线索收集与时间线推理**：通过三种观察行动（快速扫视、仔细观察、直觉判断）获取不同深度线索，拼合 NPC 行动时间线，检测矛盾并触发推理。
+- **多维证据评分**：完整性、时效性、可靠性、关联度、矛盾标记五个维度综合评估证据质量。
+- **许知微助手**：自带提示卡、案件板和推荐行动，辅助玩家推进调查。
+
+当前版本：**v0.11.0-newbie-ui-unlock**，已从 SillyTavern 完全独立，本地运行时代号为 **SLT（Standalone LoopTrain）**。
+
+线上部署：https://looptrain.me/play/game
 
 ---
 
-## 当前本地默认入口
+## 系统架构
+
+```text
+浏览器 (Browser)
+  └── SLT 前端 (Vanilla JS 组件化架构)
+        ├── GameShell (根编排器)
+        ├── 11 个 UI 组件 (layout / actions / feedback / overlays)
+        ├── UIStage 渐进解锁系统 (7 阶段状态机)
+        ├── 许知微助手提示系统 (assistant-hint.js)
+        ├── 案件板 (case-board.js)
+        └── 音效系统 (audio-manager.js, Web Audio API)
+
+SLT Server (Node.js + Express, 端口 3030)
+  ├── engine.js -- 裁判引擎 (纯函数, 唯一状态裁判)
+  ├── TypeScript Runtime (src/runtime/ -- MemoryRuntime + 事件溯源 + Assistant AI)
+  ├── LLM Bridge (llm/ -- DeepSeek provider + Mock fallback)
+  └── 数据层 (materials/runtime/ -- 13 子目录, 24+ JSON 文件)
+
+线上部署 (Alibaba Cloud ECS)
+  ├── nginx 反向代理
+  ├── pm2 进程管理
+  └── https://looptrain.me/play/game
+```
+
+---
+
+## 技术架构
+
+| 层 | 技术栈 | 说明 |
+|---|---|---|
+| 前端 | Vanilla HTML/CSS/JS | 无框架, 组件化 ES6 class 架构, 手机竖屏优先 (390px 基准) |
+| 后端 | Node.js + Express | 端口 3030, 21 个 API 端点 |
+| 引擎 | engine.js (纯函数) | AP/线索/对话/循环/时间线推理/证据评分 |
+| Runtime | TypeScript (src/runtime/) | 24 目录 68 文件, MemoryRuntime + 事件溯源 + 14 子系统 |
+| LLM | DeepSeek Bridge | 线上已启用, Mock 为降级 fallback, API Key 服务端持有 |
+| 数据 | JSON 文件 (materials/runtime/) | 13 子目录 24+ 文件, 内容完全外置化 |
+| 测试 | Node.js assert + Playwright | 引擎单元测试 + standalone smoke test + 4 E2E spec |
+| 存档 | localStorage 版本化双 key | SaveMeta + runtime, breaking change 自动检测 |
+| 部署 | nginx + pm2 | Alibaba Cloud ECS Ubuntu 22.04 |
+| Devlog | Astro 静态站 | https://looptrain.me/ |
+
+---
+
+## 快速启动
 
 > **注意**：`node server.js` 是长期运行的守护进程，直接执行会阻塞终端。使用 tmux/screen 将其放入后台 session。
 
@@ -59,10 +110,10 @@ bash scripts/verify_slt.sh
 
 验证内容包括：
 
-- `node --check`
+- `node --check` 语法检查
 - standalone engine smoke tests
-- `/api/health`
-- `/api/npcs`
+- `/api/health` 健康端点
+- `/api/npcs` NPC 数据端点
 - 首页 HTML 不包含 `SillyTavern`
 
 ---
@@ -71,39 +122,64 @@ bash scripts/verify_slt.sh
 
 ```text
 looptrain/
-  standalone/       # 当前本地默认运行时
-    server.js       # Express 后端，端口 3030
-    engine.js       # LoopTrain 裁判引擎
-    public/         # 独立游戏前端与资产
-    tests/          # standalone smoke tests
+  standalone/              # 当前本地默认运行时
+    server.js              # Express 后端, 端口 3030, 21 个 API 端点
+    engine.js              # LoopTrain 裁判引擎 (1263 行)
+    src/runtime/           # TypeScript Runtime (24 目录, 68 文件, 14 子系统)
+    llm/                   # LLM Bridge (DeepSeek + Mock)
+    public/                # 独立游戏前端与资产
+      app.js               # 主编排器
+      components/          # 11 个 UI 组件 (layout / actions / feedback / overlays)
+      ui-stage.js          # 渐进解锁状态机 (7 阶段)
+      assistant-hint.js    # 许知微提示生成
+      case-board.js        # 案件板渲染
+      loading-state.js     # 加载状态管理
+      portrait-intro.js    # 立绘入场动画
+      audio-manager.js     # 音效系统
+      style.css            # 手机端 UI 样式
+      assets/              # 立绘 + 音效
+    tests/                 # standalone smoke tests + e2e/ (4 Playwright spec)
 
-  materials/        # 可复用剧情/规则/素材
-  docs/             # 架构文档
+  materials/
+    looptrain/             # 设计态内容 (线索/剧集/规则/场景/Prompt)
+    runtime/               # 运行态数据 (13 子目录, 24+ JSON 文件)
+    assets/                # 可复用立绘和概念图
+    sound/                 # 音频源素材
 
-devlog/             # looptrain.me 开发日志静态站
-scripts/            # SLT 本地启动/验证脚本
+  tests/                   # 引擎单元测试 (6 个测试文件)
+  docs/                    # 游戏架构文档
+
+devlog/                    # looptrain.me 开发日志静态站 (Astro)
+docs/                      # 根级架构文档 + Work Item 流转
+scripts/                   # SLT 启动/验证/部署脚本 (10 个)
 ```
 
 ---
 
-## 当前边界
+## 当前能力
 
-### SLT 已经具备
+### SLT 已具备
 
-- 无 `window.SillyTavern`
-- 无 ST UI
-- 本地 Express 后端
-- 复用 `engine.js`
-- Mock 模式可玩
-- 成功路径可达「试玩版结束」
-- 失败路径可进入下一轮
+- 独立 Express 后端, 无 SillyTavern 依赖
+- engine.js 纯函数裁判引擎 (AP/线索/对话/循环/时间线推理/证据评分)
+- 组件化前端架构 (GameShell + 11 组件, flex 布局, 手机竖屏)
+- UIStage 渐进解锁系统 (7 阶段: intro -> first_observation -> first_dialogue -> loop_memory_intro -> caseboard_intro -> contradiction_intro -> normal_play)
+- NPC 时间线推理系统 (3 种观察行动 + 矛盾检测 + 推理生成 + 5 维证据评分)
+- Goal Engine DSL + 12 条指令系统
+- 许知微助手 (提示卡 + 案件板 + 推荐行动)
+- 《寒灯初醒》试玩版完整内容 (5 角色, 3 场景, 20 线索, 8 目标)
+- 音效系统 (场景环境音 + 按钮音效 + 时间压力 + 失败冲击)
+- 存档系统 (localStorage 版本化双 key + breaking change 检测)
+- Playwright E2E 回归测试 (4 spec)
+- TypeScript Runtime (MemoryRuntime + 事件溯源 + Assistant AI 子系统)
+- 已部署线上: https://looptrain.me/play/game
+- 真实 LLM 动态对话 (DeepSeek, 线上已启用, Mock 为降级模式)
 
 ### SLT 尚未具备
 
-- 真实 LLM Bridge
-- 后端 `.env` API Key 管理
-- 生产进程管理
-- 线上 `/play/game` 切换
+- 许知微判定交互 (verdict_options 数据已预留)
+- IndexedDB 存档迁移 (当前 localStorage)
+- 手机端真机测试覆盖
 
 ---
 
@@ -152,8 +228,6 @@ npm run dev -- --host 127.0.0.1
 https://looptrain.me/
 ```
 
-当前线上游戏入口仍处于迁移前状态；本地目标已经切换为 SLT。\n\n直到 SLT 生产部署完成并经确认后，才切换线上 `/play/game` 到 standalone runtime。
-
 ---
 
 ## Legacy ST 说明
@@ -168,6 +242,9 @@ https://looptrain.me/
 
 ## 推荐下一步
 
-1. 增加 LLM Bridge，但默认保留 Mock 模式。
-2. 增加 Playwright 本地回归测试。
-3. 本地稳定后，再评估线上 `/play/game` 切换。
+1. LLM 对话质量调优 (DeepSeek 已上线, 需优化 prompt 和回复质量)
+2. 实现许知微判定交互系统
+3. 存档系统迁移到 IndexedDB
+4. 手机端真机适配验证
+5. 扩展 NPC 和剧情 (10+ NPC, 事故真相主线)
+6. 多结局系统探索

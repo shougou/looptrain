@@ -8,7 +8,7 @@ v0.11.0-newbie-ui-unlock — 渐进式 UI 解锁系统（UIStage 状态机 + 许
 
 - Runtime: standalone Node.js，pm2 管理，端口 3030
 - 前端: vanilla HTML/CSS/JS，组件化 flex 布局，手机竖屏
-- LLM: Mock 模式（预设模板对话），DeepSeek Bridge 已预留接口
+- LLM: DeepSeek 已上线（线上启用），Mock 为降级 fallback
 - 音效: Web Audio API，场景环境音 + 按钮音效 + 时间压力 + 失败冲击
 - 存档: localStorage 版本化双 key 架构（SaveMeta + runtime），breaking change 自动检测与重置
 - 部署: https://looptrain.me/play/game（nginx 反向代理）
@@ -20,12 +20,13 @@ v0.11.0-newbie-ui-unlock — 渐进式 UI 解锁系统（UIStage 状态机 + 许
 - NPC 时间线推理系统已上线（player_timeline + 3 种观察行动 + 矛盾检测 + 推理生成 + 多维证据评分）
 - Goal Engine + 指令系统 + 许知微助手已上线
 - 《寒灯初醒》完整试玩内容已上线
-- 暂用 Mock 模式，待接入真实 LLM
-- 测试: Playwright E2E 25 步回归测试 + ui-components.spec.js 组件测试 + newbie-flow.spec.js 新手流程测试（Mock 模式）
+- LLM 动态对话已上线 (DeepSeek), 需持续优化 prompt 和回复质量
+- 测试: Playwright E2E 25 步回归测试 + ui-components.spec.js 组件测试 + newbie-flow.spec.js 新手流程测试
 - 版本号治理: VERSION 文件作为唯一源，sync_version.sh 自动同步 11 个位置
 
 ## 最近完成
 
+- v0.11.0 LLM 正式上线：DeepSeek 动态对话已启用，Mock 降级为 fallback 模式
 - v0.11.0 渐进式 UI 解锁系统：UIStage 7 阶段状态机、许知微主界面化提示卡、案件板 CaseBoard、加载状态管理、按钮点击反馈
 - v0.11.0 手机竖版 UX/UI 重设计：组件化架构（12 组件 + GameShell）、flex 流式布局、EventFeed + ActionResultCard、ActionDock + MoreActionsSheet、FocusWatchBar 持续观察、ArchiveSheet 档案抽屉、DialogueFocusSheet 对话聚焦、高风险确认面板
 - v0.10.0 NPC 时间线推理系统：player_timeline + 3 种观察行动 + 矛盾检测 + 推理生成 + 多维证据评分
@@ -37,6 +38,6 @@ v0.11.0-newbie-ui-unlock — 渐进式 UI 解锁系统（UIStage 状态机 + 许
 
 - 组件化架构为 v0.11.0 新增，需要实际游玩验证各组件交互
 - Playwright E2E 测试需更新 DOM 选择器（旧测试选择器不再匹配）
-- Mock 模式对话文本单一，真实 LLM 接入后需重测全部对话路径
+- LLM 动态对话为新增，需实际游玩验证对话质量和 Engine 边界稳定性
 - 手机端真机测试覆盖不足
 - 存档系统仍为 localStorage 实现，后续需迁移到 IndexedDB
