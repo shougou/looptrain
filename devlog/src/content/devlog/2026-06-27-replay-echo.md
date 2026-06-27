@@ -1,8 +1,10 @@
 ---
 title: 'v0.12.0 · Replay Echo：时间线回放与 NPC 记忆残响'
-date: '2026-06-27'
+date: 2026-06-27T12:00:00+08:00
 version: 'v0.12.0-replay-echo'
 category: 'release'
+status: 'done'
+summary: '引入时间线回放系统（失败后从锚点接入）和 NPC 记忆残响系统（跨轮情感残留影响开场白和 LLM 表演），新增 LLM Echo Guard 防止打破第四面墙，修复 portrait-intro.js 崩溃 bug。'
 ---
 
 v0.12.0 不只是一次功能更新，它改变了《寒灯初醒》的时间线感知方式。
