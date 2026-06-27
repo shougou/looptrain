@@ -34,7 +34,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ── API routes (no /api/plugins — standalone) ──
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, engine: 'looptrain', version: 'v0.11.0-newbie-ui-unlock', mode: 'standalone' });
+  res.json({
+    ok: true, engine: 'looptrain',
+    version: '0.12.0',
+    release_channel: 'playtest',
+    release_name: 'Replay Echo',
+    story_version: 'c01-trial-0.3',
+    save_schema_version: 2,
+    mode: 'standalone'
+  });
 });
 
 app.post('/api/session/init', (req, res) => {
@@ -80,6 +88,18 @@ app.post('/api/loop/fail', (req, res) => {
 
 app.post('/api/loop/next', (req, res) => {
   res.json(engine.nextLoop(req.body || {}));
+});
+
+app.post('/api/replay/resume', (req, res) => {
+  const { previous, anchor, policy } = req.body || {};
+  if (!previous || !previous.state) return res.status(400).json({ error: 'missing_previous_state' });
+  if (!anchor || !anchor.clock) return res.status(400).json({ error: 'missing_anchor' });
+  try {
+    res.json(engine.resumeFromReplayAnchor(previous, anchor, policy || { mode: 'preposition' }));
+  } catch (e) {
+    console.error('[LT] /api/replay/resume error:', e);
+    res.status(500).json({ error: 'replay_resume_failed', message: e.message });
+  }
 });
 
 app.get('/api/suggestions', (req, res) => {
@@ -273,7 +293,13 @@ app.post('/api/llm/npc-reply', async (req, res) => {
           DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL, LLM_MAX_TOKENS, LLM_TEMPERATURE,
         });
         const cleaned = llm.cleanLlmReply(raw);
-        return res.json({ reply: cleaned, mode: 'llm' });
+        const guarded = llm.guardLlmEchoReply(cleaned, npc_id, state || engine.START_STATE);
+        if (guarded) {
+          return res.json({ reply: guarded, mode: 'llm' });
+        }
+        console.warn('[LT] LLM reply rejected by echo guard, falling back to mock');
+        const mockFallback = await llm.generateMockReply(npc_id);
+        return res.json({ reply: mockFallback, mode: 'mock_echo_guard' });
       } catch (e) {
         console.warn('[LT] LLM call failed, falling back to mock:', e.message);
       }
@@ -293,12 +319,12 @@ app.get('/', (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n  LoopTrain Standalone v0.11.0-newbie-ui-unlock`);
-  console.log(`  ────────────────────────`);
+  console.log(`\n  LoopTrain Playtest v0.12.0 · Replay Echo`);
+  console.log(`  ─────────────────────────────────────────`);
   console.log(`  Local:  http://localhost:${PORT}`);
   console.log(`  LLM:    ${LLM_ENABLED && DEEPSEEK_API_KEY ? 'enabled (deepseek)' : 'mock only'}`);
   console.log(`  Memory: ${memoryRuntime ? 'enabled' : 'disabled'}`);
-  console.log(`  Engine: v0.11.0-newbie-ui-unlock\n`);
+  console.log(`  Story:  c01-trial-0.3 | Save Schema: 2\n`);
 });
 
 module.exports = app;

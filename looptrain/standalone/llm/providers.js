@@ -49,4 +49,29 @@ function cleanLlmReply(text) {
     .trim();
 }
 
-module.exports = { generateMockReply, generateDeepSeekReply, cleanLlmReply };
+function guardLlmEchoReply(reply, npcId, state) {
+  if (!reply) return reply;
+  var ns = (state && state.npc_states && state.npc_states[npcId]) || {};
+  if (!ns.memory_echo) return reply;
+
+  var forbidden = ['上一轮', '循环', '轮回', '我记得你', '上次你', '你又来了'];
+  for (var i = 0; i < forbidden.length; i++) {
+    if (reply.indexOf(forbidden[i]) >= 0) return null;
+  }
+
+  var forbiddenReveals = [
+    { key: 'bomb_location', keywords: ['炸弹', '爆炸物', '炸弹位置'] },
+    { key: 'player_identity', keywords: ['你是间谍', '你是特工', '情报员'] },
+    { key: 'loop_mechanic', keywords: ['时间循环', '你被困在', '循环里'] }
+  ];
+  for (var j = 0; j < forbiddenReveals.length; j++) {
+    var fr = forbiddenReveals[j];
+    for (var k = 0; k < fr.keywords.length; k++) {
+      if (reply.indexOf(fr.keywords[k]) >= 0) return null;
+    }
+  }
+
+  return reply;
+}
+
+module.exports = { generateMockReply, generateDeepSeekReply, cleanLlmReply, guardLlmEchoReply };

@@ -1,15 +1,18 @@
 'use strict';
 
-/* LoopTrain Standalone v0.11.0-newbie-ui-unlock
+/* LoopTrain Playtest v0.12.0 · Replay Echo
  * Component-based UI. Pure vanilla JS. No SillyTavern.
  * Preserves all game logic from v0.10.0; replaces rendering layer.
  */
 
-// ── Save version constants ──
-var LT_SAVE_SCHEMA_VERSION = 1;
-var LT_MIN_COMPATIBLE_SCHEMA_VERSION = 1;
-var LT_RUNTIME_VERSION = 'v0.11.0-newbie-ui-unlock';
-var LT_STORY_VERSION = 'demo-0.8-handeng';
+// ── Version constants (四层版本号体系) ──
+var LT_APP_VERSION = '0.12.0';
+var LT_RELEASE_CHANNEL = 'playtest';
+var LT_RELEASE_NAME = 'Replay Echo';
+var LT_STORY_VERSION = 'c01-trial-0.3';
+var LT_SAVE_SCHEMA_VERSION = 2;
+var LT_MIN_COMPATIBLE_SCHEMA_VERSION = 2;
+var LT_RUNTIME_VERSION = LT_APP_VERSION; // 向后兼容
 var LT_KEY_PREFIX = 'lt:';
 var LT_SAVE_META_KEY = 'lt:save:meta';
 var LT_SAVE_RUNTIME_KEY = 'lt:save:runtime';
@@ -371,6 +374,7 @@ function handleObserveResponse(res, template) {
   if (res.state) {
     if (prevState) { var events = deriveAudioEvents(prevState, res.state, res); if (events.length) AudioManager.dispatchAll(events); }
     state = res.state; saveState(); prevAudioState = clone(state);
+    if (typeof RuntimeRecorder !== 'undefined') RuntimeRecorder.recordEvent('OBSERVATION_RESOLVED', prevStateForCard, null, res, state);
   }
   if (res.suggestions !== undefined) state._suggestions = res.suggestions;
   if (res.goal !== undefined) { state._goalData = res.goal; state._goal = res.goal; }
@@ -405,13 +409,18 @@ async function endDialogue() {
 async function failLoop() {
   const res = await api('/loop/fail', { state, failure_type: 'time_out_explosion' });
   handleResponse(res, false);
+  if (typeof RuntimeRecorder !== 'undefined' && res?.state) RuntimeRecorder.recordEvent('LOOP_FAILED', state, null, res, res.state);
 }
 
 async function nextLoop() {
   const res = await api('/loop/next', { state, loop_failure_outcome: lastFailure });
   var ng = document.getElementById('overlay-ng'); if (ng) ng.classList.remove('lt-show');
   lastFailure = null;
-  if (res?.state) state = res.state;
+  if (res?.state) {
+    state = res.state;
+    saveState();
+    if (typeof RuntimeRecorder !== 'undefined') RuntimeRecorder.recordEvent('LOOP_STARTED', null, null, res, state);
+  }
   if (res?.opening) eventFeed.appendMessage('system', res.opening);
   else eventFeed.appendMessage('system', '你回到了 14:00。');
   focusWatchBar.stopWatch();
@@ -477,6 +486,7 @@ function handleResponse(res, inDialogue) {
     state = res.state; saveState();
     if (prevState) { var events = deriveAudioEvents(prevState, state, res); if (events.length) AudioManager.dispatchAll(events); }
     prevAudioState = clone(state);
+    if (typeof RuntimeRecorder !== 'undefined') RuntimeRecorder.recordEvent('ACTION_COMMITTED', prevStateForCard, null, res, state);
   }
   if (res.suggestions !== undefined) state._suggestions = res.suggestions;
   if (res.goal !== undefined) {
@@ -522,8 +532,76 @@ function renderFailureOutcome(out) {
   var facts = (out.confirmed_facts || []).map(function(x) { return '<li>' + esc(x.text) + '</li>'; }).join('') || '<li>没有确认事实</li>';
   var sus = (out.suspicions || []).map(function(x) { return '<li>' + esc(x.text) + '</li>'; }).join('');
   var sug = (out.next_loop_suggestions || []).map(function(x) { return '<li>' + esc(x.label) + '</li>'; }).join('') || '<li>重新规划路线</li>';
-  if (ngCard) ngCard.innerHTML = '<div class="lt-ng-title">循环失败</div><div>' + esc(out.failure_reason || '你没能阻止爆炸。') + '</div><div class="lt-subtitle">带入下一轮的记忆</div><ul>' + facts + '</ul>' + (sus ? '<div class="lt-subtitle">疑点</div><ul>' + sus + '</ul>' : '') + '<div class="lt-subtitle">下一轮建议</div><ul>' + sug + '</ul><button class="lt-btn lt-next" id="btn-next-loop">进入第 ' + (Number(out.loop || state.loop) + 1) + ' 轮</button>';
+  var replayAnchorsHtml = '<div class="lt-subtitle">下一轮接入点</div>'
+    + '<div class="lt-replay-anchors" id="replay-anchors-container">'
+    + '<div class="lt-anchor-card lt-anchor-selected" data-anchor-id="restart">14:00 从头开始</div>'
+    + '<div id="replay-anchors-loading">加载中...</div>'
+    + '</div>';
+  if (ngCard) ngCard.innerHTML = '<div class="lt-ng-title">循环失败</div><div>' + esc(out.failure_reason || '你没能阻止爆炸。') + '</div><div class="lt-subtitle">带入下一轮的记忆</div><ul>' + facts + '</ul>' + (sus ? '<div class="lt-subtitle">疑点</div><ul>' + sus + '</ul>' : '') + '<div class="lt-subtitle">下一轮建议</div><ul>' + sug + '</ul>' + replayAnchorsHtml + '<button class="lt-btn lt-next" id="btn-next-loop">进入第 ' + (Number(out.loop || state.loop) + 1) + ' 轮</button>';
   ng.classList.add('lt-show');
+
+  var prevLoop = out.loop || state.loop;
+  if (typeof RuntimeDB !== 'undefined' && RuntimeDB.isReady()) {
+    RuntimeDB.getAnchorsByLoop(prevLoop).then(function(anchors) {
+      var container = document.getElementById('replay-anchors-loading');
+      if (!container) return;
+      container.innerHTML = '';
+      for (var i = 0; i < anchors.length; i++) {
+        var a = anchors[i];
+        var card = document.createElement('div');
+        card.className = 'lt-anchor-card';
+        card.dataset.anchorId = a.anchorId;
+        card.innerHTML = '<div class="lt-anchor-label">' + esc(a.label) + '</div>'
+                       + '<div class="lt-anchor-summary">' + esc(a.summary) + '</div>';
+        card.addEventListener('click', function() {
+          document.querySelectorAll('.lt-anchor-card').forEach(function(c) { c.classList.remove('lt-anchor-selected'); });
+          this.classList.add('lt-anchor-selected');
+        });
+        container.appendChild(card);
+      }
+      if (!container.children.length) container.innerHTML = '<div class="lt-anchor-empty">无可用接入点</div>';
+    });
+  } else {
+    var loading = document.getElementById('replay-anchors-loading');
+    if (loading) loading.innerHTML = '<div class="lt-anchor-empty">历史记录不可用，将从 14:00 开始</div>';
+  }
+
+  var btnNext = document.getElementById('btn-next-loop');
+  if (btnNext) {
+    btnNext.onclick = async function() {
+      var selected = document.querySelector('.lt-anchor-card.lt-anchor-selected');
+      var anchorId = selected ? selected.dataset.anchorId : 'restart';
+
+      if (anchorId === 'restart' || typeof RuntimeDB === 'undefined' || !RuntimeDB.isReady()) {
+        nextLoop();
+      } else {
+        var anchor = await RuntimeDB.getAnchorById(anchorId);
+        if (anchor) {
+          var res = await api('/replay/resume', {
+            previous: { state: state, loop_failure_outcome: lastFailure },
+            anchor: anchor,
+            policy: { mode: 'preposition' }
+          });
+          if (res?.state) {
+            state = res.state;
+            saveState();
+            lastFailure = null;
+            var ng2 = document.getElementById('overlay-ng');
+            if (ng2) ng2.classList.remove('lt-show');
+            if (res.opening) eventFeed.appendMessage('system', res.opening);
+            else eventFeed.appendMessage('system', '你回到了 ' + anchor.clock + '。');
+            focusWatchBar.stopWatch();
+            toast('进入第 ' + state.loop + ' 轮');
+            gameShell.setState(state);
+            if (typeof RuntimeRecorder !== 'undefined') RuntimeRecorder.recordEvent('LOOP_STARTED', null, null, res, state);
+            setTimeout(function() { showXuWelcome(state.loop); }, 1000);
+          }
+        } else {
+          nextLoop();
+        }
+      }
+    };
+  }
 }
 
 // ── Xu Zhiwei welcome ──

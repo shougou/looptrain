@@ -16,5 +16,14 @@
     { "label": "质问三号车厢", "template": "我盯着他：你是不是去过三号车厢？别撒谎。", "grants_claim": "claim_gray_denies_carriage3", "requires_inference": "inf_gray_alibi_contradicted" },
     { "label": "反问试探", "template": "我看着他的眼睛：你刚才为什么一直盯着三号车厢方向？" },
     { "label": "结束对话", "template": "__END_DIALOGUE__" }
-  ]
+  ],
+  "memory_echo_profile": {
+    "susceptibility": 0.6,
+    "allowed_effects": ["suspicion_residue", "fear_residue"],
+    "forbidden_reveals": ["bomb_location", "player_identity", "loop_mechanic"],
+    "max_suspicion_delta_per_loop": 10,
+    "opening_variants": {
+      "gray_remembers_pressure": "灰衣乘客的目光在你身上停了一瞬。他没有说话，但你感觉到他比上一次更快地警觉了起来。"
+    }
+  }
 }

@@ -81,6 +81,22 @@ function buildNpcPrompt(npcId, playerText, state) {
     ].join('\n');
   }
 
+  var ns = (state.npc_states && state.npc_states[npcId]) || {};
+  var echo = ns.memory_echo;
+  if (echo) {
+    systemPrompt += '\n\n【轮回残响】\n';
+    systemPrompt += '你并不清楚上一轮发生了什么，也不能说"我记得上一轮"。\n';
+    systemPrompt += '但你对玩家产生了某种无法解释的感觉：\n';
+    systemPrompt += '- 类型：' + echo.kind + '\n';
+    systemPrompt += '- 强度：' + echo.intensity + '/100\n';
+    systemPrompt += '- 表演方向：' + (echo.performanceHint || '微妙的情绪偏移') + '\n\n';
+    systemPrompt += '你只能把它表现为语气、迟疑、警惕、熟悉感或情绪变化。\n';
+    systemPrompt += '你不能因此透露自己不可能知道的事实。\n';
+    systemPrompt += '你不能说"上一轮""循环""我记得你"。\n';
+    systemPrompt += '你只能说"我是不是在哪里见过你""你刚才的眼神让我不太舒服"\n';
+    systemPrompt += '"不知道为什么，我觉得你不像坏人"。\n';
+  }
+
   return { systemPrompt: systemPrompt, userPrompt: userPrompt };
 }
 

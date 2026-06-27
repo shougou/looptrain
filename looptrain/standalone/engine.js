@@ -702,6 +702,71 @@ function carryTimelineToNextLoop(prevState) {
   });
 }
 
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
+}
+
+function buildNpcMemoryEchoes(prevState, loopOutcome) {
+  var echoes = [];
+  var ns = (prevState && prevState.npc_states) || {};
+  var prevLoop = (prevState && prevState.loop) || 1;
+
+  if (ns.xiaoning && ns.xiaoning.trust >= 45) {
+    echoes.push({
+      echoId: 'echo_xiaoning_trust_l' + prevLoop,
+      npcId: 'xiaoning', sourceLoop: prevLoop, sourceEventIds: [],
+      kind: 'trust_residue', intensity: 35, valence: 'positive',
+      visibleToPlayer: true, canAffectDialogue: true, canAffectNpcState: true,
+      modifiers: { trustDelta: 5, fearDelta: -3, openingVariant: 'xiaoning_dejavu_soft' },
+      performanceHint: '温柔迟疑，似曾相识，但说不清原因'
+    });
+  }
+
+  if (ns.gray_passenger && ns.gray_passenger.suspicion >= 50) {
+    echoes.push({
+      echoId: 'echo_gray_suspicion_l' + prevLoop,
+      npcId: 'gray_passenger', sourceLoop: prevLoop, sourceEventIds: [],
+      kind: 'suspicion_residue', intensity: 50, valence: 'negative',
+      visibleToPlayer: true, canAffectDialogue: true, canAffectNpcState: true,
+      modifiers: { suspicionDelta: 8, composureDelta: -5, openingVariant: 'gray_remembers_pressure' },
+      performanceHint: '更快警觉，目光锐利，但不解释原因'
+    });
+  }
+
+  if (ns.zhao_police && ns.zhao_police.trust >= 30 && prevState && prevState.flags && prevState.flags.zhao_checked_floor) {
+    echoes.push({
+      echoId: 'echo_zhao_emotional_l' + prevLoop,
+      npcId: 'zhao_police', sourceLoop: prevLoop, sourceEventIds: [],
+      kind: 'emotional_residue', intensity: 30, valence: 'mixed',
+      visibleToPlayer: true, canAffectDialogue: true, canAffectNpcState: true,
+      modifiers: { trustDelta: 3, openingVariant: 'zhao_senses_readiness' },
+      performanceHint: '觉得玩家像是早有准备，微妙审视'
+    });
+  }
+
+  return echoes;
+}
+
+function applyNpcMemoryEchoes(state, echoes) {
+  state.npc_memory_echoes = echoes;
+  for (var i = 0; i < echoes.length; i++) {
+    var echo = echoes[i];
+    var ns = state.npc_states[echo.npcId];
+    if (!ns) continue;
+    if (echo.canAffectNpcState) {
+      ns.trust = clamp((ns.trust || 0) + (echo.modifiers.trustDelta || 0), -100, 100);
+      ns.fear = clamp((ns.fear || 0) + (echo.modifiers.fearDelta || 0), 0, 100);
+      ns.suspicion = clamp((ns.suspicion || 0) + (echo.modifiers.suspicionDelta || 0), 0, 100);
+      ns.composure = clamp((ns.composure || 0) + (echo.modifiers.composureDelta || 0), 0, 100);
+    }
+    ns.memory_echo = {
+      kind: echo.kind, intensity: echo.intensity,
+      openingVariant: echo.modifiers.openingVariant || null,
+      performanceHint: echo.performanceHint || null
+    };
+  }
+}
+
 // ── Dialogue text lookup (from loaded JSON) ──
 
 function _dlgText(key, condition) {
@@ -829,6 +894,17 @@ function successHtml() {
   return '<div class="lt-msg-title">试玩版结束</div>\n<div>赵乘警用警棍敲了敲地板。咚。声音是空的。</div>\n<div>他的脸色终于变了："你到底是谁？"</div>\n<div>三号车厢方向，一切安静得异常。</div>\n<div class="lt-subtitle">你证明了</div>\n<ul>\n<li>三号车厢确实存在异常。</li>\n<li>小宁听见的声音是真的。</li>\n<li>赵乘警开始相信你。</li>\n<li>证据链已经完整。</li>\n</ul>\n<div class="lt-subtitle">但你还不知道</div>\n<ul>\n<li>那个灰衣乘客到底是谁。</li>\n<li>谁制造了这场事故。</li>\n<li>循环为什么持续发生。</li>\n</ul>\n<div class="lt-subtitle">正式版目标</div>\n<div>找出真相，打破循环，留下属于你的答案。</div>';
 }
 
+function resolveNpcOpening(npcId, npc, state) {
+  var ns = state.npc_states[npcId] || {};
+  if (ns.memory_echo && ns.memory_echo.openingVariant) {
+    var profile = npc.memory_echo_profile;
+    if (profile && profile.opening_variants && profile.opening_variants[ns.memory_echo.openingVariant]) {
+      return profile.opening_variants[ns.memory_echo.openingVariant];
+    }
+  }
+  return npc.opening;
+}
+
 function startDialogue(state, npcId) {
   var s = normalize(state);
   var npc = NPCS[npcId];
@@ -847,7 +923,7 @@ function startDialogue(state, npcId) {
   return {
     state: s,
     ui: { mode: 'dialogue', portrait: npc.portrait, placeholder: '对' + npc.name + '说些什么……' },
-    messages: [{ type: 'npc', npc_id: npcId, text: npc.opening }],
+    messages: [{ type: 'npc', npc_id: npcId, text: resolveNpcOpening(npcId, npc, s) }],
     suggestions: dialogueSuggestions(s),
     goal: currentGoal(s),
   };
@@ -1199,7 +1275,69 @@ function nextLoop(previous) {
   } else {
     opening += '\n\n你只记得上一轮的失败。';
   }
+
+  var echoes = buildNpcMemoryEchoes(prevState, previous && previous.loop_failure_outcome);
+  applyNpcMemoryEchoes(s, echoes);
+
+  if (echoes.length > 0) {
+    opening += '\n\n你感觉车厢里的气氛和上一次不太一样。';
+  }
+
   return { state: s, opening: opening, suggestions: suggestions(s), goal: currentGoal(s) };
+}
+
+function calculatePrepositionAP(anchor, policy) {
+  if (policy && policy.apPolicy === 'free_debug') return START_STATE.ap_remaining;
+  if (policy && policy.apPolicy === 'strict_previous') return anchor.apRemaining;
+  var minutesFromStart = timeToMinutes(anchor.clock) - timeToMinutes(START_STATE.clock);
+  if (minutesFromStart <= 0) return START_STATE.ap_remaining;
+  var cost = Math.max(1, Math.min(3, Math.ceil(minutesFromStart / 5)));
+  return Math.max(1, START_STATE.ap_remaining - cost);
+}
+
+function buildReplayOpening(s, anchor) {
+  var loc = anchor.location === 'connector_2_3' ? '连接处' : '二号车厢';
+  var opening = '你猛地睁开眼。\n\n' + loc + '，' + anchor.clock + '。';
+  opening += '\n\n你已经知道上一轮这里会发生异常，于是这一次醒来后没有再重复无效询问，而是直接提前守到了这里。';
+  if (s.player_timeline && s.player_timeline.entries && s.player_timeline.entries.length) {
+    opening += '\n\n你记得上一轮留下的信息，但这些记忆仍需要本轮重新验证。';
+  }
+  if (s.npc_memory_echoes && s.npc_memory_echoes.length) {
+    opening += '\n\n你感觉车厢里的气氛和上一次不太一样。';
+  }
+  return opening;
+}
+
+function resumeFromReplayAnchor(previous, anchor, policy) {
+  var next = nextLoop(previous);
+  var s = normalize(next.state);
+
+  s.clock = anchor.clock;
+  s.location = anchor.location || START_STATE.location;
+  s.ap_remaining = calculatePrepositionAP(anchor, policy);
+  s.flags.intro_seen = true;
+  s.dialogue_session = null;
+  s.active_npc = null;
+  s.mode = 'explore';
+
+  s.replay = {
+    mode: (policy && policy.mode) ? policy.mode : 'preposition',
+    source_loop: anchor.loopNo,
+    anchor_id: anchor.anchorId,
+    resumed_at: anchor.clock
+  };
+
+  return {
+    state: s,
+    opening: buildReplayOpening(s, anchor),
+    replay_resume_outcome: {
+      anchor: anchor,
+      inherited_memory_count: s.player_timeline.entries.length,
+      note: '上一轮记忆已带入，但仍需本轮重新验证关键证据。'
+    },
+    suggestions: suggestions(s),
+    goal: currentGoal(s)
+  };
 }
 
 function getNpcs() { return clone(NPCS); }
@@ -1260,4 +1398,7 @@ module.exports = {
   generateInference: generateInference, evaluateEvidence: evaluateEvidence,
   canConvinceZhao: canConvinceZhao, carryTimelineToNextLoop: carryTimelineToNextLoop,
   addTimelineEntry: addTimelineEntry, hasCurrentEntry: hasCurrentEntry, hasInference: hasInference,
+  buildNpcMemoryEchoes: buildNpcMemoryEchoes, applyNpcMemoryEchoes: applyNpcMemoryEchoes,
+  resumeFromReplayAnchor: resumeFromReplayAnchor, calculatePrepositionAP: calculatePrepositionAP,
+  buildReplayOpening: buildReplayOpening, resolveNpcOpening: resolveNpcOpening,
 };

@@ -16,5 +16,14 @@
     { "label": "展示证据", "template": "我把目前获得的线索逐条告诉赵乘警，请他亲自检查。" },
     { "label": "请求检查地板", "template": "我请求赵乘警不要惊动乘客，只检查二号车厢地板和连接处。" },
     { "label": "结束对话", "template": "__END_DIALOGUE__" }
-  ]
+  ],
+  "memory_echo_profile": {
+    "susceptibility": 0.5,
+    "allowed_effects": ["emotional_residue", "trust_residue"],
+    "forbidden_reveals": ["bomb_location", "player_identity", "loop_mechanic"],
+    "max_trust_delta_per_loop": 5,
+    "opening_variants": {
+      "zhao_senses_readiness": "赵乘警看了你一眼，微微皱眉。「你看起来……比上次从容多了。」"
+    }
+  }
 }

@@ -16,5 +16,15 @@
     { "label": "问她是否一直在这", "template": "我看着她：你一直坐在这里吗？有没有离开过？", "grants_claim": "claim_xiaoning_stayed_carriage2" },
     { "label": "问布娃娃", "template": "我看着她怀里的布娃娃，轻声问：这是你妈妈给你的吗？" },
     { "label": "结束对话", "template": "__END_DIALOGUE__" }
-  ]
+  ],
+  "memory_echo_profile": {
+    "susceptibility": 0.75,
+    "allowed_effects": ["trust_residue", "fear_residue", "deja_vu"],
+    "forbidden_reveals": ["bomb_location", "player_identity", "loop_mechanic"],
+    "max_trust_delta_per_loop": 8,
+    "max_fear_delta_per_loop": 10,
+    "opening_variants": {
+      "xiaoning_dejavu_soft": "小宁抬起头看你，眼神里有一瞬间的恍惚。她轻声说：「你……我是不是在哪里见过你？」"
+    }
+  }
 }
