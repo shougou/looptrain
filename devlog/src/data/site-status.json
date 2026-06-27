@@ -1,13 +1,14 @@
 {
   "play": {
-    "currentVersion": "v0.11.0-newbie-ui-unlock",
+    "currentVersion": "v0.12.0-replay-echo",
     "playUrl": "/play/game",
     "playLabel": "进入游戏",
     "recommendedDevice": "手机竖屏",
-    "stageStatus": "独立运行时 · 试玩版",
-    "stageDescription": "v0.7 建立了目标引擎、12 条指令系统和许知微助手；v0.8 完成《寒灯初醒》全部试玩内容；v0.10 建立 NPC 时间线推理系统；v0.11 实现渐进式 UI 解锁系统（7 阶段 UIStage + 许知微主界面化 + 案件板 + 加载状态 + 按钮动效）。",
+    "stageStatus": "Playtest · v0.12.0 Replay Echo",
+    "stageDescription": "v0.7 建立了目标引擎、12 条指令系统和许知微助手；v0.8 完成《寒灯初醒》全部试玩内容；v0.10 建立 NPC 时间线推理系统；v0.11 实现渐进式 UI 解锁系统；v0.12 引入时间线回放（失败后从锚点接入）和 NPC 记忆残响（跨轮情感残留）。",
     "knownIssues": [
-      "v0.10.0 新增 NPC 时间线推理系统，三条通关路径需实际游玩验证平衡。",
+      "v0.12.0 时间线回放系统，多轮游玩验证锚点选择 + 状态正确性。",
+      "Playwright E2E 测试需更新 DOM 选择器以匹配 v0.12.0 UI。",
       "许知微判定交互未实现（verdict_options 数据已预留，下迭代开发）。",
       "存档系统仍为 localStorage 实现，后续需迁移到 IndexedDB。",
       "手机端真机测试覆盖不足。"
@@ -15,9 +16,9 @@
     "feedbackNote": "试玩反馈可以直接联系开发者。"
   },
   "site": {
-    "lastUpdated": "2026-06-25",
-    "currentPhase": "试玩版内容完成",
-    "nextFocus": "许知微判定交互、LLM Bridge 接入、手机端真机适配",
+    "lastUpdated": "2026-06-27",
+    "currentPhase": "Playtest v0.12.0 Replay Echo",
+    "nextFocus": "E2E 回放流程测试、手机端真机适配、LLM 对话质量调优",
     "tagline": "一个互动叙事游戏。也是一个 AI 协同开发实验室。",
     "description": "通过开发这个游戏，探索 AI 与人类如何共同完成复杂软件——状态管理、Prompt 设计、Agent 协作、Runtime 架构、AI Coding 工作流。"
   }

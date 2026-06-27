@@ -1,7 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-test.describe('LT v0.11.0 UI Components', () => {
+test.describe('LT v0.12.0 UI Components', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://127.0.0.1:3030/');
     // Dismiss intro if visible

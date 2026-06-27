@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('LoopTrain v0.11.0 完整玩家路径', () => {
+test.describe('LoopTrain v0.12.0 完整玩家路径', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/?reset=1');
     await page.waitForSelector('.lt-intro.lt-show', { timeout: 10000 });

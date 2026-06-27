@@ -185,7 +185,7 @@ SS_VER=$(grep -oP '"currentVersion":\s*"([^"]+)"' "$ROOT/devlog/src/data/site-st
 
 MANIFEST_VER=$(grep -oP '"looptrain_version":\s*"?([^",]+)"?' "$ROOT/MANIFEST.json" | grep -oP 'v?[0-9][^",]*' || echo "unknown")
 PKG_VER=$(grep -oP '"version":\s*"?([^",]+)"?' "$ROOT/looptrain/standalone/package.json" | grep -oP '[0-9][^",]*' || echo "unknown")
-SERVER_HEALTH_VER=$(grep -oP "version:\\s*'([^']+)'" "$ROOT/looptrain/standalone/server.js" | grep -oP "v?[0-9][^']*" || echo "unknown")
+SERVER_HEALTH_VER=$(grep -oP "\bversion:\s*'([^']+)'" "$ROOT/looptrain/standalone/server.js" | grep -oP "v?[0-9][^']*" || echo "unknown")
 APP_RUNTIME_VER=$(grep -oP "LT_RUNTIME_VERSION\\s*=\\s*'([^']+)'" "$ROOT/looptrain/standalone/public/app.js" | grep -oP "v?[0-9][^']*" || echo "unknown")
 
 # Extract version from AGENT.md §2

@@ -1,6 +1,6 @@
 'use strict';
 
-/* AudioManager — LoopTrain v0.11.0-newbie-ui-unlock
+/* AudioManager — LoopTrain v0.12.0-replay-echo
  * Pure vanilla JS. HTMLAudioElement-based, degrade-safe.
  * No Web Audio API. No game judgment. Audio-only.
  */

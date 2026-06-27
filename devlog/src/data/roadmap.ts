@@ -3,9 +3,9 @@ import type { RoadmapPhase } from '../types/index';
 const roadmap: RoadmapPhase[] = [
   {
     id: 'current',
-    label: '当前阶段：试玩版内容完成',
+    label: '当前阶段：Playtest v0.12.0 Replay Echo',
     description:
-      'v0.7 建立了目标引擎、指令系统和许知微助手；v0.8 完成《寒灯初醒》全部试玩内容。下一步接入真实 LLM。',
+      'v0.7 建立了目标引擎、指令系统和许知微助手；v0.8 完成《寒灯初醒》全部试玩内容；v0.10 建立 NPC 时间线推理系统；v0.11 实现渐进式 UI 解锁系统；v0.12 引入时间线回放（失败后从锚点接入）和 NPC 记忆残响（跨轮情感残留）。',
     tasks: [
       {
         task: '剥离 ST，建立 Standalone MVP',
@@ -51,8 +51,8 @@ const roadmap: RoadmapPhase[] = [
       },
       {
         task: 'LLM Bridge 真实接入',
-        status: '未开始',
-        description: '当前 Mock 模式对话可玩但文本单一；接入 DeepSeek 实现 NPC 动态对话。',
+        status: '已完成',
+        description: 'v0.11.0 接入 DeepSeek 动态 NPC 对话，Mock 降级为 fallback 模式。v0.12.0 增加 LLM Echo Guard 禁词检测。',
         priority: 'high',
       },
       {
@@ -79,14 +79,50 @@ const roadmap: RoadmapPhase[] = [
         description: 'localStorage 版本化双 key 存档（SaveMeta + runtime），启动时自动检测 breaking change 并引导重置。后续需迁移到 IndexedDB。',
         priority: 'high',
       },
+      {
+        task: '时间线回放系统',
+        status: '已完成',
+        description: 'v0.12.0 实现失败后从上一轮锚点接入：resumeFromReplayAnchor + calculatePrepositionAP + 预置 AP 计算。',
+        priority: 'high',
+      },
+      {
+        task: 'NPC 记忆残响系统',
+        status: '已完成',
+        description: 'v0.12.0 实现跨轮情感残留：buildNpcMemoryEchoes + resolveNpcOpening + LLM 残响段落注入。',
+        priority: 'high',
+      },
+      {
+        task: 'LLM Echo Guard',
+        status: '已完成',
+        description: 'v0.12.0 实现禁词检测（6 禁词 + 3 组 forbidden_reveals）+ 回退 Mock 模式。',
+        priority: 'high',
+      },
+      {
+        task: 'Runtime 事件记录系统',
+        status: '已完成',
+        description: 'v0.12.0 实现 IndexedDB 前端封装（5 store + 降级策略）+ 行动边界自动记录。',
+        priority: 'medium',
+      },
     ],
   },
   {
     id: 'next',
-    label: '下一阶段：体验增强',
+    label: '下一阶段：体验验证与 E2E 测试',
     description:
-      '在独立运行时稳定的基础上，增强视听体验、叙事深度和角色交互。',
+      '验证 v0.12.0 新系统的稳定性，更新 E2E 测试，完成剩余体验增强。',
     tasks: [
+      {
+        task: 'E2E 时间线回放完整流程测试',
+        status: '未开始',
+        description: 'replay-flow.spec.js：多轮失败 → 选择锚点 → 接入 → 推进的完整流程。',
+        priority: 'high',
+      },
+      {
+        task: 'Chrome 隐私模式 IndexedDB 降级验证',
+        status: '未开始',
+        description: '验证 IndexedDB 不可用时 localStorage fallback 正确工作。',
+        priority: 'medium',
+      },
       {
         task: '增加背景音乐',
         status: '未开始',

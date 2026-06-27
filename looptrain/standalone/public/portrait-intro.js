@@ -1,6 +1,6 @@
 'use strict';
 
-/* PortraitIntro — v0.12.0 NPC portrait entrance animation.
+/* PortraitIntro — v0.12.0-replay-echo NPC portrait entrance animation.
  * Web Animations API + CSS transform. No dependencies.
  * Plays once per NPC per loop.
  *

@@ -1,3 +1,28 @@
+## v0.12.0-replay-echo — 2026-06-27
+
+### Added
+- 时间线回放系统：失败后从上一轮时间线选择锚点接入（resumeFromReplayAnchor + calculatePrepositionAP + 预置 AP 计算）
+- NPC 记忆残响系统：buildNpcMemoryEchoes + applyNpcMemoryEchoes + resolveNpcOpening（3 NPC 阈值规则：trust/fear/suspicion）
+- LLM Echo Guard：prompt 注入残响段落 + guardLlmEchoReply 禁词检测（6 禁词 + 3 组 forbidden_reveals）
+- Runtime 事件记录系统：IndexedDB 前端封装（5 store：meta/events/snapshots/replayAnchors/runs）+ 降级策略
+- 四层版本号体系：app / channel / release name / story version
+- 3 个新引擎测试（replay_resume/npc_memory_echo/llm_echo_guard）
+- POST /api/replay/resume 端点
+- 前端 ReplayAnchorPicker UI（失败结算卡内嵌）
+
+### Changed
+- engine.js startDialogue() 使用 resolveNpcOpening() 替代 npc.opening（支持 Echo 开场白）
+- server.js /api/health 返回四层版本字段
+- app.js 版本常量迁移到四层体系
+- 版本号从 v0.11.0 升级到 v0.12.0
+- Save Schema Version 从 1 升级到 2（breaking change，旧存档自动重置）
+
+### Fixed
+- portrait-intro.js getBoundingClientRect is not a function（47 次控制台错误）：删除重复 setImage 定义，try-catch-finally 防御性检查
+- nextLoop() 遗漏 saveState() 导致刷新后丢失新轮次状态
+
+---
+
 ## v0.11.0-newbie-ui-unlock — 2026-06-25
 
 ### Added

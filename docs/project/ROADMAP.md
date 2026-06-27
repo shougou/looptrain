@@ -1,6 +1,6 @@
 # Roadmap
 
-## 当前阶段：试玩版内容完成
+## 当前阶段：Playtest v0.12.0 Replay Echo
 
 - [x] 剥离 SillyTavern，建立 Standalone MVP
 - [x] 建立 TypeScript Runtime 架构（MemoryRuntime + Deterministic Assistant）
@@ -13,16 +13,23 @@
 - [x] 内容一致性全面审计（时间线、角色、场景、文本）
 - [x] LLM Bridge 真实接入（DeepSeek，线上已启用）
 - [x] Playwright 回归测试
-- [x] 状态持久化（localStorage 版本化存档 + breaking change 检测，后续需迁移 IndexedDB）
+- [x] 状态持久化（localStorage 版本化存档 + breaking change 检测）
+- [x] 时间线回放系统（锚点选择 + 预置 AP + 状态继承）
+- [x] NPC 记忆残响系统（跨轮情感残留 + LLM 表演感知）
+- [x] LLM Echo Guard（禁词检测 + 回退 Mock）
+- [x] Runtime 事件记录（IndexedDB 前端封装 + 降级策略）
+- [x] 四层版本号体系（app / channel / release / story）
 
-## 下一阶段：体验增强
+## 下一阶段：体验验证与 E2E 测试
 
 - [x] 真实 LLM NPC 动态对话（DeepSeek，线上已启用）
 - [ ] Playwright 自动回归测试
 - [ ] 手机端真机适配验证
 - [ ] 背景音乐 + 关键事件音效
 - [x] NPC 自主时间线（世界状态独立推进）
-- [x] 失败结算后的线索继承完善（player_timeline + memory 转换 + current_loop_verified）
+- [ ] E2E 时间线回放完整流程测试（replay-flow.spec.js）
+- [ ] Chrome 隐私模式 IndexedDB 降级真机验证
+- [ ] 存档系统 localStorage -> IndexedDB 完整迁移
 
 ## 探索方向
 

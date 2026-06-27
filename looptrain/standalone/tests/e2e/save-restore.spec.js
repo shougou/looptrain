@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('LoopTrain v0.11.0 存档/恢复/重置', () => {
+test.describe('LoopTrain v0.12.0 存档/恢复/重置', () => {
   test('进行中刷新恢复', async ({ page }) => {
     await page.goto('/?reset=1');
     await page.waitForSelector('#intro-start-btn', { timeout: 10000 });

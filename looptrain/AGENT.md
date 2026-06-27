@@ -19,7 +19,7 @@ LoopTrain 当前本地开发主线是 **SLT（Standalone LoopTrain）**。
 当前版本：
 
 ```text
-v0.11.0-newbie-ui-unlock
+v0.12.0-replay-echo
 ```
 
 当前状态：

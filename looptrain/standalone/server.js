@@ -36,7 +36,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true, engine: 'looptrain',
-    version: '0.12.0',
+    version: 'v0.12.0-replay-echo',
     release_channel: 'playtest',
     release_name: 'Replay Echo',
     story_version: 'c01-trial-0.3',
