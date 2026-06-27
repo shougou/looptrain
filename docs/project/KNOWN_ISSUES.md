@@ -13,6 +13,12 @@
 | 7 | 时间线回放系统为 v0.12.0 新增，需多轮游玩验证锚点选择 + 接入点 + 状态正确性 | 功能正确性 | 高 |
 | 8 | 存档系统 localStorage -> IndexedDB 完整迁移尚未完成 | 技术债务 | 中 |
 
+## 已验证
+
+| # | 问题 | 验证日期 | 验证方式 | 验证结果 | 验证边界 |
+|---|------|:------:|:------:|:------:|:------:|
+| 1 | RuntimeDB IndexedDB 降级策略验证 | 2026-06-27 | Playwright E2E，通过 `page.addInitScript` 模拟 `window.indexedDB` 不存在 | 游戏启动、基础行动、失败结算、进入下一轮均正常；降级提示显示正确 | 本次只覆盖 `window.indexedDB` 缺失，不覆盖 `indexedDB.open` onerror、blocked、quota、SecurityError 或真实浏览器私密模式差异 |
+
 ## 已解决
 
 | # | 问题 | 解决版本 |
